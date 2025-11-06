@@ -1,0 +1,42 @@
+services:
+  opensearch:
+    # This should only be used to run the opensearch integration tests for the project and for local development.
+    image: opensearchproject/opensearch:3.1.0
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - PW_ADMIN=password
+      - PW_DASH=password
+      - network.host=0.0.0.0
+      - NETWORK_HOST=0.0.0.0
+      # Throw away password for demo cluster
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD="ThrowAwayPass!101#"
+    volumes:
+      - ./config/config.yml:/usr/share/opensearch/config/config.yml
+      - ./config/security.yml:/usr/share/opensearch/config/opensearch-security/config.yml
+      - ./config/internal_users.yml.tpl:/usr/share/opensearch/config/opensearch-security/internal_users.yml.tpl
+      - ./azul:/usr/share/opensearch/azul
+    ports:
+      - 9204:9200
+    networks:
+      openid:
+        ipv4_address: 10.53.0.10
+
+  dashboards:
+    # default creds are admin:password
+    image: opensearchproject/opensearch-dashboards:3.1.0
+    environment:
+      OPENSEARCH_HOSTS: https://10.53.0.10:9200
+      OPENSEARCH_PASSWORD: password
+    ports:
+      - 5601:5601
+    networks:
+      openid:
+        ipv4_address: 10.53.0.14
+
+networks:
+  openid:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.53.0.0/24

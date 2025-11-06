@@ -1,0 +1,349 @@
+{
+  "entity": {
+    "sha1": "c4fa85af27b7807d5d9945359228bb16034257f9",
+    "datastreams": [
+      {
+        "mime": "application/x-dosexec",
+        "file_format_legacy": "Win32 EXE",
+        "sha1": "c4fa85af27b7807d5d9945359228bb16034257f9",
+        "label": "content",
+        "sha256": "2bd322c8784fe18426cae39c7a23e8e8330f8510ad4ac6102bdd9bb28c2fba35",
+        "md5": "f2f76d16e17c971eecd77f1597f88e2b",
+        "magic": "PE32 executable (GUI) Intel 80386, for MS Windows",
+        "sha512": "d0108dd92cb9cba21c02fbe5e48212f005156fa09769b25ba0c061604a9480fdf59d231e5e475e5322c2996cd25665cce12064ef662ed1764fed893735b47f49",
+        "size": 32256,
+        "language": ""
+      },
+      {
+        "mime": "text/plain",
+        "file_format_legacy": "Text",
+        "sha1": "ce392b51753451b48c5105bc48503013cd1986fd",
+        "label": "report",
+        "sha256": "0a6cf29af328e128b7074d7964cc355b167be925a950116b0124a6692bcf0e04",
+        "md5": "5a0369a83c1a345370c082f5eca2d59f",
+        "magic": "ASCII text, with very long lines, with no line terminators",
+        "sha512": "3f4589f99a58bac04b82066fd03ba91222e6af3c5f365a72ede35ed8363416e5c465a347178ee8e4cb6190177ca682619fd1afaf00780f4b135d556b37079d51",
+        "size": 46033,
+        "language": ""
+      },
+      {
+        "mime": "image/gif",
+        "file_format_legacy": "GIF",
+        "sha1": "9135bdffb7c381c5c0a80459e5e3a4e04dd75894",
+        "label": "screenshot",
+        "sha256": "499b2fdde23fe8e425a511f6bb2a6df9bf055f7a40e190c096aefde441537bda",
+        "md5": "8fd036d19738efcb87fe702240de7053",
+        "magic": "GIF image data, version 89a, 640 x 480",
+        "sha512": "3c81ebcf9cfb52be47ada4baf273ca0b6e7352152ed3cf003dfd53f77413d28fb655258d60cdc9e110811179178cfde91b1f44ce90a91da2e46c0fb4debc8cdc",
+        "size": 186608,
+        "language": ""
+      }
+    ],
+    "info": {
+      "sandbox": [
+        {
+          "sandbox": "Azul Cuckoo",
+          "profile": "EXE",
+          "tags": "",
+          "route": "inetsim",
+          "options": "",
+          "timeout": 120,
+          "package": "<auto>",
+          "contacted_hosts": [],
+          "resolved_hosts": [],
+          "persistence": [
+            {
+              "category": "service",
+              "value": "usbhc"
+            }
+          ],
+          "pcap": null,
+          "screenshot": "499b2fdde23fe8e425a511f6bb2a6df9bf055f7a40e190c096aefde441537bda",
+          "tlsmaster": null,
+          "report_url": null
+        }
+      ]
+    },
+    "sha256": "2bd322c8784fe18426cae39c7a23e8e8330f8510ad4ac6102bdd9bb28c2fba35",
+    "features": [
+      {
+        "label": "console_output",
+        "name": "behaviour_description",
+        "type": "string",
+        "value": "Command line console output was observed"
+      },
+      {
+        "label": "creates_service",
+        "name": "behaviour_description",
+        "type": "string",
+        "value": "Creates a service"
+      },
+      {
+        "label": "persistence_autorun",
+        "name": "behaviour_description",
+        "type": "string",
+        "value": "Installs itself for autorun at Windows startup"
+      },
+      {
+        "label": "packer_entropy",
+        "name": "behaviour_description",
+        "type": "string",
+        "value": "The binary likely contains encrypted or compressed data indicative of a packer"
+      },
+      {
+        "label": "uses_windows_utilities",
+        "name": "behaviour_description",
+        "type": "string",
+        "value": "Uses Windows utilities for basic Windows functionality"
+      },
+      {
+        "label": "uses_windows_utilities",
+        "name": "behaviour_indicator",
+        "type": "string",
+        "value": "sc create usbhc binPath= C:\\Windows\\system32\\drivers\\usbhc.sys type= kernel start= auto DisplayName= usbhc"
+      },
+      {
+        "label": "uses_windows_utilities",
+        "name": "behaviour_indicator",
+        "type": "string",
+        "value": "sc delete usbhc"
+      },
+      {
+        "label": "uses_windows_utilities",
+        "name": "behaviour_indicator",
+        "type": "string",
+        "value": "sc start usbhc"
+      },
+      {
+        "label": "uses_windows_utilities",
+        "name": "behaviour_indicator",
+        "type": "string",
+        "value": "sc stop usbhc"
+      },
+      {
+        "name": "behaviour_signature",
+        "type": "string",
+        "value": "console_output"
+      },
+      {
+        "name": "behaviour_signature",
+        "type": "string",
+        "value": "creates_service"
+      },
+      {
+        "name": "behaviour_signature",
+        "type": "string",
+        "value": "packer_entropy"
+      },
+      {
+        "name": "behaviour_signature",
+        "type": "string",
+        "value": "persistence_autorun"
+      },
+      {
+        "name": "behaviour_signature",
+        "type": "string",
+        "value": "uses_windows_utilities"
+      },
+      {
+        "label": "sample",
+        "name": "command_executed",
+        "type": "string",
+        "value": "sc create usbhc binPath= C:\\Windows\\system32\\drivers\\usbhc.sys type= kernel start= auto DisplayName= usbhc"
+      },
+      {
+        "label": "sample",
+        "name": "command_executed",
+        "type": "string",
+        "value": "sc delete usbhc"
+      },
+      {
+        "label": "sample",
+        "name": "command_executed",
+        "type": "string",
+        "value": "sc start usbhc"
+      },
+      {
+        "label": "sample",
+        "name": "command_executed",
+        "type": "string",
+        "value": "sc stop usbhc"
+      },
+      {
+        "label": "sample",
+        "name": "file_created",
+        "type": "filepath",
+        "value": "C:\\Windows\\System32\\drivers\\usbhc.sys"
+      },
+      {
+        "label": "sc.exe",
+        "name": "file_opened",
+        "type": "filepath",
+        "value": "C:\\Windows\\SysWOW64\\en-US\\KERNELBASE.dll.mui"
+      },
+      {
+        "label": "sc.exe",
+        "name": "file_opened",
+        "type": "filepath",
+        "value": "C:\\Windows\\SysWOW64\\en-US\\sc.exe.mui"
+      },
+      {
+        "label": "sample",
+        "name": "file_written",
+        "type": "filepath",
+        "value": "C:\\Windows\\System32\\drivers\\usbhc.sys"
+      },
+      {
+        "name": "persistence_category",
+        "type": "string",
+        "value": "service"
+      },
+      {
+        "label": "service",
+        "name": "persistence_value",
+        "type": "string",
+        "value": "usbhc"
+      },
+      {
+        "name": "process_name",
+        "type": "filepath",
+        "value": "sample"
+      },
+      {
+        "name": "process_name",
+        "type": "filepath",
+        "value": "sc.exe"
+      },
+      {
+        "label": "sc.exe",
+        "name": "registry_key_read",
+        "type": "string",
+        "value": "HKEY_CURRENT_USER\\Control Panel\\Desktop\\MuiCached\\MachinePreferredUILanguages"
+      },
+      {
+        "label": "sc.exe",
+        "name": "registry_key_read",
+        "type": "string",
+        "value": "HKEY_CURRENT_USER\\Control Panel\\Desktop\\PreferredUILanguages"
+      },
+      {
+        "label": "sc.exe",
+        "name": "registry_key_read",
+        "type": "string",
+        "value": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\Windows Error Reporting\\WMR\\Disable"
+      },
+      {
+        "label": "sc.exe",
+        "name": "registry_key_read",
+        "type": "string",
+        "value": "HKEY_LOCAL_MACHINE\\SYSTEM\\ControlSet001\\Control\\MUI\\UILanguages\\en-US\\AlternateCodePage"
+      },
+      {
+        "label": "sc.exe",
+        "name": "registry_key_read",
+        "type": "string",
+        "value": "HKEY_LOCAL_MACHINE\\SYSTEM\\ControlSet001\\Control\\MUI\\UILanguages\\en-US\\Type"
+      },
+      {
+        "label": "sc.exe",
+        "name": "registry_key_read",
+        "type": "string",
+        "value": "HKEY_LOCAL_MACHINE\\SYSTEM\\ControlSet001\\Control\\Nls\\CustomLocale\\EMPTY"
+      },
+      {
+        "label": "sc.exe",
+        "name": "registry_key_read",
+        "type": "string",
+        "value": "HKEY_LOCAL_MACHINE\\SYSTEM\\ControlSet001\\Control\\Nls\\Language\\InstallLanguageFallback"
+      },
+      {
+        "label": "sc.exe",
+        "name": "service_created",
+        "type": "string",
+        "value": "usbhc"
+      },
+      {
+        "label": "usbhc",
+        "name": "service_display_name",
+        "type": "string",
+        "value": "usbhc"
+      },
+      {
+        "label": "usbhc",
+        "name": "service_filepath",
+        "type": "string",
+        "value": "C:\\Windows\\System32\\drivers\\usbhc.sys"
+      },
+      {
+        "label": "sc.exe",
+        "name": "service_name",
+        "type": "string",
+        "value": "usbhc"
+      },
+      {
+        "label": "sc.exe",
+        "name": "service_started",
+        "type": "string",
+        "value": "usbhc"
+      },
+      {
+        "label": "usbhc",
+        "name": "service_type",
+        "type": "string",
+        "value": "SERVICE_KERNEL_DRIVER"
+      }
+    ],
+    "md5": "f2f76d16e17c971eecd77f1597f88e2b",
+    "type": "Win32 EXE",
+    "sha512": "d0108dd92cb9cba21c02fbe5e48212f005156fa09769b25ba0c061604a9480fdf59d231e5e475e5322c2996cd25665cce12064ef662ed1764fed893735b47f49",
+    "size": 32256
+  },
+  "source": {
+    "references": {},
+    "path": [
+      {
+        "sha256": "2bd322c8784fe18426cae39c7a23e8e8330f8510ad4ac6102bdd9bb28c2fba35",
+        "author": {
+          "category": "user",
+          "security": {
+            "exclusive": ["OFFICIAL"],
+            "inclusive": [],
+            "markings": []
+          },
+          "name": "anony-moose"
+        },
+        "action": "sourced",
+
+        "filename": "2bd322c8784fe18426cae39c7a23e8e8330f8510ad4ac6102bdd9bb28c2fba35",
+        "size": 32256,
+        "type": "Win32 EXE",
+        "timestamp": "2021-10-08T04:44:09.518886+00:00"
+      },
+      {
+        "sha256": "2bd322c8784fe18426cae39c7a23e8e8330f8510ad4ac6102bdd9bb28c2fba35",
+        "author": {
+          "version": "2021.08.30",
+          "category": "plugin",
+          "name": "Cuckoo"
+        },
+        "action": "enriched",
+        "timestamp": "2021-10-11T05:19:25.110241+00:00"
+      }
+    ],
+    "name": "virustotal",
+    "timestamp": "2021-10-08T04:44:09.461000+00:00",
+    "security": {
+      "inclusive": [],
+      "exclusive": ["OFFICIAL"],
+      "markings": []
+    }
+  },
+  "author": {
+    "version": "2021.08.30",
+    "category": "plugin",
+    "name": "Cuckoo"
+  },
+  "kafka_key": "e560eeb951c3c97a4990ebb0288d8da7",
+  "action": "enriched",
+  "timestamp": "2021-10-11T05:19:25.110241+00:00"
+}

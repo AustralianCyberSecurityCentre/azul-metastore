@@ -1,0 +1,90 @@
+?start: main
+
+// Various permutations of strings, both unquoted, single quoted and double quoted
+// These are separate terminals to enable selecting on single vs double
+tag_string_double_quoted  : /"((?:.(?!(?<![\\\\])"))*.?)"/
+tag_string_single_quoted  : /'((?:.(?!(?<![\\\\])'))*.?)'/
+tag_string_unquoted : /(?![Oo][Rr])(?![Aa][Nn][Dd])[a-zA-Z0-9_*?@#$][a-zA-Z0-9\.\-_*?@#$]*/
+
+_tag_string : tag_string_unquoted | tag_string_double_quoted | tag_string_single_quoted
+
+parenthesised_expr : "(" _WS* _logical_expr _WS* ")"
+
+_or_label : "OR" | "or" | "Or"
+or_logical_expr : expression_excl_logic _WS+ _or_label _WS+ _logical_expr
+
+_and_label : "AND" | "and" | "And"
+and_logical_expr : expression_excl_logic _WS+ _and_label _WS+ _logical_expr
+
+_not_label : "NOT" | "not" | "Not"
+_not_prefix : (_not_label _WS+) | ("!" _WS*)
+
+not_logical_expr : _not_prefix expression_excl_logic
+
+_implicit_and_logical_expr : expression_excl_logic (_WS+ _logical_expr)*
+
+!inclusive_start_operator : "["
+!inclusive_end_operator : "]"
+!exclusive_start_operator : "("
+!exclusive_end_operator : ")"
+
+_start_operator : inclusive_start_operator | exclusive_start_operator
+_end_operator : inclusive_end_operator | exclusive_end_operator
+
+_to : "TO" | "to"
+range_expression : _start_operator _WS* number_or_filesize_expression _WS* _to _WS* number_or_filesize_expression _WS* _end_operator
+
+// Supports e.g. 5TiB, 100GB, 10b
+filesize_suffix : /((?:[TtGgMmKk][Ii]?)?[Bb])/
+
+number_token : SIGNED_NUMBER
+// We only want to attempt parsing filesizes for numeric operators
+number_or_filesize_expression : number_token filesize_suffix?
+number_expression : number_token
+
+_string_expression : _tag_string
+
+// In a tag of a key:value combination, this is the value component
+// For string comparisons, a number can also be a string in this case 
+// - we don't care unless we are doing a numerical comparison
+tag_value : range_expression
+            | _string_expression
+_numeric_tag_value : range_expression
+                   | number_or_filesize_expression
+
+generic_comparison : ":"
+exact_comparison : ":="
+gt_comparison : ":>"
+le_comparison : ":<"
+gte_comparison : ":>="
+lte_comparison : ":<="
+
+_num_comparison_ops : exact_comparison
+                    | gt_comparison
+                    | le_comparison
+                    | gte_comparison
+                    | lte_comparison
+_str_comparison_ops : generic_comparison
+
+// key:value combination
+key_value_tag : (_tag_string _str_comparison_ops tag_value?)
+              | (_tag_string _num_comparison_ops _numeric_tag_value)
+
+// value without a key
+raw_tag : tag_value
+
+// Prevents ambigious parsing with a loop in AND/OR logical expressions
+expression_excl_logic : parenthesised_expr
+                      | key_value_tag
+                      | raw_tag
+                      | not_logical_expr
+
+_logical_expr : and_logical_expr
+              | or_logical_expr
+              | _implicit_and_logical_expr
+
+main : _WS* _logical_expr?
+
+%import common.SIGNED_NUMBER -> SIGNED_NUMBER
+%import common.WS -> _WS
+

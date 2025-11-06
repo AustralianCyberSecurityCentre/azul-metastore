@@ -1,0 +1,56 @@
+---
+_meta:
+  type: "config"
+  config_version: 2
+
+config:
+  dynamic:
+    http:
+      anonymous_auth_enabled: false
+      xff:
+        enabled: false
+        internalProxies: '192\.168\.0\.10|192\.168\.0\.11' # regex pattern
+    authc:
+      basic_internal_auth_domain:
+        description: "Authenticate via HTTP Basic against internal users database"
+        http_enabled: true
+        transport_enabled: true
+        order: 0
+        http_authenticator:
+          type: basic
+          challenge: false
+        authentication_backend:
+          type: intern
+      jwt_auth_domain:
+        description: "Authenticate via Json Web Token"
+        http_enabled: true
+        transport_enabled: true
+        order: 1
+        http_authenticator:
+          type: jwt
+          challenge: false
+          config:
+            # This pre-shared secret matches tests/support.auth.py for local testing
+            # decoded signing_key: 'secret.secret.secret.secret.secret.secret.'
+            signing_key: "c2VjcmV0LnNlY3JldC5zZWNyZXQuc2VjcmV0LnNlY3JldC5zZWNyZXQu"
+            jwt_header: "Authorization"
+            jwt_url_parameters: null
+            roles_key: "roles"
+            subject_key: "sub"
+        authentication_backend:
+          type: noop
+      # this would configure an external OIDC provider but is not required for integration tests
+      # openid_auth_domain:
+      #   http_enabled: true
+      #   transport_enabled: true
+      #   order: 2
+      #   http_authenticator:
+      #     type: openid
+      #     challenge: false
+      #     config:
+      #       subject_key: preferred_username
+      #       roles_key: roles
+      #       # assume aad
+      #       openid_connect_url: "https://external.example.com"
+      #   authentication_backend:
+      #     type: noop

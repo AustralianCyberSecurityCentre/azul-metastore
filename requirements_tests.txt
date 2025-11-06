@@ -1,0 +1,10 @@
+azul-bedrock[test_utils]
+click
+fastapi[all]>=0.60.0
+httpx
+pyjwt
+pytest
+respx
+ssdeep
+tox
+black

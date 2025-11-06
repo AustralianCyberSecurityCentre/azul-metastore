@@ -1,0 +1,1899 @@
+{
+  "author": {
+    "name": "vtfilemapper",
+    "version": "0.27",
+    "category": "plugin"
+  },
+  "action": "mapped",
+  "source": {
+    "name": "virustotal",
+    "path": [
+      {
+        "author": {
+          "name": "vtfileloader",
+          "version": "1.1",
+          "category": "loader"
+        },
+        "action": "file_scanned",
+        "sha256": "2bd322c8784fe18426cae39c7a23e8e8330f8510ad4ac6102bdd9bb28c2fba35-1633582504",
+
+        "size": 32256,
+        "type": "Win32 EXE",
+        "timestamp": "2021-10-08T13:42:56+11:00"
+      },
+      {
+        "author": {
+          "name": "vtfilemapper",
+          "version": "0.27",
+          "category": "plugin"
+        },
+        "action": "mapped",
+        "sha256": "2bd322c8784fe18426cae39c7a23e8e8330f8510ad4ac6102bdd9bb28c2fba35",
+
+        "size": 32256,
+        "type": "Win32 EXE",
+        "timestamp": "2021-10-08T13:43:20.668807284+11:00"
+      }
+    ],
+    "timestamp": "2021-10-07T04:55:04Z"
+  },
+  "entity": {
+    "sha256": "2bd322c8784fe18426cae39c7a23e8e8330f8510ad4ac6102bdd9bb28c2fba35",
+    "sha1": "c4fa85af27b7807d5d9945359228bb16034257f9",
+    "md5": "f2f76d16e17c971eecd77f1597f88e2b",
+    "size": 32256,
+    "type": "Win32 EXE",
+    "features": [
+      {
+        "name": "vt_first_seen",
+        "value": "2012-06-06T11:24:43Z",
+        "type": "datetime"
+      },
+      {
+        "name": "vt_vhash",
+        "value": "0340467d15551bz715=z",
+        "type": "string"
+      },
+      {
+        "name": "av_signature",
+        "value": "Gen:Variant.Zusy.Elzob.8865",
+        "type": "string",
+        "label": "ALYac"
+      },
+      {
+        "name": "av_signature",
+        "value": "Malicious",
+        "type": "string",
+        "label": "APEX"
+      },
+      {
+        "name": "av_signature",
+        "value": "Win32:Malware-gen",
+        "type": "string",
+        "label": "AVG"
+      },
+      {
+        "name": "av_signature",
+        "value": "suspicious",
+        "type": "string",
+        "label": "Acronis"
+      },
+      {
+        "name": "av_signature",
+        "value": "Gen:Variant.Zusy.Elzob.8865",
+        "type": "string",
+        "label": "Ad-Aware"
+      },
+      {
+        "name": "av_signature",
+        "value": "Trojan/Generic.ASMalwS.7901D7",
+        "type": "string",
+        "label": "Antiy-AVL"
+      },
+      {
+        "name": "av_signature",
+        "value": "Win32:Malware-gen",
+        "type": "string",
+        "label": "Avast"
+      },
+      {
+        "name": "av_signature",
+        "value": "HEUR/AGEN.1115728",
+        "type": "string",
+        "label": "Avira"
+      },
+      {
+        "name": "av_signature",
+        "value": "Gen:Variant.Zusy.Elzob.8865",
+        "type": "string",
+        "label": "BitDefender"
+      },
+      {
+        "name": "av_signature",
+        "value": "TrojWare.Win32.Trojan.FakeAlert.AB_gen_b1@1dw8ck",
+        "type": "string",
+        "label": "Comodo"
+      },
+      {
+        "name": "av_signature",
+        "value": "malicious.6e17c9",
+        "type": "string",
+        "label": "Cybereason"
+      },
+      {
+        "name": "av_signature",
+        "value": "Unsafe",
+        "type": "string",
+        "label": "Cylance"
+      },
+      {
+        "name": "av_signature",
+        "value": "Malicious (score: 100)",
+        "type": "string",
+        "label": "Cynet"
+      },
+      {
+        "name": "av_signature",
+        "value": "a variant of Win32/Lechiket.A",
+        "type": "string",
+        "label": "ESET-NOD32"
+      },
+      {
+        "name": "av_signature",
+        "value": "Gen:Variant.Zusy.Elzob.8865 (B)",
+        "type": "string",
+        "label": "Emsisoft"
+      },
+      {
+        "name": "av_signature",
+        "value": "Generic.mg.f2f76d16e17c971e",
+        "type": "string",
+        "label": "FireEye"
+      },
+      {
+        "name": "av_signature",
+        "value": "W32/Agent2.FHRC!tr",
+        "type": "string",
+        "label": "Fortinet"
+      },
+      {
+        "name": "av_signature",
+        "value": "Gen:Variant.Zusy.Elzob.8865",
+        "type": "string",
+        "label": "GData"
+      },
+      {
+        "name": "av_signature",
+        "value": "Trojan.Win32.Agent",
+        "type": "string",
+        "label": "Ikarus"
+      },
+      {
+        "name": "av_signature",
+        "value": "Trojan/Agent.fyla",
+        "type": "string",
+        "label": "Jiangmin"
+      },
+      {
+        "name": "av_signature",
+        "value": "Trojan ( 003ac81f1 )",
+        "type": "string",
+        "label": "K7AntiVirus"
+      },
+      {
+        "name": "av_signature",
+        "value": "Trojan ( 003ac81f1 )",
+        "type": "string",
+        "label": "K7GW"
+      },
+      {
+        "name": "av_signature",
+        "value": "Trojan.Win32.Agent2.fhrc",
+        "type": "string",
+        "label": "Kaspersky"
+      },
+      {
+        "name": "av_signature",
+        "value": "Win32.Troj.Agent2.fh.(kcloud)",
+        "type": "string",
+        "label": "Kingsoft"
+      },
+      {
+        "name": "av_signature",
+        "value": "Trojan.Win32.Agent2.4!c",
+        "type": "string",
+        "label": "Lionic"
+      },
+      {
+        "name": "av_signature",
+        "value": "malware (ai score=85)",
+        "type": "string",
+        "label": "MAX"
+      },
+      {
+        "name": "av_signature",
+        "value": "Generic.djs",
+        "type": "string",
+        "label": "McAfee"
+      },
+      {
+        "name": "av_signature",
+        "value": "Generic.djs",
+        "type": "string",
+        "label": "McAfee-GW-Edition"
+      },
+      {
+        "name": "av_signature",
+        "value": "Gen:Variant.Zusy.Elzob.8865",
+        "type": "string",
+        "label": "MicroWorld-eScan"
+      },
+      {
+        "name": "av_signature",
+        "value": "Trojan:Win32/Lechiket.A",
+        "type": "string",
+        "label": "Microsoft"
+      },
+      {
+        "name": "av_signature",
+        "value": "Trojan.Win32.Agent.sfhig",
+        "type": "string",
+        "label": "NANO-Antivirus"
+      },
+      {
+        "name": "av_signature",
+        "value": "Trj/Zeus.BOOU",
+        "type": "string",
+        "label": "Panda"
+      },
+      {
+        "name": "av_signature",
+        "value": "Trojan.Generic@ML.100 (RDML:GEfJr7jmHXwvaPifJWfxlg)",
+        "type": "string",
+        "label": "Rising"
+      },
+      {
+        "name": "av_signature",
+        "value": "Trojan.Agent/Gen-Lechiket",
+        "type": "string",
+        "label": "SUPERAntiSpyware"
+      },
+      {
+        "name": "av_signature",
+        "value": "Static AI - Suspicious PE",
+        "type": "string",
+        "label": "SentinelOne"
+      },
+      {
+        "name": "av_signature",
+        "value": "ML/PE-A + Mal/Generic-L",
+        "type": "string",
+        "label": "Sophos"
+      },
+      {
+        "name": "av_signature",
+        "value": "ML.Attribute.HighConfidence",
+        "type": "string",
+        "label": "Symantec"
+      },
+      {
+        "name": "av_signature",
+        "value": "Win32.Trojan.Agent2.Eeqx",
+        "type": "string",
+        "label": "Tencent"
+      },
+      {
+        "name": "av_signature",
+        "value": "Trojan.Win32.Generic!BT",
+        "type": "string",
+        "label": "VIPRE"
+      },
+      {
+        "name": "av_signature",
+        "value": "Trojan.Win32.A.Agent.32256.AA",
+        "type": "string",
+        "label": "ViRobot"
+      },
+      {
+        "name": "av_signature",
+        "value": "W32.Agent2.Fhrc",
+        "type": "string",
+        "label": "Webroot"
+      },
+      {
+        "name": "av_signature",
+        "value": "Trojan.GenAsa!hyo0M6BAAAI",
+        "type": "string",
+        "label": "Yandex"
+      },
+      {
+        "name": "av_signature",
+        "value": "Trojan.Agent2.Win32.20621",
+        "type": "string",
+        "label": "Zillya"
+      },
+      {
+        "name": "tag",
+        "value": "suspicious-dns",
+        "type": "string"
+      },
+      {
+        "name": "tag",
+        "value": "peexe",
+        "type": "string"
+      },
+      {
+        "name": "magic",
+        "value": "PE32 executable for MS Windows (GUI) Intel 80386 32-bit",
+        "type": "string"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "Unicode",
+        "type": "string",
+        "label": "CharacterSet"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "24064",
+        "type": "string",
+        "label": "CodeSize"
+      },
+      {
+        "name": "pe_code_size",
+        "value": 24064,
+        "type": "integer"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "TODO: <Company name>",
+        "type": "string",
+        "label": "CompanyName"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "0x681d",
+        "type": "string",
+        "label": "EntryPoint"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "TODO: <File description>",
+        "type": "string",
+        "label": "FileDescription"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "0x003f",
+        "type": "string",
+        "label": "FileFlagsMask"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "Windows NT 32-bit",
+        "type": "string",
+        "label": "FileOS"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "0",
+        "type": "string",
+        "label": "FileSubtype"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "Win32 EXE",
+        "type": "string",
+        "label": "FileType"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "exe",
+        "type": "string",
+        "label": "FileTypeExtension"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "1.0.0.1",
+        "type": "string",
+        "label": "FileVersion"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "1.0.0.1",
+        "type": "string",
+        "label": "FileVersionNumber"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "Executable, 32-bit",
+        "type": "string",
+        "label": "ImageFileCharacteristics"
+      },
+      {
+        "name": "pe_characteristics",
+        "value": "Executable",
+        "type": "string"
+      },
+      {
+        "name": "pe_characteristics",
+        "value": "32-bit",
+        "type": "string"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "6.0",
+        "type": "string",
+        "label": "ImageVersion"
+      },
+      {
+        "name": "pe_image_version",
+        "value": "6.0",
+        "type": "string"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "7168",
+        "type": "string",
+        "label": "InitializedDataSize"
+      },
+      {
+        "name": "pe_init_data_size",
+        "value": 7168,
+        "type": "integer"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "installe.exe",
+        "type": "string",
+        "label": "InternalName"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "Russian",
+        "type": "string",
+        "label": "LanguageCode"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "Copyright (C) 2012",
+        "type": "string",
+        "label": "LegalCopyright"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "8.0",
+        "type": "string",
+        "label": "LinkerVersion"
+      },
+      {
+        "name": "pe_linker_version",
+        "value": "8.0",
+        "type": "string"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "application/octet-stream",
+        "type": "string",
+        "label": "MIMEType"
+      },
+      {
+        "name": "mime",
+        "value": "application/octet-stream",
+        "type": "string"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "Intel 386 or later, and compatibles",
+        "type": "string",
+        "label": "MachineType"
+      },
+      {
+        "name": "pe_machine",
+        "value": "Intel 386 or later, and compatibles",
+        "type": "string"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "4.0",
+        "type": "string",
+        "label": "OSVersion"
+      },
+      {
+        "name": "pe_os_version",
+        "value": "4.0",
+        "type": "string"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "Executable application",
+        "type": "string",
+        "label": "ObjectFileType"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "installe.exe",
+        "type": "string",
+        "label": "OriginalFileName"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "PE32",
+        "type": "string",
+        "label": "PEType"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "TODO: <Product name>",
+        "type": "string",
+        "label": "ProductName"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "1.0.0.1",
+        "type": "string",
+        "label": "ProductVersion"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "1.0.0.1",
+        "type": "string",
+        "label": "ProductVersionNumber"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "Windows GUI",
+        "type": "string",
+        "label": "Subsystem"
+      },
+      {
+        "name": "pe_subsystem",
+        "value": "Windows GUI",
+        "type": "string"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "4.0",
+        "type": "string",
+        "label": "SubsystemVersion"
+      },
+      {
+        "name": "pe_subsystem_version",
+        "value": "4.0",
+        "type": "string"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "2012:05:22 20:29:43+00:00",
+        "type": "string",
+        "label": "TimeStamp"
+      },
+      {
+        "name": "exif_metadata",
+        "value": "0",
+        "type": "string",
+        "label": "UninitializedDataSize"
+      },
+      {
+        "name": "pe_uninit_data_size",
+        "value": 0,
+        "type": "integer"
+      },
+      {
+        "name": "pe_authentihash",
+        "value": "e745f5458c45725b300e15907d7cfca3d71417cc829a80564d38b7495c39fc7e",
+        "type": "string"
+      },
+      {
+        "name": "pe_linked_date",
+        "value": "2012-05-22T20:29:00Z",
+        "type": "datetime"
+      },
+      {
+        "name": "pe_compile_time",
+        "value": "2012-05-22T20:29:43Z",
+        "type": "datetime"
+      },
+      {
+        "name": "pe_import_hash",
+        "value": "908f372db7747578169bf7658c28c073",
+        "type": "string"
+      },
+      {
+        "name": "pe_entry_point",
+        "value": 26653,
+        "type": "integer"
+      },
+      {
+        "name": "pe_resource_language",
+        "value": "ENGLISH US",
+        "type": "string",
+        "label": "de394243a34a665a494fd6bc3b6e43562c602f86c2ad597bf4fdeb62da491d3a"
+      },
+      {
+        "name": "pe_resource",
+        "value": "de394243a34a665a494fd6bc3b6e43562c602f86c2ad597bf4fdeb62da491d3a",
+        "type": "string"
+      },
+      {
+        "name": "pe_resource_type",
+        "value": "RT_ICON",
+        "type": "string",
+        "label": "de394243a34a665a494fd6bc3b6e43562c602f86c2ad597bf4fdeb62da491d3a"
+      },
+      {
+        "name": "pe_resource_language",
+        "value": "ENGLISH US",
+        "type": "string",
+        "label": "a14e70ed824f3f17d3a51136aa08839954d6d3ccadaa067415c7bfc08e6636b0"
+      },
+      {
+        "name": "pe_resource",
+        "value": "a14e70ed824f3f17d3a51136aa08839954d6d3ccadaa067415c7bfc08e6636b0",
+        "type": "string"
+      },
+      {
+        "name": "pe_resource_type",
+        "value": "RT_GROUP_ICON",
+        "type": "string",
+        "label": "a14e70ed824f3f17d3a51136aa08839954d6d3ccadaa067415c7bfc08e6636b0"
+      },
+      {
+        "name": "pe_resource_language",
+        "value": "ENGLISH US",
+        "type": "string",
+        "label": "eed1ae6b58959215e58d77bc40bb556958b9b33faaf376efcfade0eea5a0ae6f"
+      },
+      {
+        "name": "pe_resource",
+        "value": "eed1ae6b58959215e58d77bc40bb556958b9b33faaf376efcfade0eea5a0ae6f",
+        "type": "string"
+      },
+      {
+        "name": "pe_resource_type",
+        "value": "RT_VERSION",
+        "type": "string",
+        "label": "eed1ae6b58959215e58d77bc40bb556958b9b33faaf376efcfade0eea5a0ae6f"
+      },
+      {
+        "name": "pe_resource_language",
+        "value": "ENGLISH US",
+        "type": "string",
+        "label": "ec5d04c8ef3fe0e571c8e604bf146b393108cee11f1ad3d665b7501ec20d37d0"
+      },
+      {
+        "name": "pe_resource",
+        "value": "ec5d04c8ef3fe0e571c8e604bf146b393108cee11f1ad3d665b7501ec20d37d0",
+        "type": "string"
+      },
+      {
+        "name": "pe_resource_type",
+        "value": "RT_MANIFEST",
+        "type": "string",
+        "label": "ec5d04c8ef3fe0e571c8e604bf146b393108cee11f1ad3d665b7501ec20d37d0"
+      },
+      {
+        "name": "pe_import_module",
+        "value": "KERNEL32.dll",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function_count",
+        "value": 7,
+        "type": "integer",
+        "label": "KERNEL32.dll"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "CreateProcessA",
+        "type": "string",
+        "label": "KERNEL32.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "KERNEL32.dll!CreateProcessA",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "GetModuleHandleA",
+        "type": "string",
+        "label": "KERNEL32.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "KERNEL32.dll!GetModuleHandleA",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "WaitForSingleObject",
+        "type": "string",
+        "label": "KERNEL32.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "KERNEL32.dll!WaitForSingleObject",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "WriteFile",
+        "type": "string",
+        "label": "KERNEL32.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "KERNEL32.dll!WriteFile",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "CloseHandle",
+        "type": "string",
+        "label": "KERNEL32.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "KERNEL32.dll!CloseHandle",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "CreateFileA",
+        "type": "string",
+        "label": "KERNEL32.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "KERNEL32.dll!CreateFileA",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "GetSystemDirectoryA",
+        "type": "string",
+        "label": "KERNEL32.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "KERNEL32.dll!GetSystemDirectoryA",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_module",
+        "value": "msvcrt.dll",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function_count",
+        "value": 21,
+        "type": "integer",
+        "label": "msvcrt.dll"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "_cexit",
+        "type": "string",
+        "label": "msvcrt.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "msvcrt.dll!_cexit",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "__p__fmode",
+        "type": "string",
+        "label": "msvcrt.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "msvcrt.dll!__p__fmode",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "_c_exit",
+        "type": "string",
+        "label": "msvcrt.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "msvcrt.dll!_c_exit",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "_except_handler3",
+        "type": "string",
+        "label": "msvcrt.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "msvcrt.dll!_except_handler3",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "_adjust_fdiv",
+        "type": "string",
+        "label": "msvcrt.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "msvcrt.dll!_adjust_fdiv",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "_exit",
+        "type": "string",
+        "label": "msvcrt.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "msvcrt.dll!_exit",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "__p__commode",
+        "type": "string",
+        "label": "msvcrt.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "msvcrt.dll!__p__commode",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "memset",
+        "type": "string",
+        "label": "msvcrt.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "msvcrt.dll!memset",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "strcat",
+        "type": "string",
+        "label": "msvcrt.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "msvcrt.dll!strcat",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "free",
+        "type": "string",
+        "label": "msvcrt.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "msvcrt.dll!free",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "malloc",
+        "type": "string",
+        "label": "msvcrt.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "msvcrt.dll!malloc",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "__initenv",
+        "type": "string",
+        "label": "msvcrt.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "msvcrt.dll!__initenv",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "_controlfp",
+        "type": "string",
+        "label": "msvcrt.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "msvcrt.dll!_controlfp",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "memcpy",
+        "type": "string",
+        "label": "msvcrt.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "msvcrt.dll!memcpy",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "exit",
+        "type": "string",
+        "label": "msvcrt.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "msvcrt.dll!exit",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "_XcptFilter",
+        "type": "string",
+        "label": "msvcrt.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "msvcrt.dll!_XcptFilter",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "__getmainargs",
+        "type": "string",
+        "label": "msvcrt.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "msvcrt.dll!__getmainargs",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "_initterm",
+        "type": "string",
+        "label": "msvcrt.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "msvcrt.dll!_initterm",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "__setusermatherr",
+        "type": "string",
+        "label": "msvcrt.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "msvcrt.dll!__setusermatherr",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "sprintf",
+        "type": "string",
+        "label": "msvcrt.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "msvcrt.dll!sprintf",
+        "type": "string"
+      },
+      {
+        "name": "pe_import_function",
+        "value": "__set_app_type",
+        "type": "string",
+        "label": "msvcrt.dll"
+      },
+      {
+        "name": "pe_import_function_fullname",
+        "value": "msvcrt.dll!__set_app_type",
+        "type": "string"
+      },
+      {
+        "name": "pe_export_count",
+        "value": 1,
+        "type": "integer"
+      },
+      {
+        "name": "pe_export_function",
+        "value": "",
+        "type": "string"
+      },
+      {
+        "name": "pe_section_count",
+        "value": 4,
+        "type": "integer"
+      },
+      {
+        "name": "pe_section",
+        "value": ".text",
+        "type": "string"
+      },
+      {
+        "name": "pe_section_virtual_address",
+        "value": 4096,
+        "type": "integer",
+        "label": ".text"
+      },
+      {
+        "name": "pe_section_virtual_size",
+        "value": 23670,
+        "type": "integer",
+        "label": ".text"
+      },
+      {
+        "name": "pe_section_raw_size",
+        "value": 24064,
+        "type": "integer",
+        "label": ".text"
+      },
+      {
+        "name": "pe_section_raw_hash",
+        "value": "3797c4128f45913adf2a0f71b9cca743",
+        "type": "string",
+        "label": ".text"
+      },
+      {
+        "name": "pe_section",
+        "value": ".data",
+        "type": "string"
+      },
+      {
+        "name": "pe_section_virtual_address",
+        "value": 28672,
+        "type": "integer",
+        "label": ".data"
+      },
+      {
+        "name": "pe_section_virtual_size",
+        "value": 304,
+        "type": "integer",
+        "label": ".data"
+      },
+      {
+        "name": "pe_section_raw_size",
+        "value": 512,
+        "type": "integer",
+        "label": ".data"
+      },
+      {
+        "name": "pe_section_raw_hash",
+        "value": "05cf1d65bbd8703148ed0c932c482c9e",
+        "type": "string",
+        "label": ".data"
+      },
+      {
+        "name": "pe_section",
+        "value": ".rsrc",
+        "type": "string"
+      },
+      {
+        "name": "pe_section_virtual_address",
+        "value": 32768,
+        "type": "integer",
+        "label": ".rsrc"
+      },
+      {
+        "name": "pe_section_virtual_size",
+        "value": 5748,
+        "type": "integer",
+        "label": ".rsrc"
+      },
+      {
+        "name": "pe_section_raw_size",
+        "value": 6144,
+        "type": "integer",
+        "label": ".rsrc"
+      },
+      {
+        "name": "pe_section_raw_hash",
+        "value": "c3321d51341e6f9c550afe331333ba4f",
+        "type": "string",
+        "label": ".rsrc"
+      },
+      {
+        "name": "pe_section",
+        "value": ".reloc",
+        "type": "string"
+      },
+      {
+        "name": "pe_section_virtual_address",
+        "value": 40960,
+        "type": "integer",
+        "label": ".reloc"
+      },
+      {
+        "name": "pe_section_virtual_size",
+        "value": 258,
+        "type": "integer",
+        "label": ".reloc"
+      },
+      {
+        "name": "pe_section_raw_size",
+        "value": 512,
+        "type": "integer",
+        "label": ".reloc"
+      },
+      {
+        "name": "pe_section_raw_hash",
+        "value": "13869ed27df8412a256b33d104efec26",
+        "type": "string",
+        "label": ".reloc"
+      },
+      {
+        "name": "contacted_host",
+        "value": "<MACHINE_DNS_SERVER>:53",
+        "type": "uri"
+      },
+      {
+        "name": "contacted_port",
+        "value": 53,
+        "type": "integer",
+        "label": "UDP"
+      },
+      {
+        "name": "resolved_host",
+        "value": "brfroadh.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "uvjuxout.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "tjgiowyp.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "nkfsowoh.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "jdqgwkie.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "pqjjjpio.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "xyyqylfr.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "yeirefdl.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "seqtnlnq.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "qpjnkivm.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "htrdgxbv.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "llhbtfyx.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "vdvobhad.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "btcpbggk.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "oxwomtqi.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "tvrcmnrd.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "vnfoyrrg.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "vawbasbr.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "pmdjjtjv.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "dcljuyqk.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "gdxrnmkl.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "fljarcyu.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "tbrxcivi.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "rpsmkdvd.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "ctyuduib.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "qdnuaoji.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "hlrbyqlx.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "kjlcwbas.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "lfmffgri.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "dxknladt.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "qfhkbifs.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "ssstblyq.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "ahbtmcvp.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "ivecjsnq.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "kelhxoxi.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "wnsfjfmy.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "bfdsuklc.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "ooqfttcy.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "chskqjgk.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "mgqedwhx.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "lapfmlmv.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "hibssgnq.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "ytxhldoh.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "phgrvfre.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "plibytkn.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "iqvipibl.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "psqrbtqm.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "qseepite.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "ydjfoiuv.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "erhhtsqt.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "xeawjrbb.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "csfkhuav.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "sreptltq.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "pprcrcxr.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "yqbdlcyl.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "bbmpkbfd.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "vmdnrspu.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "lvkforxw.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "plgfantn.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "yiofewvo.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "fhqbltsj.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "cvlsuiwx.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "srkncljx.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "cjrdcolu.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "dlryywhq.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "pophldfo.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "aqflsemp.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "hjwjusxp.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "pgfhtery.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "dpxpnfnr.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "ivnssryo.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "gdrwxlcg.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "uglphugr.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "xiuugiuy.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "xdmvjsok.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "senwxtmf.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "rfprcghs.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "mqpmuaok.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "uqxjwkag.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "uryfuiwm.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "xscbmyat.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "cvtoshnr.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "oqqhrqgy.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "wreqxxwd.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "vhrdwfvq.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "ajveebff.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "emdkjkyt.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "onqgqknm.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "xdgjwbds.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "aaayppnh.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "hbrkbgqp.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "cnpamend.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "vowkorho.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "hmlfdqrp.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "xtksdkbf.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "edelvsog.com",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "meflogpe.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "xuyesadn.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "lynmrcqe.org",
+        "type": "uri"
+      },
+      {
+        "name": "resolved_host",
+        "value": "jbiabvvq.org",
+        "type": "uri"
+      },
+      {
+        "name": "command_executed",
+        "value": "sc stop usbhc",
+        "type": "string"
+      },
+      {
+        "name": "process_name",
+        "value": "sc stop usbhc",
+        "type": "filepath"
+      },
+      {
+        "name": "service_stopped",
+        "value": "usbhc",
+        "type": "string"
+      },
+      {
+        "name": "command_executed",
+        "value": "sc delete usbhc",
+        "type": "string"
+      },
+      {
+        "name": "process_name",
+        "value": "sc delete usbhc",
+        "type": "filepath"
+      },
+      {
+        "name": "service_deleted",
+        "value": "usbhc",
+        "type": "string"
+      },
+      {
+        "name": "command_executed",
+        "value": "sc create usbhc binPath= C:\\WINDOWS\\system32\\drivers\\usbhc.sys type= kernel start= auto DisplayName= usbhc",
+        "type": "string"
+      },
+      {
+        "name": "process_name",
+        "value": "sc create usbhc binPath=",
+        "type": "filepath"
+      },
+      {
+        "name": "service_display_name",
+        "value": "usbhc",
+        "type": "string",
+        "label": "usbhc"
+      },
+      {
+        "name": "service_filepath",
+        "value": "C:\\WINDOWS\\system32\\drivers\\usbhc.sys",
+        "type": "string",
+        "label": "usbhc"
+      },
+      {
+        "name": "service_type",
+        "value": "SERVICE_KERNEL_DRIVER",
+        "type": "string",
+        "label": "usbhc"
+      },
+      {
+        "name": "service_name",
+        "value": "usbhc",
+        "type": "string"
+      },
+      {
+        "name": "persistence_category",
+        "value": "service",
+        "type": "string"
+      },
+      {
+        "name": "persistence_value",
+        "value": "usbhc",
+        "type": "string",
+        "label": "service"
+      },
+      {
+        "name": "service_created",
+        "value": "usbhc",
+        "type": "string"
+      },
+      {
+        "name": "command_executed",
+        "value": "sc start usbhc",
+        "type": "string"
+      },
+      {
+        "name": "process_name",
+        "value": "sc start usbhc",
+        "type": "filepath"
+      },
+      {
+        "name": "service_started",
+        "value": "usbhc",
+        "type": "string"
+      },
+      {
+        "name": "module_loaded",
+        "value": "version.dll",
+        "type": "filepath"
+      },
+      {
+        "name": "module_loaded",
+        "value": "advapi32.dll",
+        "type": "filepath"
+      },
+      {
+        "name": "mutex",
+        "value": "ShimCacheMutex",
+        "type": "string"
+      },
+      {
+        "name": "mutex_opened",
+        "value": "ShimCacheMutex",
+        "type": "string"
+      },
+      {
+        "name": "file_opened",
+        "value": "C:\\WINDOWS\\system32\\sc.exe",
+        "type": "filepath"
+      },
+      {
+        "name": "file_opened",
+        "value": "C:\\WINDOWS\\system32\\drivers\\usbhc.sys",
+        "type": "filepath"
+      },
+      {
+        "name": "file_written",
+        "value": "C:\\WINDOWS\\system32\\drivers\\usbhc.sys",
+        "type": "filepath"
+      }
+    ],
+    "info": {
+      "sandbox": [
+        {
+          "resolved_hosts": [
+            "brfroadh.org",
+            "uvjuxout.org",
+            "tjgiowyp.org",
+            "nkfsowoh.org",
+            "jdqgwkie.org",
+            "pqjjjpio.com",
+            "xyyqylfr.org",
+            "yeirefdl.org",
+            "seqtnlnq.org",
+            "qpjnkivm.org",
+            "htrdgxbv.com",
+            "llhbtfyx.org",
+            "vdvobhad.org",
+            "btcpbggk.com",
+            "oxwomtqi.org",
+            "tvrcmnrd.org",
+            "vnfoyrrg.org",
+            "vawbasbr.org",
+            "pmdjjtjv.org",
+            "dcljuyqk.com",
+            "gdxrnmkl.org",
+            "fljarcyu.com",
+            "tbrxcivi.com",
+            "rpsmkdvd.org",
+            "ctyuduib.com",
+            "qdnuaoji.org",
+            "hlrbyqlx.com",
+            "kjlcwbas.com",
+            "lfmffgri.org",
+            "dxknladt.org",
+            "qfhkbifs.com",
+            "ssstblyq.com",
+            "ahbtmcvp.org",
+            "ivecjsnq.org",
+            "kelhxoxi.org",
+            "wnsfjfmy.org",
+            "bfdsuklc.org",
+            "ooqfttcy.com",
+            "chskqjgk.org",
+            "mgqedwhx.org",
+            "lapfmlmv.org",
+            "hibssgnq.org",
+            "ytxhldoh.com",
+            "phgrvfre.org",
+            "plibytkn.org",
+            "iqvipibl.com",
+            "psqrbtqm.org",
+            "qseepite.org",
+            "ydjfoiuv.org",
+            "erhhtsqt.org",
+            "xeawjrbb.org",
+            "csfkhuav.com",
+            "sreptltq.org",
+            "pprcrcxr.com",
+            "yqbdlcyl.com",
+            "bbmpkbfd.org",
+            "vmdnrspu.com",
+            "lvkforxw.org",
+            "plgfantn.com",
+            "yiofewvo.com",
+            "fhqbltsj.org",
+            "cvlsuiwx.org",
+            "srkncljx.com",
+            "cjrdcolu.com",
+            "dlryywhq.org",
+            "pophldfo.org",
+            "aqflsemp.org",
+            "hjwjusxp.org",
+            "pgfhtery.org",
+            "dpxpnfnr.com",
+            "ivnssryo.org",
+            "gdrwxlcg.org",
+            "uglphugr.org",
+            "xiuugiuy.org",
+            "xdmvjsok.com",
+            "senwxtmf.org",
+            "rfprcghs.org",
+            "mqpmuaok.com",
+            "uqxjwkag.org",
+            "uryfuiwm.org",
+            "xscbmyat.org",
+            "cvtoshnr.org",
+            "oqqhrqgy.org",
+            "wreqxxwd.com",
+            "vhrdwfvq.org",
+            "ajveebff.com",
+            "emdkjkyt.com",
+            "onqgqknm.org",
+            "xdgjwbds.com",
+            "aaayppnh.org",
+            "hbrkbgqp.com",
+            "cnpamend.com",
+            "vowkorho.org",
+            "hmlfdqrp.org",
+            "xtksdkbf.com",
+            "edelvsog.com",
+            "meflogpe.org",
+            "xuyesadn.org",
+            "lynmrcqe.org",
+            "jbiabvvq.org"
+          ],
+          "sandbox": "VirusTotal Behaviour-v1",
+          "route": "internet",
+          "contacted_hosts": ["<MACHINE_DNS_SERVER>:53"],
+          "pcap_author": "vtdownload",
+          "persistence": [
+            {
+              "value": "usbhc",
+              "category": "service"
+            }
+          ]
+        }
+      ],
+      "ssdeep": "384:q0EkY3AAbSh7oapbqLnUm4yi+UQxrVFEy1Mdh3Lq9dSMDDV3qNHs3rQkEpFXjUMz:qCY3LE848+y1M3L0HQkE7wMfK1Quwn"
+    }
+  },
+  "timestamp": "2021-10-08T13:43:20.668807284+11:00",
+  "kafka_key": "acc3c873bfaad27621a796c4ba1474f5"
+}
