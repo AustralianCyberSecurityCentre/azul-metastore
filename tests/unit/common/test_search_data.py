@@ -37,15 +37,15 @@ class TestSearchData(unit_test.BaseUnitTestCase):
     @mock.patch("azul_metastore.common.search_data.credentials_to_es")
     def test_es(self, _cte):
         _cte.return_value = 515
-        self.assertEqual(515, search_data.SearchData({}, []).es())
+        self.assertEqual(515, search_data.SearchData({}, [], []).es())
 
     @mock.patch("azul_metastore.common.search_data.credentials_to_access")
     def test_access(self, _cta):
         _cta.return_value = 515
-        self.assertEqual(515, search_data.SearchData({}, []).access())
+        self.assertEqual(515, search_data.SearchData({}, [], []).access())
 
     def test_unique(self):
-        self.assertEqual("cactus|", search_data.SearchData({"unique": "cactus"}, []).unique())
-        self.assertEqual("cactus|a", search_data.SearchData({"unique": "cactus"}, ["a"]).unique())
-        self.assertEqual("cactus|a.c", search_data.SearchData({"unique": "cactus"}, ["a", "c"]).unique())
-        self.assertEqual("cactus|a.c", search_data.SearchData({"unique": "cactus"}, ["c", "a"]).unique())
+        self.assertEqual("cactus|", search_data.SearchData({"unique": "cactus"}, [], []).unique())
+        self.assertEqual("cactus|a", search_data.SearchData({"unique": "cactus"}, ["a"], []).unique())
+        self.assertEqual("cactus|a.c", search_data.SearchData({"unique": "cactus"}, ["a", "c"], []).unique())
+        self.assertEqual("cactus|a.c", search_data.SearchData({"unique": "cactus"}, ["c", "a"], []).unique())

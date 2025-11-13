@@ -21,7 +21,7 @@ class TestWrapper(unit_test.BaseUnitTestCase):
         w = wrapper.Wrapper("", "encoded", {}, [], {}, 1)
 
         # check exclusive filter works
-        sd = search_data.SearchData(credentials={}, security_exclude=["HIGH"])
+        sd = search_data.SearchData(credentials={}, security_exclude=["HIGH"], security_include=[])
         query = {}
         query = w._limit_search(sd, query)
         self.assertEqual(

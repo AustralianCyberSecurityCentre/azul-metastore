@@ -290,15 +290,11 @@ class Wrapper:
             raise Exception("Can only have bool in top level query (or within kNN query filter)")
 
         tmp.setdefault("must_not", [])
-        tmp.setdefault("must", [])
         tmp.setdefault("filter", [])
         if not isinstance(tmp["must_not"], list):
             raise Exception("must_not in bool must be a list")
         if not isinstance(tmp["filter"], list):
             raise Exception("filter in bool must be a list")
-
-        if not isinstance(tmp["must"], list):
-            tmp["must"] = []
 
         if sd.security_exclude:
             # convert to safe format
