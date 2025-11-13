@@ -25,9 +25,12 @@ def _get_base() -> context.Context:
 
 
 @cachetools.cached(
-    cache=memcache.get_ttl_cache("restapi_get_subctx"), key=lambda x, y, z: x.credentials.unique + "." + ".".join(y) + "." + ".".join(z)
+    cache=memcache.get_ttl_cache("restapi_get_subctx"),
+    key=lambda x, y, z: x.credentials.unique + "." + ".".join(y) + "." + ".".join(z),
 )
-def _get_subctx_cached(user_info: UserInfo, security_exclude: list[str], security_include: list[str] = None) -> context.Context:
+def _get_subctx_cached(
+    user_info: UserInfo, security_exclude: list[str], security_include: list[str] = None
+) -> context.Context:
     """Get the context for making queries to Opensearch."""
     return _get_subctx(user_info, security_exclude, security_include)
 
@@ -122,7 +125,9 @@ class QuickRefs:
         request: Request,
         response: Response,
         security_exclude: list[str] = Query([], alias="x", description="Exclude these security labels during queries"),
-        security_include: list[str] = Query([], alias="i", description="Include these RELs for AND search in opensearch during queries"),
+        security_include: list[str] = Query(
+            [], alias="i", description="Include these RELs for AND search in opensearch during queries"
+        ),
         include_queries: bool = Query(
             False, alias="include_queries", description="Include all Opensearch queries run during request."
         ),
@@ -148,7 +153,9 @@ class QuickRefs:
         request: Request,
         response: Response,
         security_exclude: list[str] = Query([], alias="x", description="Exclude these security labels during queries"),
-        security_include: list[str] = Query([], alias="i", description="Include these RELs for AND search in opensearch during queries"),
+        security_include: list[str] = Query(
+            [], alias="i", description="Include these RELs for AND search in opensearch during queries"
+        ),
         include_queries: bool = Query(False, include_in_schema=False),
     ) -> context.Context:
         """Return ctx for current user (add's alias for include_queries)."""
