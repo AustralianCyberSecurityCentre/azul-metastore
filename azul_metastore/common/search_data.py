@@ -57,8 +57,8 @@ class SearchData:
     """Everything needed to execute a search."""
 
     credentials: dict
-    security_exclude: list[str]  # list of user-specified security exclusions to apply to documents.
-
+    security_exclude: list[str]  # list of user-specified security exclusions to apply to documents.    
+    security_include: list[str]  # list of user-specified security included RELS to apply to documents using AND.
     # log opensearch queries and responses to python logger
     enable_log_es_queries: bool = False
     # Store the run es queries so that they can be reviewed after being run.
@@ -85,4 +85,4 @@ class SearchData:
 
 def get_writer_search_data() -> SearchData:
     """Return search data for writer user."""
-    return SearchData(credentials=settings.get_writer_creds(), security_exclude=[])
+    return SearchData(credentials=settings.get_writer_creds(), security_exclude=[], security_include=[])

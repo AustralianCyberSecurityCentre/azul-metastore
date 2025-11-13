@@ -272,11 +272,24 @@ class Wrapper:
         """Return all indices for the encoder."""
         return sd.es().indices.get(index=self.alias, **kwargs)
 
+    def contains_sha256(self, query: dict) -> bool:
+        if isinstance(query, dict):
+            for key, value in query.items():
+                if key == "sha256":
+                    return True
+                if self.contains_sha256(value):
+                    return True
+        elif isinstance(query, list):
+            for item in query:
+                if self.contains_sha256(item):
+                    return True
+        return False
+
+
     def _limit_search(self, sd: search_data.SearchData, body: dict) -> dict:
         # make a copy as we are modifying the original query
         body = copy.deepcopy(body)
         query = body.setdefault("query", {})
-
         # Inject the security limiter into kNN operators if available (as it has a inner option for filtering
         # which is faster and avoids issues around no results being returned as kNN has a finite limit)
         if set(query.keys()) == {"knn"}:
@@ -291,11 +304,15 @@ class Wrapper:
             raise Exception("Can only have bool in top level query (or within kNN query filter)")
 
         tmp.setdefault("must_not", [])
+        tmp.setdefault("must", [])
         tmp.setdefault("filter", [])
         if not isinstance(tmp["must_not"], list):
             raise Exception("must_not in bool must be a list")
         if not isinstance(tmp["filter"], list):
             raise Exception("filter in bool must be a list")
+
+        if not isinstance(tmp["must"], list):
+            tmp["must"] = []
 
         if sd.security_exclude:
             # convert to safe format
@@ -305,6 +322,53 @@ class Wrapper:
                 {"terms": {"encoded_security.exclusive": safes}},
                 {"terms": {"encoded_security.markings": safes}},
             ]
+        
+        if sd.security_include: # user has specified AND search based on RELs            
+            # Convert to safe format and build AND-style term clauses
+            musts = utils.azsec().unsafe_to_safe(sd.security_include)
+            mustnots = utils.azsec().unsafe_to_safe(sd.security_exclude)
+            
+            must_clauses = [
+                {"term": {"encoded_security.inclusive": value}}
+                for value in musts
+            ]
+
+            must_not_clauses = [
+                {"term": {"encoded_security.inclusive": value}}
+                for value in mustnots
+            ]
+
+            for f in body['query']['bool']['filter']:
+                if 'has_child' in f and 'query' in f['has_child']:
+                    hc_query = f['has_child']['query']
+
+                    # Wrap non-bool query
+                    if 'bool' not in hc_query:
+                        f['has_child']['query'] = {
+                            'bool': {
+                                'must': [hc_query] + must_clauses,
+                                'must_not': must_not_clauses
+                            }
+                        }
+                    else:
+                        # Replace any 'terms' clause targeting encoded_security.inclusive
+                        existing_must = hc_query['bool'].get('must', [])
+                        new_must = []
+
+                        for clause in existing_must:
+                            if (
+                                'terms' in clause and
+                                isinstance(clause['terms'], dict) and
+                                'encoded_security.inclusive' in clause['terms']
+                            ):
+                                continue  # skip the old terms clause
+                            new_must.append(clause)
+
+                        # Add individual term clauses (AND logic)
+                        new_must.extend(must_clauses)
+                        hc_query['bool']['must'] = new_must
+                        existing_must_not = hc_query['bool'].get('must_not', [])
+                        hc_query['bool']['must_not'] = existing_must_not + must_not_clauses
 
         return body
 

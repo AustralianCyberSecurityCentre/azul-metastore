@@ -139,7 +139,7 @@ class DynamicTestCase(basic_test.BasicTest):
                 "username": username,
                 "password": password,
             }
-            admin_session = search_data.SearchData(credentials, security_exclude=[])
+            admin_session = search_data.SearchData(credentials, security_exclude=[], security_include=[])
             opensearch_config.write_config_to_opensearch(admin_session, rolesmapping=True)
 
         # delete any existing azul indices with the writer user
