@@ -1,173 +1,198 @@
-"""Fastapi helpers for constructing queries."""
+"""CLI entrypoint to metastore."""
 
 import logging
-from typing import Optional
+import os
+import time
+import traceback
+from enum import IntEnum
 
-import cachetools
-from azul_bedrock.models_auth import UserInfo
-from azul_bedrock.models_restapi import basic as bedr_basic
-from azul_security.exceptions import SecurityAccessException
-from fastapi import HTTPException, Query, Request, Response
-from pydantic import create_model
-from starlette.status import HTTP_401_UNAUTHORIZED
+import click
+from prometheus_client import start_http_server
 
-from azul_metastore import context, settings
-from azul_metastore.common import memcache, search_data
+from azul_metastore import context, entry_purge, ingestor, settings
+from azul_metastore.common import manager, search_data
+from azul_metastore.opensearch_config import (
+    get_opensearch_cli_commands,
+    write_config_to_opensearch,
+)
+from azul_metastore.query import age_off as _age_off
 
 logger = logging.getLogger(__name__)
 
 
-@cachetools.cached(cache=memcache.get_lru_cache("restapi_get_base"))
-def _get_base() -> context.Context:
-    """Return the general context object, cache so it only gets created once."""
-    logger.info("metastore - create commonly used objects")
-    return context.get_general_context()
+def start_prometheus_server():
+    """Start the prometheus server if the prometheus port is set."""
+    port = settings.Metastore().prometheus_port
+    if port:
+        logger.info(f"starting prometheus metrics server started on port {port}")
+        start_http_server(port)
 
 
-@cachetools.cached(
-    cache=memcache.get_ttl_cache("restapi_get_subctx"),
-    key=lambda x, y, z: x.credentials.unique + "." + ".".join(y) + "." + ".".join(z),
+@click.group()
+def cli():
+    """Entrypoint to the program."""
+    pass
+
+
+@cli.command()
+def force_update_templates():
+    """Force opensearch templates to be added.
+
+    Note this can only add properties, not remove or modify existing properties.
+    """
+    man = manager.Manager()
+    man.initialise(sd=search_data.get_writer_search_data(), force=True)
+
+
+@cli.command()
+def ingest_plugin():
+    """Ingest plugin events from dispatcher."""
+    start_prometheus_server()
+    ctx = context.get_writer_context()
+    ing = ingestor.PluginIngestor(ctx)
+    ing.main()
+
+
+@cli.command()
+def ingest_binary():
+    """Ingest binary events from dispatcher."""
+    start_prometheus_server()
+    ctx = context.get_writer_context()
+    ing = ingestor.BinaryIngestor(ctx)
+    ing.main()
+
+
+@cli.command()
+def ingest_status():
+    """Ingest status events from dispatcher."""
+    start_prometheus_server()
+    ctx = context.get_writer_context()
+    ing = ingestor.StatusIngestor(ctx)
+    ing.main()
+
+
+class AuthOptions(IntEnum):
+    """Authentication options for logging to Opensearch and creating roles."""
+
+    user_and_password = 1
+    jwt = 2
+    oauth_token = 3
+
+
+@cli.command()
+@click.option(
+    "--print-only",
+    is_flag=True,
+    default=False,
+    help="Print the metastore API commands to create the roles rather than using the API.",
 )
-def _get_subctx_cached(
-    user_info: UserInfo, security_exclude: list[str], security_include: list[str] = None
-) -> context.Context:
-    """Get the context for making queries to Opensearch."""
-    return _get_subctx(user_info, security_exclude, security_include)
+@click.option(
+    "--rolesmapping",
+    is_flag=True,
+    default=False,
+    help="Also generate a role mapping for external roles named using 'unsafe' security names. "
+    + "You likely want to create a custom mapping instead.",
+)
+@click.option(
+    "--no-input",
+    is_flag=True,
+    default=False,
+    help="Continue role creation without prompting for confirmation (non-interactive use).",
+)
+def apply_opensearch_config(print_only: bool, rolesmapping: bool, no_input: bool = False):
+    """Apply the current security configuration to Opensearch."""
+    if rolesmapping:
+        click.echo("Additionally creating role mappings.")
 
+    if print_only:
+        click.echo("Generating Opensearch Interactive API commands to create security resources.")
+        commands = get_opensearch_cli_commands(rolesmapping)
+        result = (
+            "------------------------\nThe Opensearch commands to create the necessary roles are as follows:\n\n"
+            + "\n".join(commands)
+        )
+        click.echo(result)
+    # Check for env vars and set selected if present
+    env_username = os.environ.get("METASTORE_OPENSEARCH_ADMIN_USERNAME")
+    env_password = os.environ.get("METASTORE_OPENSEARCH_ADMIN_PASSWORD")
+    if no_input and not (env_username and env_password):
+        raise ValueError(
+            "When using --no-input, both METASTORE_OPENSEARCH_ADMIN_USERNAME and "
+            "METASTORE_OPENSEARCH_ADMIN_PASSWORD must be set."
+        )
 
-def _get_subctx(user_info: UserInfo, security_exclude: list[str], security_include: list[str]) -> context.Context:
-    """Get the context for making queries to Opensearch and get a cached version if it's available."""
-    security_exclude = [x.upper() for x in security_exclude]  # FUTURE use security module for this.
-    security_include = [i.upper() for i in security_include]
-    ctx = _get_base().copy_with(
-        user_info=user_info,
-        sd=search_data.SearchData(
-            credentials=user_info.credentials.model_dump(),
-            security_exclude=security_exclude,
-            security_include=security_include,
-            enable_log_es_queries=settings.get().log_opensearch_queries,
-        ),
-    )
-
-    # verify that we have minimum required access
-    try:
-        ctx.get_user_access()
-    except SecurityAccessException as e:
-        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail=str(e))
-    return ctx
-
-
-class QuickRefs:
-    """Collects together a few very commonly used pieces of data used by restapi endpoints for metastore."""
-
-    models = {}
-
-    @classmethod
-    def gen_response(cls, _type):
-        """Response objects are generated dynamically as I was sick of wrapping objects in (data:object,meta:dict)."""
-        name = f"Response:{str(_type)}"
-        if name not in cls.models:
-            cls.models[name] = create_model(name, __base__=bedr_basic.Response, data=(_type, None))
-        return cls.models[name]
-
-    @classmethod
-    def set_security_headers(
-        cls,
-        ctx: context.Context,
-        response: Optional[Response],
-        security_label: Optional[str] = None,
-        ex: Optional[HTTPException] = None,
+    elif no_input or click.confirm(
+        text="Will create the security resources in Opensearch.\nContinue?",
+        default=False,
+        abort=True,
     ):
-        """Configures security headers for the response for this request."""
-        if security_label is None:
-            security_label = ctx.get_user_current_security()
-        # Raised HTTPResponses might not encode a regular response. Do this ourselves:
-        if ex is not None:
-            if ex.headers is None:
-                ex.headers = dict()
-            ex.headers["x-azul-security"] = security_label
-        elif response is not None:
-            response.headers["x-azul-security"] = security_label
-            # Now that a security label has been set manually, remove the defaulted marker
-            # This always passes even if this header doesn't exist
-            del response.headers["x-azul-security-defaulted"]
+        options = [f"{v} - {k}" for k, v in AuthOptions._member_map_.items()]
+        if env_username and env_password:
+            selected = AuthOptions.user_and_password
         else:
-            raise Exception("Logic error - should be setting response and/or exception!")
+            selected = None
 
-    @classmethod
-    def format_response(cls, ctx: context.Context, data, response: Response):
-        """Wrap the responses in a common model and add information about the request."""
-        meta = bedr_basic.Meta()
+        while not selected:
+            try:
 
-        # add opensearch query info to response
-        if ctx.sd is not None and ctx.sd.enable_capture_es_queries:
-            meta.queries = ctx.sd.captured_es_queries
+                int_val = click.prompt(
+                    text="For auth please select" + f" from the following options (enter the number) {options}",
+                    type=int,
+                )
+                selected = AuthOptions(int_val)
+            except Exception:
+                click.echo(
+                    f"Provided input option was invalid '{int_val}' is not a"
+                    + f" valid option must be one of {", ".join([str(x.value) for x in AuthOptions])}."
+                )
 
-        # get current security context for the query
-        meta.security = ctx.get_user_current_security()
-        # ensure response has a http header with accurate security info
-        cls.set_security_headers(ctx, response, meta.security)
-
-        return bedr_basic.Response(data=data, meta=meta)
-
-    def subctx(self, user_info: UserInfo, security_exclude: list[str], security_include: list[str], no_cache: bool):
-        """Return ctx for current user (overwriteable)."""
-        if no_cache:
-            ctx = _get_subctx(user_info, security_exclude, security_include)
+        credentials = None
+        if selected == AuthOptions.user_and_password:
+            username = env_username or click.prompt(text="Please provide the username for Opensearch: ")
+            password = env_password or click.prompt(text="Please provide the password for Opensearch: ")
+            credentials = {"unique": username, "format": "basic", "username": username, "password": password}
+        elif selected == AuthOptions.jwt:
+            token = click.prompt(text="Please provide the JWT for Opensearch: ")
+            credentials = {"unique": "local-user-jwt", "format": "jwt", "token": token}
+        elif selected == AuthOptions.oauth_token:
+            token = click.prompt(text="Please provide the OAuth token for Opensearch: ")
+            credentials = {"unique": "local-user-oauth", "format": "jwt", "token": token}
         else:
-            ctx = _get_subctx_cached(user_info, security_exclude, security_include)
-        # remove state gathered on last request (e.g. num opensearch queries)
-        ctx.clear_state()
-        return ctx
-
-    def ctx(
-        self,
-        request: Request,
-        response: Response,
-        security_exclude: list[str] = Query([], alias="x", description="Exclude these security labels during queries"),
-        security_include: list[str] = Query(
-            [], alias="i", description="Include these RELs for AND search in opensearch during queries"
-        ),
-        include_queries: bool = Query(
-            False, alias="include_queries", description="Include all Opensearch queries run during request."
-        ),
-    ) -> context.Context:
-        """Return ctx for current user."""
+            click.echo("Error. Must provide credentials.")
+            return 7
+        credentials = search_data.SearchData(credentials, security_exclude=[])
         try:
-            user_info = request.state.user_info
-        except AttributeError as e:
-            raise Exception("user_info is not available on request.state") from e
-
-        # If we are enabling es queries we should also bypass the cache so we need the value now.
-        ctx = self.subctx(user_info, security_exclude, security_include, no_cache=include_queries)
-        ctx.sd.enable_capture_es_queries = include_queries
-
-        # Configure initial security headers for this context in case it doesn't get set later.
-        response.headers.append("x-azul-security", ctx.azsec.get_default_security())
-        response.headers.append("x-azul-security-defaulted", "true")
-
-        return ctx
-
-    def ctx_without_queries(
-        self,
-        request: Request,
-        response: Response,
-        security_exclude: list[str] = Query([], alias="x", description="Exclude these security labels during queries"),
-        include_queries: bool = Query(False, include_in_schema=False),
-    ) -> context.Context:
-        """Return ctx for current user (add's alias for include_queries)."""
-        return self.ctx(request, response, security_exclude, include_queries)
-
-    gr = gen_response
-    fr = format_response
-    kw = {
-        "response_model_exclude_unset": True,
-    }
-
-    @property
-    def writer(self) -> context.Context:
-        """Get the context object for the writer user."""
-        return context.get_writer_context()
+            write_config_to_opensearch(credentials, rolesmapping)
+        except Exception:
+            click.echo(f"Failed to update and validate roles with exception traceback:\n{traceback.format_exc()}")
+            return
+        click.echo("Successfully created and validated all roles.")
 
 
-qr = QuickRefs()
+@cli.command()
+@click.option("--loop/--no-loop", default=True)
+def age_off(loop):
+    """Delete expired indices."""
+    start_prometheus_server()
+    logger.info("started age off worker")
+    while True:
+        # find old documents and delete
+        _age_off.do_age_off()
+        if not loop:
+            break
+
+        logger.info("wait for an hour")
+        # wait for an hour
+        time.sleep(60 * 60)
+
+
+cli.add_command(entry_purge.cli)
+
+
+@cli.result_callback()
+def _finished(result, **kwargs):
+    logger.info("command finished")
+
+
+if __name__ == "__main__":
+    cli()
