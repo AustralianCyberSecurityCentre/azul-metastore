@@ -20,7 +20,7 @@ class TestSearch(integration_test.DynamicTestCase):
             "username": cls.username,
             "password": cls.password,
         }
-        cls.admin_session = search_data.SearchData(cls.credentials, security_exclude=[])
+        cls.admin_session = search_data.SearchData(cls.credentials, security_exclude=[], security_include=[])
         cls.test_role_name = "s-low"
 
     def setUp(self):
