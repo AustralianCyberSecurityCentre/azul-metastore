@@ -304,16 +304,30 @@ class Wrapper:
                 {"terms": {"encoded_security.exclusive": safes}},
                 {"terms": {"encoded_security.markings": safes}},
             ]
+            must_not_clause = []
+            must_not_clause += [
+                {"terms": {"encoded_security.inclusive": safes}},
+                {"terms": {"encoded_security.exclusive": safes}},
+                {"terms": {"encoded_security.markings": safes}},
+            ]
+            # add must not clause to children
+            for f in body["query"]["bool"]["filter"]:
+                if "has_child" in f and "query" in f["has_child"]:
+                    hc_query = f["has_child"]["query"]
 
+                    # Wrap non-bool query
+                    if "bool" not in hc_query:
+                        f["has_child"]["query"] = {
+                            "bool": {"must_not": must_not_clause}
+                        }
+                
         if sd.security_include:  # user has specified AND search based on RELs
             # Convert to safe format and build AND-style term clauses
             musts = utils.azsec().unsafe_to_safe(sd.security_include)
             mustnots = utils.azsec().unsafe_to_safe(sd.security_exclude)
-
             must_clauses = [{"term": {"encoded_security.inclusive": value}} for value in musts]
-
             must_not_clauses = [{"term": {"encoded_security.inclusive": value}} for value in mustnots]
-
+           
             for f in body["query"]["bool"]["filter"]:
                 if "has_child" in f and "query" in f["has_child"]:
                     hc_query = f["has_child"]["query"]
@@ -343,6 +357,51 @@ class Wrapper:
                         existing_must_not = hc_query["bool"].get("must_not", [])
                         hc_query["bool"]["must_not"] = existing_must_not + must_not_clauses
 
+        return body
+    
+    def _limit_search_paginate_(self, sd: search_data.SearchData, body: dict) -> dict:
+        # make a copy as we are modifying the original query
+        body = copy.deepcopy(body)
+        query = body.setdefault("query", {})
+        # Inject the security limiter into kNN operators if available (as it has a inner option for filtering
+        # which is faster and avoids issues around no results being returned as kNN has a finite limit)
+        if set(query.keys()) == {"knn"}:
+            knn_filter = query["knn"]
+            if len(knn_filter) != 1:
+                # This gets more complicated with security filters; don't worry about this edge case
+                raise Exception("kNN filters only supported for one search term")
+            query = knn_filter[list(knn_filter.keys())[0]].setdefault("filter", {})
+
+        tmp = query.setdefault("bool", {})
+        if set(query.keys()) != {"bool"}:
+            raise Exception("Can only have bool in top level query (or within kNN query filter)")
+
+        tmp.setdefault("must_not", [])
+        tmp.setdefault("must", [])
+        tmp.setdefault("filter", [])
+        if not isinstance(tmp["must_not"], list):
+            raise Exception("must_not in bool must be a list")
+        if not isinstance(tmp["must"], list):
+            raise Exception("must in bool must be a list")
+        if not isinstance(tmp["filter"], list):
+            raise Exception("filter in bool must be a list")
+
+        if sd.security_exclude:
+            # convert to safe format
+            safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
+            tmp["must_not"] += [
+                {"terms": {"encoded_security.inclusive": safes}},
+                {"terms": {"encoded_security.exclusive": safes}},
+                {"terms": {"encoded_security.markings": safes}},
+            ]        
+
+        if sd.security_include:  # user has specified AND search based on RELs
+            # Convert to safe format and build AND-style term clauses
+            musts = utils.azsec().unsafe_to_safe(sd.security_include)
+            tmp["must"] += [
+                {"terms": {"encoded_security.inclusive": musts}}
+            ]
+    
         return body
 
     def count(self, sd: search_data.SearchData, body: dict, *args, **kwargs):
@@ -424,6 +483,13 @@ class Wrapper:
     def search(self, sd: search_data.SearchData, body: dict, **kwargs):
         """Perform basic opensearch query."""
         body = self._limit_search(sd, body)
+        with TimeAndLogCommand(sd, self.alias, body, "search", **kwargs) as es:
+            return es.search(index=self.alias, body=body, **kwargs)
+    
+    def paginate_search(self, sd: search_data.SearchData, body: dict, **kwargs):
+        """Perform basic opensearch query."""
+        # separate limit_search function for pagination to ensure exclude, include security filters work.
+        body = self._limit_search_paginate_(sd, body)
         with TimeAndLogCommand(sd, self.alias, body, "search", **kwargs) as es:
             return es.search(index=self.alias, body=body, **kwargs)
 

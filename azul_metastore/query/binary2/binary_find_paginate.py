@@ -80,7 +80,7 @@ def find_all_binaries(
             body["query"]["bool"]["filter"] = [result]
 
     # perform search
-    resp = ctx.man.binary2.w.search(ctx.sd, body=body)
+    resp = ctx.man.binary2.w.paginate_search(ctx.sd, body=body)
     after = resp["aggregations"]["COMPOSITE"].get("after_key", None)
     if after:
         after = json.dumps(after)
@@ -93,7 +93,6 @@ def find_all_binaries(
     for row in resp["aggregations"]["COMPOSITE"]["buckets"]:
         eid = row["key"]["SHA256"]
         found_binaries.append(models_restapi.EntityFindSimpleItem(sha256=eid))
-
     # assemble final result object and avoid setting properties if they are None
     ret = models_restapi.EntityFindSimple(items=found_binaries)
     if after:
