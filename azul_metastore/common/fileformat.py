@@ -12,7 +12,7 @@ from azul_bedrock.exceptions import ApiException
 from cart import cart
 from fastapi import UploadFile
 from pydantic import ByteSize
-from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
+from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +62,7 @@ async def unpack_content(
 
         if too_big_fail or len(buffered_data) == MAX_BUNDLED_PRE_EXTRACT_SIZE:
             raise ApiException(
-                status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=HTTP_422_UNPROCESSABLE_CONTENT,
                 ref=f"Can't extract file larger than {ByteSize(MAX_BUNDLED_PRE_EXTRACT_SIZE).human_readable()}",
                 external=f"Can't extract file larger than {ByteSize(MAX_BUNDLED_PRE_EXTRACT_SIZE).human_readable()}",
                 internal="extract_file_too_large",
@@ -174,7 +174,7 @@ async def async_handle_malpz(async_stream: UploadFile) -> Tuple[bytes, dict]:
         )
         if len(buffered_data) >= MAX_BUNDLED_PRE_EXTRACT_SIZE:
             raise ApiException(
-                status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=HTTP_422_UNPROCESSABLE_CONTENT,
                 ref=f"Can't unmalpz file larger than {ByteSize(MAX_BUNDLED_PRE_EXTRACT_SIZE).human_readable()}",
                 external=f"Can't unmalpz file larger than {ByteSize(MAX_BUNDLED_PRE_EXTRACT_SIZE).human_readable()}",
                 internal="unmalpz_file_too_large",

@@ -18,7 +18,7 @@ from fastapi import (
     Query,
     Response,
 )
-from starlette.status import HTTP_404_NOT_FOUND, HTTP_422_UNPROCESSABLE_ENTITY
+from starlette.status import HTTP_404_NOT_FOUND, HTTP_422_UNPROCESSABLE_CONTENT
 
 from azul_metastore import context
 from azul_metastore.common import wrapper
@@ -353,13 +353,13 @@ def create_tag_on_binary(
         ctx.azsec.check_access(ctx.get_user_access().security.labels, security, raise_error=True)
     except SecurityParseException:
         raise ApiException(
-            status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref="Must provide valid security string.",
             internal="invalid_security_string",
         )
     except SecurityAccessException as e:
         raise ApiException(
-            status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref="security greater than user permissions",
             external="security being applied by the user is greater than the current users security."
             + f"because user: {str(e)}",

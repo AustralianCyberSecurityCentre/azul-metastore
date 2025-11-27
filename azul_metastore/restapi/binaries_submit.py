@@ -20,7 +20,7 @@ from fastapi import (
     UploadFile,
 )
 from pydantic import AfterValidator, BaseModel, computed_field, model_validator
-from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
+from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT
 
 from azul_metastore import context
 from azul_metastore.common.utils import to_utc
@@ -42,7 +42,7 @@ def _to_utc_except(timestamp: str):
         return to_utc(timestamp)
     except Exception as e:
         raise ApiException(
-            status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref="bad_timestamp",
             external="a bad timestamp was provided",
             internal="bad_timestamp",
@@ -65,7 +65,7 @@ def validate_json(field_name: str, field_value: str | None):
             json.loads(field_value)
     except ValueError as e:
         raise ApiException(
-            status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref="bad_json",
             external=f"Bad json for the field {field_name} was provided, value was {field_value}",
             internal="bad_json",
@@ -240,7 +240,7 @@ async def submit_binary_to_source(
         # read alt streams
         if len(stream_data) != len(stream_labels):
             raise ApiException(
-                status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=HTTP_422_UNPROCESSABLE_CONTENT,
                 ref="stream labels must be supplied for all stream data",
                 external="stream labels must be supplied for all stream data",
                 internal="upload_bad_stream_data_labels",
@@ -313,7 +313,7 @@ async def submit_binary_to_source_dataless(
         # read alt streams
         if len(stream_data) != len(stream_labels):
             raise ApiException(
-                status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=HTTP_422_UNPROCESSABLE_CONTENT,
                 ref="stream labels must be supplied for all stream data",
                 external="stream labels must be supplied for all stream data",
                 internal="upload_bad_stream_data_labels",

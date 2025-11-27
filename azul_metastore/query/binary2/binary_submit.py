@@ -12,7 +12,7 @@ from starlette.datastructures import UploadFile
 from starlette.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND,
-    HTTP_422_UNPROCESSABLE_ENTITY,
+    HTTP_422_UNPROCESSABLE_CONTENT,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 
@@ -70,7 +70,7 @@ async def _process_augmented_streams(
         for label, aug_binary in augstreams or []:
             if label == "content":
                 raise ApiException(
-                    status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=HTTP_422_UNPROCESSABLE_CONTENT,
                     ref="aug stream cannot be 'content'",
                     external="aug stream cannot be 'content'",
                     internal="upload_no_aug_content",
@@ -223,13 +223,13 @@ async def high_level_submit_binary(
         ctx.azsec.check_access(ctx.get_user_access().security.labels, security, raise_error=True)
     except SecurityParseException:
         raise ApiException(
-            status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref="Must provide valid security string.",
             internal="invalid_security_string",
         )
     except SecurityAccessException as e:
         raise ApiException(
-            status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref="security greater than user permissions",
             external="security being applied by the user is greater than the current users security."
             + f"because user: {str(e)}",
@@ -252,7 +252,7 @@ async def high_level_submit_binary(
 
     if not binary and not sha256:
         raise ApiException(
-            status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref="Must supply binary or sha256",
             external="Must supply binary or sha256",
             internal="upload_no_binary_sha256",
@@ -260,7 +260,7 @@ async def high_level_submit_binary(
 
     if parent_sha256 and not binary_read.find_stream_references(ctx, parent_sha256)[0]:
         raise ApiException(
-            status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref="Parent Id (sha256) must already exist",
             external="Parent Id (sha256) must already exist",
             internal="upload_not_found_parent_sha256",
@@ -298,7 +298,7 @@ async def high_level_submit_binary(
                 entities.append(entity)
         except fileformat.ExtractException as e:
             raise ApiException(
-                status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=HTTP_422_UNPROCESSABLE_CONTENT,
                 ref="bad_bundled_submission",
                 external=str(e),
                 internal=str(e),
@@ -323,7 +323,7 @@ async def high_level_submit_binary(
         entities.append(entity)
     if not entities:
         raise ApiException(
-            status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref="Unable to extract files",
             external="Cannot find any files to extract. This may be an unsupported filetype or bad password.",
             internal="upload_nothing_extracted",
