@@ -5,13 +5,13 @@ from azul_bedrock.exceptions import ApiException
 from azul_bedrock.models_restapi import features as bedr_features
 from azul_security import exceptions
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response
-from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
+from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT
 
 from azul_metastore import context
 from azul_metastore.encoders.annotation import InvalidAnnotation
 from azul_metastore.query import annotation
 from azul_metastore.query import plugin as plg
-from azul_metastore.query.binary2 import binary_feature
+from azul_metastore.query.binary2 import binary_feature, binary_feature_pivot
 from azul_metastore.restapi.quick import qr
 
 router = APIRouter()
@@ -141,7 +141,7 @@ def create_feature_value_tag(
         security = ctx.azsec.string_normalise(security)
     except exceptions.SecurityException:
         raise ApiException(
-            status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref="security was not valid",
             external=f"security was not valid ({security})",
             internal="upload_bad_security",
@@ -232,4 +232,31 @@ def find_values_in_feature(
         e = HTTPException(status_code=404)
         qr.set_security_headers(ctx, resp, ex=e)
         raise e
+    return qr.fr(ctx, data, resp)
+
+
+@router.post("/v0/features/pivot", response_model=qr.gr(bedr_features.FeaturePivotResponse), **qr.kw)
+def feature_pivot_search(
+    resp: Response,
+    feature_values: list[bedr_features.FeaturePivotRequest] = Body([], embed=True),
+    ctx: context.Context = Depends(qr.ctx),
+):
+    """Return all the common features for binaries that contain the provided features.
+
+    Feature values attached to binaries with a count of 1 are ignored because they aren't 'common'
+    Below the feats 3,4 and 5 are ignored because they have a count of 1.
+    E.g
+    Binary 1 has features (feat1: val1, feat2: val2, feat3: val3, feat5: val5)
+    Binary 2 has features (feat1: val1, feat2: val2, feat4: val4, feat5: val99)
+    Response to request for "feat1: val1" would be:
+    (feat1: value: val1, count: 2, feat2: value: val2, count: 2)
+    """
+    if not feature_values:
+        raise ApiException(
+            status_code=HTTP_422_UNPROCESSABLE_CONTENT,
+            ref="feature_values not valid",
+            external="feature values must be a valid list of tuples containing feature_name, feature_value",
+            internal="pivot_invalid_feature_values",
+        )
+    data = binary_feature_pivot.find_common_features_from_features(ctx, feature_values)
     return qr.fr(ctx, data, resp)

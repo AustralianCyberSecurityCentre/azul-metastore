@@ -10,7 +10,7 @@ from azul_bedrock.models_restapi.basic import UserAccess
 from azul_security import admin
 from azul_security import security as sec
 from azul_security.exceptions import SecurityException
-from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
+from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT
 
 from azul_metastore import settings
 from azul_metastore.common import manager, memcache, opensearch, search_data, wrapper
@@ -116,7 +116,7 @@ class Context:
             return self.azsec.string_normalise(security)
         except SecurityException:
             raise ApiException(
-                status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=HTTP_422_UNPROCESSABLE_CONTENT,
                 ref="security was not valid",
                 external=f"security was not valid ({security})",
                 internal="upload_bad_security",
