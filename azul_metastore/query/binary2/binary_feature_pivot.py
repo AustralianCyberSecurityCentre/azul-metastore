@@ -59,11 +59,11 @@ def find_common_features_from_features(
 
     # Aggregations for all the features that exist in Azul with the provided binaries.
     all_aggregations = {}
+    feature_descriptions = dict()
     for feat in azul_known_features:
         all_aggregations[feat.name] = {"terms": {"field": f"features_map.{feat.name}", "min_doc_count": 2}}
-        # all_aggregations[feat.name] = {
-        #     "composite": {"size": 1000, "sources": [{feat.name: {"terms": {"field": f"features_map.{feat.name}"}}}]}
-        # }
+        if feat.descriptions:
+            feature_descriptions[feat.name] = feat.descriptions[0].desc
 
     agg_body = {
         "query": {"bool": {"filter": [{"terms": {"sha256": matching_sha256s}}]}},
@@ -91,7 +91,9 @@ def find_common_features_from_features(
         if current_feat_value_count:
             fpnwvc.append(
                 bedr_features.FeaturePivotNameWithValueCount(
-                    feature_name=feature_name, values_and_counts=current_feat_value_count
+                    feature_name=feature_name,
+                    values_and_counts=current_feat_value_count,
+                    feature_description=feature_descriptions.get(feature_name, ""),
                 )
             )
 

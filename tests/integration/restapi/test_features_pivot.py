@@ -65,6 +65,7 @@ class TestFeatures(integration_test.BaseRestapi):
                 "feature_value_counts": [
                     {
                         "feature_name": "f1",
+                        "feature_description": "generic_description",
                         "values_and_counts": [
                             {"feature_value": "v1", "entity_count": "2"},
                             {"feature_value": "v2", "entity_count": "2"},
@@ -111,6 +112,7 @@ class TestFeatures(integration_test.BaseRestapi):
                 "feature_value_counts": [
                     {
                         "feature_name": "f2",
+                        "feature_description": "generic_description",
                         "values_and_counts": [{"feature_value": "http://blah.com", "entity_count": "2"}],
                     }
                 ],
