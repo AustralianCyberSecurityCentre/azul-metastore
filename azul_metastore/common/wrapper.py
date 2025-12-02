@@ -291,7 +291,7 @@ class Wrapper:
 
         tmp.setdefault("must_not", [])
         tmp.setdefault("filter", [])
-       
+
         has_child = False
         for f in body["query"]["bool"]["filter"]:
             if "has_child" in f and "query" in f["has_child"]:
@@ -302,7 +302,7 @@ class Wrapper:
             # convert to safe format
             safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
             if not has_child:
-                
+
                 tmp["must_not"] += [
                     {"terms": {"encoded_security.inclusive": safes}},
                     {"terms": {"encoded_security.exclusive": safes}},
@@ -314,7 +314,7 @@ class Wrapper:
                 for value in safes:
                     if "-rel-" in value:
                         must_not_clause.append({"term": {"encoded_security.inclusive": value}})
-             
+
                 for f in body["query"]["bool"]["filter"]:
                     if "has_child" in f and "query" in f["has_child"]:
                         hc_query = f["has_child"]["query"]
@@ -322,7 +322,7 @@ class Wrapper:
                         # Wrap non-bool query
                         if "bool" not in hc_query:
                             f["has_child"]["query"] = {"bool": {"must_not": must_not_clause}}
-                    # onlly add to one has_child in the query    
+                    # onlly add to one has_child in the query
                     break
 
         if sd.security_include:  # user has specified AND search based on RELs
@@ -337,9 +337,7 @@ class Wrapper:
 
                         # Wrap non-bool query
                         if "bool" not in hc_query:
-                            f["has_child"]["query"] = {
-                                "bool": {"must": [hc_query] + must_clauses}
-                            }
+                            f["has_child"]["query"] = {"bool": {"must": [hc_query] + must_clauses}}
                         else:
                             # Replace any 'terms' clause targeting encoded_security.inclusive
                             existing_must = hc_query["bool"].get("must", [])
@@ -384,7 +382,7 @@ class Wrapper:
         if not isinstance(tmp["must"], list):
             tmp["must"] = [tmp["must"]]
         tmp.setdefault("filter", [])
-      
+
         if sd.security_exclude and not sd.security_include:
             # convert to safe format
             safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
