@@ -334,7 +334,7 @@ def find_binaries(
     body["query"]["bool"]["filter"] += qf_highlight
 
     # perform search to retrieve matching sha256s
-    resp = ctx.man.binary2.w.search(ctx.sd, body=body)
+    resp = ctx.man.binary2.w.complex_search(ctx.sd, body=body)
 
     # store data for entities in same order as found
     binary_info = {}

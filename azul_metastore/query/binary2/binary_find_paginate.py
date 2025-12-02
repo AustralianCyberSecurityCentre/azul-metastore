@@ -80,7 +80,7 @@ def find_all_binaries(
             body["query"]["bool"]["filter"] = [result]
 
     # perform search
-    resp = ctx.man.binary2.w.paginate_search(ctx.sd, body=body)
+    resp = ctx.man.binary2.w.search(ctx.sd, body=body)
     after = resp["aggregations"]["COMPOSITE"].get("after_key", None)
     if after:
         after = json.dumps(after)
