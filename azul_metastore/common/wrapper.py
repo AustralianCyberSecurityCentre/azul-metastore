@@ -291,11 +291,7 @@ class Wrapper:
 
         tmp.setdefault("must_not", [])
         tmp.setdefault("filter", [])
-        if not isinstance(tmp["must_not"], list):
-            raise Exception("must_not in bool must be a list")
-        if not isinstance(tmp["filter"], list):
-            raise Exception("filter in bool must be a list")
-
+       
         has_child = False
         for f in body["query"]["bool"]["filter"]:
             if "has_child" in f and "query" in f["has_child"]:
@@ -388,13 +384,7 @@ class Wrapper:
         if not isinstance(tmp["must"], list):
             tmp["must"] = [tmp["must"]]
         tmp.setdefault("filter", [])
-        if not isinstance(tmp["must_not"], list):
-            raise Exception("must_not in bool must be a list")
-        if not isinstance(tmp["must"], list):
-            raise Exception("must in bool must be a list")
-        if not isinstance(tmp["filter"], list):
-            raise Exception("filter in bool must be a list")
-
+      
         if sd.security_exclude and not sd.security_include:
             # convert to safe format
             safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
