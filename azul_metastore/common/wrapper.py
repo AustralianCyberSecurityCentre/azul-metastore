@@ -291,7 +291,6 @@ class Wrapper:
 
         tmp.setdefault("must_not", [])
         tmp.setdefault("filter", [])
-
         has_child = False
         for f in body["query"]["bool"]["filter"]:
             if "has_child" in f and "query" in f["has_child"]:
@@ -301,7 +300,7 @@ class Wrapper:
         if sd.security_exclude:
             # convert to safe format
             safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
-            if not has_child:
+            if not sd.security_include:
 
                 tmp["must_not"] += [
                     {"terms": {"encoded_security.inclusive": safes}},
@@ -490,14 +489,12 @@ class Wrapper:
     def complex_search(self, sd: search_data.SearchData, body: dict, **kwargs):
         """Presence of children with security excludes/includes make this more complex."""
         body = self._limit_search_complex(sd, body)
-        print(json.dumps(body))
         with TimeAndLogCommand(sd, self.alias, body, "search", **kwargs) as es:
             return es.search(index=self.alias, body=body, **kwargs)
 
     def search(self, sd: search_data.SearchData, body: dict, **kwargs):
         """Perform basic opensearch query."""
         body = self._limit_search(sd, body)
-        print(json.dumps(body))
         with TimeAndLogCommand(sd, self.alias, body, "search", **kwargs) as es:
             return es.search(index=self.alias, body=body, **kwargs)
 
