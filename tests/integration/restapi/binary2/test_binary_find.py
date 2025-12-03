@@ -148,7 +148,7 @@ class TestBinaryFind(integration_test.BaseRestapi):
             {
                 "query_type": "search",
                 "query": {
-                    "query": {"bool": {"filter": [{"terms": {"sha256": ["e1"]}}], "must_not": []}},
+                    "query": {"bool": {"filter": [{"terms": {"sha256": ["e1"]}}], "must_not": [], "must": []}},
                     "size": 0,
                     "_source": False,
                     "aggs": {
@@ -208,6 +208,7 @@ class TestBinaryFind(integration_test.BaseRestapi):
                         "bool": {
                             "filter": [{"term": {"type": "entity_tag"}}, {"terms": {"sha256": ["e1"]}}],
                             "must_not": [{"term": {"state": "disabled"}}],
+                            "must": [],
                         }
                     },
                     "sort": ["tag"],
