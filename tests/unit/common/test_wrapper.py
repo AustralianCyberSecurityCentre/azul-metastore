@@ -24,6 +24,7 @@ class TestWrapper(unit_test.BaseUnitTestCase):
         sd = search_data.SearchData(credentials={}, security_exclude=["HIGH"], security_include=[])
         query = {}
         query = w._limit_search(sd, query)
+        print(query)
         self.assertEqual(
             {
                 "query": {
@@ -33,6 +34,7 @@ class TestWrapper(unit_test.BaseUnitTestCase):
                             {"terms": {"encoded_security.exclusive": ["s-high"]}},
                             {"terms": {"encoded_security.markings": ["s-high"]}},
                         ],
+                        "must": [],
                         "filter": [],
                     }
                 }
@@ -51,6 +53,7 @@ class TestWrapper(unit_test.BaseUnitTestCase):
                             {"terms": {"encoded_security.exclusive": ["s-high"]}},
                             {"terms": {"encoded_security.markings": ["s-high"]}},
                         ],
+                        "must": [],
                         "filter": [{"terms": {"genuine.rolodex": "true"}}],
                     }
                 }

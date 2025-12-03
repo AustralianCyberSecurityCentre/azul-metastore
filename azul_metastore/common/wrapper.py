@@ -490,12 +490,14 @@ class Wrapper:
     def complex_search(self, sd: search_data.SearchData, body: dict, **kwargs):
         """Presence of children with security excludes/includes make this more complex."""
         body = self._limit_search_complex(sd, body)
+        print(json.dumps(body))
         with TimeAndLogCommand(sd, self.alias, body, "search", **kwargs) as es:
             return es.search(index=self.alias, body=body, **kwargs)
 
     def search(self, sd: search_data.SearchData, body: dict, **kwargs):
         """Perform basic opensearch query."""
         body = self._limit_search(sd, body)
+        print(json.dumps(body))
         with TimeAndLogCommand(sd, self.alias, body, "search", **kwargs) as es:
             return es.search(index=self.alias, body=body, **kwargs)
 
