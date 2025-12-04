@@ -69,7 +69,7 @@ def _create_binary_events(
     # this means if there are any duplicates the newest event is taken.
     for raw_event in sorted(raw_events, key=lambda ev: ev.timestamp, reverse=True):
         try:
-            if raw_event.author.name.startswith("maco"):
+            if raw_event.author.name.lower().startswith("maco") or raw_event.author.name.startswith("Maco"):
                 logger.info(f"Processing event by {raw_event.author.name} for file {raw_event.entity.sha256}")
                 if len(raw_event.entity.features) > 0:
                     logger.info(raw_event.model_dump_json())
@@ -89,7 +89,7 @@ def _create_binary_events(
             # Other events are processed as normal (this is for debugging and stats)
             if len(filtered_events) == 0:
                 duplicate_docs.append(raw_event)
-            if raw_event.author.name.startswith("maco"):
+            if raw_event.author.name.lower().startswith("maco") or raw_event.author.name.startswith("Maco"):
                 logger.info(f"Successfully adding events {len(filtered_events)} - {filtered_events}")
             results.extend(filtered_events)
         except Exception as e:
