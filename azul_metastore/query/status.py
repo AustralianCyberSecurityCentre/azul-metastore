@@ -191,7 +191,7 @@ def create_status(ctx: Context, raw_events: list[azm.StatusEvent]) -> tuple[list
     for raw_event in reversed(raw_events):
         try:
             if raw_event.author.name.lower().startswith("maco") or raw_event.author.name.startswith("Maco"):
-                logger.info(f"Processing event by {raw_event.author.name} for file {raw_event.entity.sha256}")
+                logger.info(f"Processing event by {raw_event.author.name}")
                 logger.info(raw_event.model_dump_json())
 
             normalised = basic_events.StatusEvent.normalise(raw_event)
