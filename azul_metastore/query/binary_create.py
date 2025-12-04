@@ -1,5 +1,6 @@
 """Queries for modifying results."""
 
+import json
 import logging
 import traceback
 
@@ -90,7 +91,7 @@ def _create_binary_events(
             if len(filtered_events) == 0:
                 duplicate_docs.append(raw_event)
             if raw_event.author.name.lower().startswith("maco") or raw_event.author.name.startswith("Maco"):
-                logger.info(f"Successfully adding events {len(filtered_events)} - {filtered_events}")
+                logger.info(f"Successfully adding events {len(filtered_events)} - {json.dumps(filtered_events)}")
             results.extend(filtered_events)
         except Exception as e:
             # retain error and process other events
