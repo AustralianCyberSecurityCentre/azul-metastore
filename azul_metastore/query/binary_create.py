@@ -73,7 +73,7 @@ def _create_binary_events(
                 logger.info(f"Processing event by {raw_event.author.name} for file {raw_event.entity.sha256}")
                 if len(raw_event.entity.features) > 0:
                     logger.info(raw_event.model_dump_json())
-                
+
             # ensure events are valid
             normalised = basic_events.BinaryEvent.normalise(raw_event)
             # don't write events that should be deleted immediately
@@ -81,7 +81,7 @@ def _create_binary_events(
                 aged_off += 1
                 logger.info(f"Auto aging off event by author {raw_event.author.name}+{raw_event.author.version}")
                 continue
-            
+
             # Encode binary events for opensearch indexing
             encoded = binary2.Binary2.encode(normalised)
             filtered_events = binary2.Binary2.filter_seen_and_create_parent_events(encoded)
