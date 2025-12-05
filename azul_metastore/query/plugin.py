@@ -31,12 +31,14 @@ def create_plugin(ctx: Context, raw_events: list[azm.PluginEvent]) -> tuple[list
     results = dict()
     bad_raw_results = []
     duplicate_docs: list[azm.PluginEvent] = []
+    is_has_maco = False
     # Reverse raw_results so if there are duplicate ids we get the newest event.
     for raw_event in reversed(raw_events):
         try:
             if raw_event.author.name.lower().startswith("maco") or raw_event.author.name.startswith("Maco"):
                 logger.info(f"Processing event by {raw_event.author.name}")
                 logger.info(raw_event.model_dump_json())
+                is_has_maco = True
             # ensure event matches model
             normalised = basic_events.PluginEvent.normalise(raw_event)
             # encode with custom opensearch properties
@@ -51,21 +53,25 @@ def create_plugin(ctx: Context, raw_events: list[azm.PluginEvent]) -> tuple[list
             continue
         key_to_add = encoded["_id"]
         if key_to_add in results:
+            logger.debug(
+                f"There are duplicate document keys when encoding plugin events id: '{key_to_add}' for "
+                + f"plugin {raw_event.author.name}-{raw_event.author.version}"
+            )
             # Append the raw_event as there is a duplicate.
             duplicate_docs.append(raw_event)
             # Check if the existing data is newer than the data to be added
             # If it is keep the old data and drop the new data.
             if pendulum.parse(results[key_to_add]["timestamp"]) >= pendulum.parse(encoded["timestamp"]):
-                logger.debug(
-                    f"There are duplicate document keys when encoding plugin events id: '{key_to_add}' for "
-                    + f"plugin {raw_event.author.name}-{raw_event.author.version}"
-                )
                 continue
         results[key_to_add] = encoded
     # No docs to go to opensearch.
     if not results:
+        if is_has_maco:
+            logger.info("NO DOCS WENT TO OPENSEARCH!")
         return bad_raw_results, duplicate_docs
 
+    if is_has_maco:
+        logger.info(f"DOCS TO BE INDEXED {'\n'.join(list(results.values()))}")
     doc_errors = ctx.man.plugin.w.wrap_and_index_docs(ctx.sd, results.values(), refresh=True, raise_on_errors=False)
     return bad_raw_results + doc_errors, duplicate_docs
 
