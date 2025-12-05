@@ -34,6 +34,9 @@ def create_plugin(ctx: Context, raw_events: list[azm.PluginEvent]) -> tuple[list
     # Reverse raw_results so if there are duplicate ids we get the newest event.
     for raw_event in reversed(raw_events):
         try:
+            if raw_event.author.name.lower().startswith("maco") or raw_event.author.name.startswith("Maco"):
+                logger.info(f"Processing event by {raw_event.author.name}")
+                logger.info(raw_event.model_dump_json())
             # ensure event matches model
             normalised = basic_events.PluginEvent.normalise(raw_event)
             # encode with custom opensearch properties
