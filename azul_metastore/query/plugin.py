@@ -71,7 +71,7 @@ def create_plugin(ctx: Context, raw_events: list[azm.PluginEvent]) -> tuple[list
         return bad_raw_results, duplicate_docs
 
     if is_has_maco:
-        logger.info(f"DOCS TO BE INDEXED {'\n'.join(list(results.values()))}")
+        logger.info(f"DOCS TO BE INDEXED {list(results.values())}")
     doc_errors = ctx.man.plugin.w.wrap_and_index_docs(ctx.sd, results.values(), refresh=True, raise_on_errors=False)
     return bad_raw_results + doc_errors, duplicate_docs
 
