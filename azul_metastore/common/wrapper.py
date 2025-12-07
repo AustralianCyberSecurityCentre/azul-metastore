@@ -516,6 +516,7 @@ class Wrapper:
                 if not success:
                     errors.append(err)
         else:
+            logger.info(f"INDEXING: {docs}")
             # wait for all data to be searchable
             success_count_with_errors = helpers.bulk(
                 sd.es(), docs, request_timeout=200, refresh=refresh, raise_on_error=raise_on_errors
