@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import os
 from typing import AsyncIterable
 
 from azul_bedrock import models_network as azm
@@ -38,7 +39,14 @@ def _transform_metadata_to_binary_entity(
     """Transform metadata into an entity."""
     ret = bin_info.to_input_entity()
     if filename:
-        ret.features.append(azm.FeatureValue(name="filename", type="filepath", value=filename))
+        ret.features.append(azm.FeatureValue(name="filename", type=azm.FeatureType.Filepath, value=filename))
+        # Add the extension as a feature if the filename has one.
+        extension = os.path.splitext(filename)[1]
+        extension = extension.replace(".", "", 1)
+        if extension:
+            ret.features.append(
+                azm.FeatureValue(name="submission_file_extension", type=azm.FeatureType.String, value=extension)
+            )
     ret.datastreams += augstreams
     return ret
 
