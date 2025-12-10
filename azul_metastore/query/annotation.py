@@ -113,7 +113,6 @@ def read_all_binary_tags(ctx: Context) -> models_restapi.ReadTags:
                 tag=row["key"], num_entities=row["num_entities"]["value"], num_entities_approx=True
             )
         )
-    print("Tags found: ", ret)
     return ret
 
 
