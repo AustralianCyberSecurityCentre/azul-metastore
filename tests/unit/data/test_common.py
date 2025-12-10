@@ -61,41 +61,23 @@ class CommonTestCases(unit_test.DataMockingUnitTest):
         self.assertEqual(
             decoded,
             {
-                "kafka_key": "tmp",
-                "action": "sourced",
                 "model_version": 5,
+                "kafka_key": "tmp",
                 "timestamp": dummy.isoformat(),
-                "source": {
-                    "name": "source",
-                    "path": [
-                        {
-                            "action": "sourced",
-                            "timestamp": "2022-02-02T00:00:00+00:00",
-                            "author": {"category": "user", "name": "me", "security": "low"},
-                            "sha256": "d1b2a59fbea7e20077af9f91b27e95e865061b270be03ff539ab3b73587882e8",
-                            "filename": "file.name",
-                            "size": 8,
-                            "file_format_legacy": "GIF",
-                            "file_format": "image/gif",
-                        }
-                    ],
-                    "timestamp": "2022-02-02T00:00:00+00:00",
-                    "security": "low",
-                },
                 "author": {"category": "user", "name": "me", "security": "low"},
                 "entity": {
-                    "size": 8,
-                    "sha512": "ac98d72fccae58536b132637d9f2220af6e87667db65f3744b7552fb9dfb1c67e3ececb7291bd287bc4a860dca2f7abf417bc89d7ab873cc028f07a24f9f6772",
                     "sha256": "d1b2a59fbea7e20077af9f91b27e95e865061b270be03ff539ab3b73587882e8",
+                    "sha512": "ac98d72fccae58536b132637d9f2220af6e87667db65f3744b7552fb9dfb1c67e3ececb7291bd287bc4a860dca2f7abf417bc89d7ab873cc028f07a24f9f6772",
                     "sha1": "4a756ca07e9487f482465a99e8286abc86ba4dc7",
                     "md5": "98bf7d8c15784f0a3d63204441e1e2aa",
                     "ssdeep": "3072:fakessdeepr6QyyjEfQvAqnf5BtZKDLeM93IbsDV:QVUWEh6nyjEIvAqnf5BOnL1V",
                     "tlsh": "T1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-                    "mime": "mimish",
-                    "magic": "magical",
+                    "size": 8,
                     "file_format_legacy": "GIF",
                     "file_format": "image/gif",
                     "file_extension": ".gif",
+                    "mime": "mimish",
+                    "magic": "magical",
                     "features": [
                         {"name": "file_format", "type": "string", "value": "image/gif"},
                         {"name": "file_format_legacy", "type": "string", "value": "GIF"},
@@ -103,23 +85,42 @@ class CommonTestCases(unit_test.DataMockingUnitTest):
                         {"name": "magic", "type": "string", "value": "magical"},
                         {"name": "mime", "type": "string", "value": "mimish"},
                         {"name": "filename", "type": "filepath", "value": "file.name"},
+                        {"name": "submission_file_extension", "type": "string", "value": "name"},
                     ],
                     "datastreams": [
                         {
-                            "identify_version": 1,
-                            "label": "content",
-                            "size": 8,
-                            "sha512": "ac98d72fccae58536b132637d9f2220af6e87667db65f3744b7552fb9dfb1c67e3ececb7291bd287bc4a860dca2f7abf417bc89d7ab873cc028f07a24f9f6772",
                             "sha256": "d1b2a59fbea7e20077af9f91b27e95e865061b270be03ff539ab3b73587882e8",
+                            "sha512": "ac98d72fccae58536b132637d9f2220af6e87667db65f3744b7552fb9dfb1c67e3ececb7291bd287bc4a860dca2f7abf417bc89d7ab873cc028f07a24f9f6772",
                             "sha1": "4a756ca07e9487f482465a99e8286abc86ba4dc7",
                             "md5": "98bf7d8c15784f0a3d63204441e1e2aa",
                             "ssdeep": "3072:fakessdeepr6QyyjEfQvAqnf5BtZKDLeM93IbsDV:QVUWEh6nyjEIvAqnf5BOnL1V",
                             "tlsh": "T1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-                            "mime": "mimish",
-                            "magic": "magical",
+                            "size": 8,
                             "file_format_legacy": "GIF",
                             "file_format": "image/gif",
                             "file_extension": ".gif",
+                            "mime": "mimish",
+                            "magic": "magical",
+                            "identify_version": 1,
+                            "label": "content",
+                        }
+                    ],
+                },
+                "action": "sourced",
+                "source": {
+                    "security": "low",
+                    "name": "source",
+                    "timestamp": "2022-02-02T00:00:00+00:00",
+                    "path": [
+                        {
+                            "sha256": "d1b2a59fbea7e20077af9f91b27e95e865061b270be03ff539ab3b73587882e8",
+                            "action": "sourced",
+                            "timestamp": "2022-02-02T00:00:00+00:00",
+                            "author": {"category": "user", "name": "me", "security": "low"},
+                            "file_format_legacy": "GIF",
+                            "file_format": "image/gif",
+                            "size": 8,
+                            "filename": "file.name",
                         }
                     ],
                 },
@@ -185,6 +186,7 @@ class CommonTestCases(unit_test.DataMockingUnitTest):
                         {"name": "magic", "type": "string", "value": "magical"},
                         {"name": "mime", "type": "string", "value": "mimish"},
                         {"name": "filename", "type": "filepath", "value": "file.name"},
+                        {"name": "submission_file_extension", "type": "string", "value": "name"},
                     ],
                     "datastreams": [
                         {
@@ -207,7 +209,9 @@ class CommonTestCases(unit_test.DataMockingUnitTest):
                 },
                 "action": "sourced",
                 "source": {
+                    "security": "low",
                     "name": "source",
+                    "timestamp": "2022-02-02T00:00:00+00:00",
                     "path": [
                         {
                             "sha256": "d1b2a59fbea7e20077af9f91b27e95e865061b270be03ff539ab3b73587882e8",
@@ -220,8 +224,6 @@ class CommonTestCases(unit_test.DataMockingUnitTest):
                             "filename": "file.name",
                         }
                     ],
-                    "timestamp": "2022-02-02T00:00:00+00:00",
-                    "security": "low",
                 },
             },
         )

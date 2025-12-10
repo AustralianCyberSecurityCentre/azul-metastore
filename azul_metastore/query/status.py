@@ -177,7 +177,7 @@ def get_binary_status(ctx: Context, sha256: str) -> list[models_restapi.StatusEv
 
 
 @capture_write_stats("status")
-def create_status(ctx: Context, raw_events: list[dict]) -> tuple[list[IngestError], list[dict]]:
+def create_status(ctx: Context, raw_events: list[azm.StatusEvent]) -> tuple[list[IngestError], list[azm.StatusEvent]]:
     """Save list of statuses to opensearch.
 
     :param ctx: Context
@@ -186,7 +186,7 @@ def create_status(ctx: Context, raw_events: list[dict]) -> tuple[list[IngestErro
     """
     results = dict()
     bad_raw_results: list[IngestError] = []
-    duplicate_docs: list[dict] = []
+    duplicate_docs: list[azm.StatusEvent] = []
     # Reverse raw_results so if there are duplicate ids we get the newest event.
     for raw_event in reversed(raw_events):
         try:

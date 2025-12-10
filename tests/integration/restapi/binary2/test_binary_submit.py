@@ -185,6 +185,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         {"name": "magic", "type": "string", "value": "magical"},
                         {"name": "mime", "type": "string", "value": "mimish"},
                         {"name": "filename", "type": "filepath", "value": "test.exe"},
+                        {"name": "submission_file_extension", "type": "string", "value": "exe"},
                     ],
                     "datastreams": [
                         {
@@ -382,7 +383,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
                                 "name": "s1",
                                 "timestamp": "2022-02-02T00:00:00Z",
                                 "references": {"ref2": "val2", "ref1": "val1"},
-                                "settings": {"passwords": "abc;def;ghi", "remove_at_depth": "3"},
+                                "settings": {"remove_at_depth": "3", "passwords": "abc;def;ghi"},
                                 "track_source_references": "s1.dd6e233ae7a843de99f9b43c349069e4",
                             }
                         ],
@@ -407,7 +408,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "key": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.user.high_all.extracted",
                         "author": {"security": "LOW", "category": "user", "name": "high_all"},
                         "action": "extracted",
-                        "num_feature_values": 6,
+                        "num_feature_values": 7,
                     }
                 ],
                 "features": [
@@ -465,6 +466,16 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "name": "mime",
                         "type": "string",
                         "value": "mimish",
+                        "label": [],
+                        "parts": {},
+                        "instances": [
+                            "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.user.high_all.extracted"
+                        ],
+                    },
+                    {
+                        "name": "submission_file_extension",
+                        "type": "string",
+                        "value": "exe",
                         "label": [],
                         "parts": {},
                         "instances": [
@@ -530,6 +541,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
                             {"name": "magic", "type": "string", "value": "magical"},
                             {"name": "mime", "type": "string", "value": "mimish"},
                             {"name": "filename", "type": "filepath", "value": "test.exe"},
+                            {"name": "submission_file_extension", "type": "string", "value": "exe"},
                         ],
                         "datastreams": [
                             {
@@ -649,7 +661,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "key": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.user.high_all.extracted",
                         "author": {"security": "LOW", "category": "user", "name": "high_all"},
                         "action": "extracted",
-                        "num_feature_values": 6,
+                        "num_feature_values": 7,
                     }
                 ],
                 "features": [
@@ -707,6 +719,16 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "name": "mime",
                         "type": "string",
                         "value": "mimish",
+                        "label": [],
+                        "parts": {},
+                        "instances": [
+                            "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.user.high_all.extracted"
+                        ],
+                    },
+                    {
+                        "name": "submission_file_extension",
+                        "type": "string",
+                        "value": "exe",
                         "label": [],
                         "parts": {},
                         "instances": [
@@ -772,6 +794,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
                             {"name": "magic", "type": "string", "value": "magical"},
                             {"name": "mime", "type": "string", "value": "mimish"},
                             {"name": "filename", "type": "filepath", "value": "test.exe"},
+                            {"name": "submission_file_extension", "type": "string", "value": "exe"},
                         ],
                         "datastreams": [
                             {
@@ -890,7 +913,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "key": "00000000000000000000000000000000000000000000000000000000000000e2.user.high_all.extracted",
                         "author": {"security": "LOW", "category": "user", "name": "high_all"},
                         "action": "extracted",
-                        "num_feature_values": 6,
+                        "num_feature_values": 7,
                     },
                 ],
                 "features": [
@@ -965,6 +988,16 @@ class TestBinaryRead(integration_test.BaseRestapi):
                             "00000000000000000000000000000000000000000000000000000000000000e2.user.high_all.extracted",
                         ],
                     },
+                    {
+                        "name": "submission_file_extension",
+                        "type": "string",
+                        "value": "exe",
+                        "label": [],
+                        "parts": {},
+                        "instances": [
+                            "00000000000000000000000000000000000000000000000000000000000000e2.user.high_all.extracted"
+                        ],
+                    },
                 ],
                 "streams": [
                     {
@@ -1024,6 +1057,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
                             {"name": "magic", "type": "string", "value": "ASCII text"},
                             {"name": "mime", "type": "string", "value": "text/plain"},
                             {"name": "filename", "type": "filepath", "value": "test.exe"},
+                            {"name": "submission_file_extension", "type": "string", "value": "exe"},
                         ],
                         "datastreams": [
                             {
@@ -1161,7 +1195,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "key": "00000000000000000000000000000000000000000000000000000000000000e1.user.high_all.sourced",
                         "author": {"security": "LOW", "category": "user", "name": "high_all"},
                         "action": "sourced",
-                        "num_feature_values": 6,
+                        "num_feature_values": 7,
                     },
                 ],
                 "features": [
@@ -1234,6 +1268,16 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "instances": [
                             "00000000000000000000000000000000000000000000000000000000000000e1.plugin.a1.sourced",
                             "00000000000000000000000000000000000000000000000000000000000000e1.user.high_all.sourced",
+                        ],
+                    },
+                    {
+                        "name": "submission_file_extension",
+                        "type": "string",
+                        "value": "exe",
+                        "label": [],
+                        "parts": {},
+                        "instances": [
+                            "00000000000000000000000000000000000000000000000000000000000000e1.user.high_all.sourced"
                         ],
                     },
                 ],

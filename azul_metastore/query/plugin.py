@@ -50,10 +50,13 @@ def create_plugin(ctx: Context, raw_events: list[azm.PluginEvent]) -> tuple[list
         if key_to_add in results:
             # Append the raw_event as there is a duplicate.
             duplicate_docs.append(raw_event)
+            logger.debug(
+                f"There are duplicate document keys when encoding plugin events id: '{key_to_add}' for "
+                + f"plugin {raw_event.author.name}-{raw_event.author.version}"
+            )
             # Check if the existing data is newer than the data to be added
             # If it is keep the old data and drop the new data.
             if pendulum.parse(results[key_to_add]["timestamp"]) >= pendulum.parse(encoded["timestamp"]):
-                logger.debug(f"There are duplicate document keys when encoding plugin events id: '{key_to_add}'")
                 continue
         results[key_to_add] = encoded
     # No docs to go to opensearch.
