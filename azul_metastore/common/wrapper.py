@@ -321,8 +321,12 @@ class Wrapper:
                         # Wrap non-bool query
                         if "bool" not in hc_query:
                             f["has_child"]["query"] = {"bool": {"must_not": must_not_clause}}
-                    # onlly add to one has_child in the query
+                    # only add to one has_child in the query
                     break
+                tmp["must_not"] += [
+                    {"terms": {"encoded_security.exclusive": safes}},
+                    {"terms": {"encoded_security.markings": safes}},
+                ]
 
         if sd.security_include:  # user has specified AND search based on RELs
             if has_child:
