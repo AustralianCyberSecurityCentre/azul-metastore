@@ -192,8 +192,11 @@ class TestWrapper(unit_test.BaseUnitTestCase):
                                     "type": "metadata",
                                     "query": {
                                         "bool": {
+                                            "must": [
+                                                {"exists": {"field": "source.name"}},
+                                                {"term": {"encoded_security.inclusive": "s-rel-apple"}},
+                                            ],
                                             "must_not": [{"term": {"encoded_security.inclusive": "s-rel-car"}}],
-                                            "must": [{"term": {"encoded_security.inclusive": "s-rel-apple"}}],
                                         }
                                     },
                                 }
@@ -232,10 +235,11 @@ class TestWrapper(unit_test.BaseUnitTestCase):
                                     "type": "metadata",
                                     "query": {
                                         "bool": {
+                                            "must_not": [{"term": {"encoded_security.inclusive": "s-rel-car"}}],
                                             "must": [
                                                 {"exists": {"field": "source.name"}},
                                                 {"term": {"encoded_security.inclusive": "s-rel-apple"}},
-                                            ]
+                                            ],
                                         }
                                     },
                                 }
