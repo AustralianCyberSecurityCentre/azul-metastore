@@ -301,14 +301,13 @@ class Wrapper:
             # convert to safe format
             safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
             if not sd.security_include:
-
                 tmp["must_not"] += [
                     {"terms": {"encoded_security.inclusive": safes}},
                     {"terms": {"encoded_security.exclusive": safes}},
                     {"terms": {"encoded_security.markings": safes}},
                 ]
             else:
-                # add must not clause to children
+                # add must_not clause to children
                 must_not_clause = []
                 for value in safes:
                     if "-rel-" in value:
@@ -318,11 +317,17 @@ class Wrapper:
                     if "has_child" in f and "query" in f["has_child"]:
                         hc_query = f["has_child"]["query"]
 
-                        # Wrap non-bool query
+                        # Ensure hc_query is wrapped in a bool once
                         if "bool" not in hc_query:
-                            f["has_child"]["query"] = {"bool": {"must_not": must_not_clause}}
-                    # only add to one has_child in the query
-                    break
+                            hc_query = {"bool": {"must": [hc_query], "must_not": []}}
+                            f["has_child"]["query"] = hc_query
+
+                        # Append must_not
+                        hc_query["bool"].setdefault("must_not", []).extend(must_not_clause)
+
+                        # only add to one has_child in the query
+                        break
+
                 tmp["must_not"] += [
                     {"terms": {"encoded_security.exclusive": safes}},
                     {"terms": {"encoded_security.markings": safes}},
@@ -338,26 +343,28 @@ class Wrapper:
                     if "has_child" in f and "query" in f["has_child"]:
                         hc_query = f["has_child"]["query"]
 
-                        # Wrap non-bool query
+                        # Ensure hc_query is wrapped in a bool once
                         if "bool" not in hc_query:
-                            f["has_child"]["query"] = {"bool": {"must": [hc_query] + must_clauses}}
-                        else:
-                            # Replace any 'terms' clause targeting encoded_security.inclusive
-                            existing_must = hc_query["bool"].get("must", [])
-                            new_must = []
+                            hc_query = {"bool": {"must": [hc_query], "must_not": []}}
+                            f["has_child"]["query"] = hc_query
 
-                            for clause in existing_must:
-                                if (
-                                    "terms" in clause
-                                    and isinstance(clause["terms"], dict)
-                                    and "encoded_security.inclusive" in clause["terms"]
-                                ):
-                                    continue  # skip the old terms clause
-                                new_must.append(clause)
+                        # Replace any 'terms' clause targeting encoded_security.inclusive
+                        existing_must = hc_query["bool"].get("must", [])
+                        new_must = []
 
-                            # Add individual term clauses (AND logic)
-                            new_must.extend(must_clauses)
-                            hc_query["bool"]["must"] = new_must
+                        for clause in existing_must:
+                            if (
+                                "terms" in clause
+                                and isinstance(clause["terms"], dict)
+                                and "encoded_security.inclusive" in clause["terms"]
+                            ):
+                                continue  # skip the old terms clause
+                            new_must.append(clause)
+
+                        # Add individual term clauses (AND logic)
+                        new_must.extend(must_clauses)
+                        hc_query["bool"]["must"] = new_must
+
                         # only add to one has_child in the query
                         break
 
