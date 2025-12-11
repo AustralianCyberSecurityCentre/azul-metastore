@@ -160,7 +160,7 @@ def apply_opensearch_config(print_only: bool, rolesmapping: bool, no_input: bool
         else:
             click.echo("Error. Must provide credentials.")
             return 7
-        credentials = search_data.SearchData(credentials, security_exclude=[])
+        credentials = search_data.SearchData(credentials, security_exclude=[], security_include=[])
         try:
             write_config_to_opensearch(credentials, rolesmapping)
         except Exception:

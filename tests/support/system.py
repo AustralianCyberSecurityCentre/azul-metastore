@@ -121,7 +121,7 @@ class System:
     def get_ctx(self, creds: dict) -> context.Context:
         """Create context using creds."""
         user_info = UserInfo(username=creds["unique"], unique_id=creds["unique"])
-        sd = search_data.SearchData(credentials=creds, security_exclude=[])
+        sd = search_data.SearchData(credentials=creds, security_exclude=[], security_include=[])
         return self.base.copy_with(user_info=user_info, sd=sd)
 
     @property

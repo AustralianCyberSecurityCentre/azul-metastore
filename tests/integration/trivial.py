@@ -27,7 +27,7 @@ def find_binaries_with_separated_features(ctx: Context, f1: str, f2: str):
             }
         },
     }
-    resp = ctx.man.binary2.w.search(ctx.sd, body=body)
+    resp = ctx.man.binary2.w.complex_search(ctx.sd, body=body)
     return [x["_id"] for x in resp["hits"]["hits"]]
 
 

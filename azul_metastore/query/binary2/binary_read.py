@@ -67,7 +67,7 @@ def find_stream_references(ctx: Context, sha256: str) -> tuple[bool, str, str]:
             }
         },
     }
-    resp = ctx.man.binary2.w.search(ctx.sd, body=body)
+    resp = ctx.man.binary2.w.complex_search(ctx.sd, body=body)
     aggs = resp["aggregations"]["CHILDREN"]
 
     if not aggs["SOURCES"]["buckets"]:

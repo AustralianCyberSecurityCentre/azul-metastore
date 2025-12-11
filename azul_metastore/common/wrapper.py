@@ -272,11 +272,10 @@ class Wrapper:
         """Return all indices for the encoder."""
         return sd.es().indices.get(index=self.alias, **kwargs)
 
-    def _limit_search(self, sd: search_data.SearchData, body: dict) -> dict:
+    def _limit_search_complex(self, sd: search_data.SearchData, body: dict) -> dict:
         # make a copy as we are modifying the original query
         body = copy.deepcopy(body)
         query = body.setdefault("query", {})
-
         # Inject the security limiter into kNN operators if available (as it has a inner option for filtering
         # which is faster and avoids issues around no results being returned as kNN has a finite limit)
         if set(query.keys()) == {"knn"}:
@@ -292,12 +291,102 @@ class Wrapper:
 
         tmp.setdefault("must_not", [])
         tmp.setdefault("filter", [])
-        if not isinstance(tmp["must_not"], list):
-            raise Exception("must_not in bool must be a list")
-        if not isinstance(tmp["filter"], list):
-            raise Exception("filter in bool must be a list")
+        has_child = False
+        for f in body["query"]["bool"]["filter"]:
+            if "has_child" in f and "query" in f["has_child"]:
+                has_child = True
+                break
 
         if sd.security_exclude:
+            # convert to safe format
+            safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
+            if not sd.security_include:
+
+                tmp["must_not"] += [
+                    {"terms": {"encoded_security.inclusive": safes}},
+                    {"terms": {"encoded_security.exclusive": safes}},
+                    {"terms": {"encoded_security.markings": safes}},
+                ]
+            else:
+                # add must not clause to children
+                must_not_clause = []
+                for value in safes:
+                    if "-rel-" in value:
+                        must_not_clause.append({"term": {"encoded_security.inclusive": value}})
+
+                for f in body["query"]["bool"]["filter"]:
+                    if "has_child" in f and "query" in f["has_child"]:
+                        hc_query = f["has_child"]["query"]
+
+                        # Wrap non-bool query
+                        if "bool" not in hc_query:
+                            f["has_child"]["query"] = {"bool": {"must_not": must_not_clause}}
+                    # only add to one has_child in the query
+                    break
+                tmp["must_not"] += [
+                    {"terms": {"encoded_security.exclusive": safes}},
+                    {"terms": {"encoded_security.markings": safes}},
+                ]
+
+        if sd.security_include:  # user has specified AND search based on RELs
+            if has_child:
+                # Convert to safe format and build AND-style term clauses
+                musts = utils.azsec().unsafe_to_safe(sd.security_include)
+                must_clauses = [{"term": {"encoded_security.inclusive": value}} for value in musts]
+
+                for f in body["query"]["bool"]["filter"]:
+                    if "has_child" in f and "query" in f["has_child"]:
+                        hc_query = f["has_child"]["query"]
+
+                        # Wrap non-bool query
+                        if "bool" not in hc_query:
+                            f["has_child"]["query"] = {"bool": {"must": [hc_query] + must_clauses}}
+                        else:
+                            # Replace any 'terms' clause targeting encoded_security.inclusive
+                            existing_must = hc_query["bool"].get("must", [])
+                            new_must = []
+
+                            for clause in existing_must:
+                                if (
+                                    "terms" in clause
+                                    and isinstance(clause["terms"], dict)
+                                    and "encoded_security.inclusive" in clause["terms"]
+                                ):
+                                    continue  # skip the old terms clause
+                                new_must.append(clause)
+
+                            # Add individual term clauses (AND logic)
+                            new_must.extend(must_clauses)
+                            hc_query["bool"]["must"] = new_must
+                        # only add to one has_child in the query
+                        break
+
+        return body
+
+    def _limit_search(self, sd: search_data.SearchData, body: dict) -> dict:
+        # make a copy as we are modifying the original query
+        body = copy.deepcopy(body)
+        query = body.setdefault("query", {})
+        # Inject the security limiter into kNN operators if available (as it has a inner option for filtering
+        # which is faster and avoids issues around no results being returned as kNN has a finite limit)
+        if set(query.keys()) == {"knn"}:
+            knn_filter = query["knn"]
+            if len(knn_filter) != 1:
+                # This gets more complicated with security filters; don't worry about this edge case
+                raise Exception("kNN filters only supported for one search term")
+            query = knn_filter[list(knn_filter.keys())[0]].setdefault("filter", {})
+
+        tmp = query.setdefault("bool", {})
+        if set(query.keys()) != {"bool"}:
+            raise Exception("Can only have bool in top level query (or within kNN query filter)")
+
+        tmp.setdefault("must_not", [])
+        tmp.setdefault("must", [])
+        if not isinstance(tmp["must"], list):
+            tmp["must"] = [tmp["must"]]
+        tmp.setdefault("filter", [])
+
+        if sd.security_exclude and not sd.security_include:
             # convert to safe format
             safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
             tmp["must_not"] += [
@@ -305,6 +394,23 @@ class Wrapper:
                 {"terms": {"encoded_security.exclusive": safes}},
                 {"terms": {"encoded_security.markings": safes}},
             ]
+        elif sd.security_exclude:
+            # convert to safe format
+            safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
+            tmp["must_not"] += [
+                {"terms": {"encoded_security.exclusive": safes}},
+                {"terms": {"encoded_security.markings": safes}},
+            ]
+
+            for value in safes:
+                if "-rel-" in value:
+                    tmp["must_not"].append({"term": {"encoded_security.inclusive": value}})
+
+        if sd.security_include:  # user has specified AND search based on RELs
+            # Convert to safe format and build AND-style term clauses
+            musts = utils.azsec().unsafe_to_safe(sd.security_include)
+            for m in musts:
+                tmp["must"].append({"term": {"encoded_security.inclusive": m}})
 
         return body
 
@@ -383,6 +489,12 @@ class Wrapper:
                 resp2 = es.get(index=self.index_shut, id=_id, ignore=404)
             ret = resp2["_source"] if resp2.get("found") else ret
         return ret
+
+    def complex_search(self, sd: search_data.SearchData, body: dict, **kwargs):
+        """Presence of children with security excludes/includes make this more complex."""
+        body = self._limit_search_complex(sd, body)
+        with TimeAndLogCommand(sd, self.alias, body, "search", **kwargs) as es:
+            return es.search(index=self.alias, body=body, **kwargs)
 
     def search(self, sd: search_data.SearchData, body: dict, **kwargs):
         """Perform basic opensearch query."""
