@@ -29,7 +29,6 @@ def stream_dispatcher_events_for_binary(
                     {"exists": {"field": "datastreams.sha1"}},
                     {"exists": {"field": "datastreams.md5"}},
                     {"exists": {"field": "datastreams.size"}},
-                    {"exists": {"field": "datastreams.file_format_legacy"}},
                     {"exists": {"field": "datastreams.magic"}},
                     {"exists": {"field": "datastreams.mime"}},
                     # Ensure we get the sourced event's cnotent datastream back.
@@ -40,7 +39,6 @@ def stream_dispatcher_events_for_binary(
                     {"exists": {"field": "md5"}},
                     {"exists": {"field": "size"}},
                     {"exists": {"field": "file_format"}},
-                    {"exists": {"field": "file_format_legacy"}},
                     {"exists": {"field": "magic"}},
                     {"exists": {"field": "mime"}},
                     # Ensure we get the event that contains content (sourced event instead of augmented events)

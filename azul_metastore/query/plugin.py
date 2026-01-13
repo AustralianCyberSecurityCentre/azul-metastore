@@ -315,7 +315,7 @@ def get_plugin(
 
 def get_raw_feature_names(ctx: Context) -> list[str]:
     """Return features that plugins are able to write to the system."""
-    basic = ["magic", "mime", "filename", "file_format_legacy"]
+    basic = ["magic", "mime", "filename"]
     body = {
         "size": 0,
         "aggs": {

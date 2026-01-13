@@ -191,14 +191,14 @@ async def download_binary_raw(
         if not source or not stream_data:
             raise ApiException(status_code=HTTP_404_NOT_FOUND, ref="Stream not found", internal="")
 
-        attachment_type = get_attachment_type(stream_data.file_format_legacy, stream_data.file_format, sha256, stream)
+        attachment_type = get_attachment_type(stream_data.file_format, sha256, stream)
         if not attachment_type:
             # we currently block any streams that don't match whitelisted types
             raise ApiException(
                 status_code=HTTP_400_BAD_REQUEST,
                 ref="Stream file type not allowed for direct download",
-                internal=f"Got: {stream_data.file_format}/{stream_data.file_format_legacy}",
-                external=f"Got: {stream_data.file_format}/{stream_data.file_format_legacy}",
+                internal=f"Got: {stream_data.file_format}",
+                external=f"Got: {stream_data.file_format}",
             )
 
         asyncIterable = await ctx.dispatcher.async_get_binary(source, stream_data.label, stream)

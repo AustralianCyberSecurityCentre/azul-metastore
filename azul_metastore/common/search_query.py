@@ -201,7 +201,6 @@ def _az_query_to_opensearch_with_keys(
                         {"prefix": {"sha512": term.lower()}},
                         {"prefix": {"ssdeep.hash": term}},
                         {"prefix": {"file_format": term}},
-                        {"prefix": {"file_format_legacy": term}},
                         {"prefix": {"magic": term}},
                         {"prefix": {"mime": term}},
                     ],

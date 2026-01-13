@@ -4,7 +4,6 @@
     "datastreams": [
       {
         "mime": "application/x-dosexec",
-        "file_format_legacy": "Win32 EXE",
         "sha1": "c4fa85af27b7807d5d9945359228bb16034257f9",
         "label": "content",
         "sha256": "2bd322c8784fe18426cae39c7a23e8e8330f8510ad4ac6102bdd9bb28c2fba35",
@@ -16,7 +15,6 @@
       },
       {
         "mime": "text/plain",
-        "file_format_legacy": "Text",
         "sha1": "ce392b51753451b48c5105bc48503013cd1986fd",
         "label": "report",
         "sha256": "0a6cf29af328e128b7074d7964cc355b167be925a950116b0124a6692bcf0e04",
@@ -28,7 +26,6 @@
       },
       {
         "mime": "image/gif",
-        "file_format_legacy": "GIF",
         "sha1": "9135bdffb7c381c5c0a80459e5e3a4e04dd75894",
         "label": "screenshot",
         "sha256": "499b2fdde23fe8e425a511f6bb2a6df9bf055f7a40e190c096aefde441537bda",
