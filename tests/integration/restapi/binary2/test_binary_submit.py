@@ -401,7 +401,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "key": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.user.high_all.extracted",
                         "author": {"security": "LOW", "category": "user", "name": "high_all"},
                         "action": "extracted",
-                        "num_feature_values": 7,
+                        "num_feature_values": 6,
                     }
                 ],
                 "features": [
@@ -419,15 +419,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "name": "file_format",
                         "type": "string",
                         "value": "image/gif",
-                        "label": [],
-                        "parts": {},
-                        "instances": [
-                            "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.user.high_all.extracted"
-                        ],
-                    },
-                    {
-                        "type": "string",
-                        "value": "GIF",
                         "label": [],
                         "parts": {},
                         "instances": [
@@ -647,7 +638,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "key": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.user.high_all.extracted",
                         "author": {"security": "LOW", "category": "user", "name": "high_all"},
                         "action": "extracted",
-                        "num_feature_values": 7,
+                        "num_feature_values": 6,
                     }
                 ],
                 "features": [
@@ -665,15 +656,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "name": "file_format",
                         "type": "string",
                         "value": "image/gif",
-                        "label": [],
-                        "parts": {},
-                        "instances": [
-                            "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.user.high_all.extracted"
-                        ],
-                    },
-                    {
-                        "type": "string",
-                        "value": "GIF",
                         "label": [],
                         "parts": {},
                         "instances": [
@@ -892,7 +874,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "key": "00000000000000000000000000000000000000000000000000000000000000e2.user.high_all.extracted",
                         "author": {"security": "LOW", "category": "user", "name": "high_all"},
                         "action": "extracted",
-                        "num_feature_values": 7,
+                        "num_feature_values": 6,
                     },
                 ],
                 "features": [
@@ -910,15 +892,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "name": "file_format",
                         "type": "string",
                         "value": "text/plain",
-                        "label": [],
-                        "parts": {},
-                        "instances": [
-                            "00000000000000000000000000000000000000000000000000000000000000e2.user.high_all.extracted"
-                        ],
-                    },
-                    {
-                        "type": "string",
-                        "value": "Text",
                         "label": [],
                         "parts": {},
                         "instances": [
@@ -1168,7 +1141,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "key": "00000000000000000000000000000000000000000000000000000000000000e1.user.high_all.sourced",
                         "author": {"security": "LOW", "category": "user", "name": "high_all"},
                         "action": "sourced",
-                        "num_feature_values": 7,
+                        "num_feature_values": 6,
                     },
                 ],
                 "features": [
@@ -1186,15 +1159,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "name": "file_format",
                         "type": "string",
                         "value": "text/plain",
-                        "label": [],
-                        "parts": {},
-                        "instances": [
-                            "00000000000000000000000000000000000000000000000000000000000000e1.user.high_all.sourced"
-                        ],
-                    },
-                    {
-                        "type": "string",
-                        "value": "Text",
                         "label": [],
                         "parts": {},
                         "instances": [
