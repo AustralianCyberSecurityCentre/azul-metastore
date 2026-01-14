@@ -114,7 +114,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                 "ssdeep": "3072:fakessdeepr6QyyjEfQvAqnf5BtZKDLeM93IbsDV:QVUWEh6nyjEIvAqnf5BOnL1V",
                 "tlsh": "T1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
                 "size": 5,
-                "file_format_legacy": "GIF",
                 "file_format": "image/gif",
                 "file_extension": ".gif",
                 "mime": "mimish",
@@ -143,7 +142,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                 "ssdeep": "3072:fakessdeepr6QyyjEfQvAqnf5BtZKDLeM93IbsDV:QVUWEh6nyjEIvAqnf5BOnL1V",
                 "tlsh": "T1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
                 "size": 5,
-                "file_format_legacy": "GIF",
                 "file_format": "image/gif",
                 "file_extension": ".gif",
                 "mime": "mimish",
@@ -161,7 +159,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
         self.assertFormatted(
             dp_events[0],
             {
-                "model_version": 5,
+                "model_version": azm.CURRENT_MODEL_VERSION,
                 "kafka_key": "tmp",
                 "timestamp": "2024-01-22T01:00:00+00:00",
                 "author": {"category": "user", "name": "high_all", "security": "LOW"},
@@ -173,14 +171,12 @@ class TestBinaryRead(integration_test.BaseRestapi):
                     "ssdeep": "3072:fakessdeepr6QyyjEfQvAqnf5BtZKDLeM93IbsDV:QVUWEh6nyjEIvAqnf5BOnL1V",
                     "tlsh": "T1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
                     "size": 5,
-                    "file_format_legacy": "GIF",
                     "file_format": "image/gif",
                     "file_extension": ".gif",
                     "mime": "mimish",
                     "magic": "magical",
                     "features": [
                         {"name": "file_format", "type": "string", "value": "image/gif"},
-                        {"name": "file_format_legacy", "type": "string", "value": "GIF"},
                         {"name": "file_extension", "type": "string", "value": ".gif"},
                         {"name": "magic", "type": "string", "value": "magical"},
                         {"name": "mime", "type": "string", "value": "mimish"},
@@ -196,7 +192,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                             "ssdeep": "3072:fakessdeepr6QyyjEfQvAqnf5BtZKDLeM93IbsDV:QVUWEh6nyjEIvAqnf5BOnL1V",
                             "tlsh": "T1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
                             "size": 5,
-                            "file_format_legacy": "GIF",
                             "file_format": "image/gif",
                             "file_extension": ".gif",
                             "mime": "mimish",
@@ -218,7 +213,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                             "action": "sourced",
                             "timestamp": "2024-01-22T01:00:00+00:00",
                             "author": {"category": "user", "name": "high_all", "security": "LOW"},
-                            "file_format_legacy": "GIF",
                             "file_format": "image/gif",
                             "size": 5,
                             "filename": "test.exe",
@@ -396,7 +390,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "timestamp": "2020-06-02T11:47:03.200000Z",
                         "author": {"category": "user", "name": "high_all", "security": "LOW"},
                         "relationship": {"colour": "blue"},
-                        "file_format_legacy": "Text",
                         "file_format": "text/plain",
                         "size": 1024,
                         "track_link": "00000000000000000000000000000000000000000000000000000000000000e1.2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.user.high_all.None",
@@ -408,7 +401,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "key": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.user.high_all.extracted",
                         "author": {"security": "LOW", "category": "user", "name": "high_all"},
                         "action": "extracted",
-                        "num_feature_values": 7,
+                        "num_feature_values": 6,
                     }
                 ],
                 "features": [
@@ -426,16 +419,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "name": "file_format",
                         "type": "string",
                         "value": "image/gif",
-                        "label": [],
-                        "parts": {},
-                        "instances": [
-                            "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.user.high_all.extracted"
-                        ],
-                    },
-                    {
-                        "name": "file_format_legacy",
-                        "type": "string",
-                        "value": "GIF",
                         "label": [],
                         "parts": {},
                         "instances": [
@@ -492,7 +475,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "ssdeep": "3072:fakessdeepr6QyyjEfQvAqnf5BtZKDLeM93IbsDV:QVUWEh6nyjEIvAqnf5BOnL1V",
                         "tlsh": "T1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
                         "size": 5,
-                        "file_format_legacy": "GIF",
                         "file_format": "image/gif",
                         "file_extension": ".gif",
                         "mime": "mimish",
@@ -514,7 +496,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
         self.assertFormatted(
             dp_events[0],
             {
-                "model_version": 5,
+                "model_version": azm.CURRENT_MODEL_VERSION,
                 "kafka_key": "meta-tmp",
                 "timestamp": "2024-01-22T01:00:00+00:00",
                 "author": {"category": "user", "name": "high_all", "security": "LOW"},
@@ -529,14 +511,12 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "ssdeep": "3072:fakessdeepr6QyyjEfQvAqnf5BtZKDLeM93IbsDV:QVUWEh6nyjEIvAqnf5BOnL1V",
                         "tlsh": "T1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
                         "size": 5,
-                        "file_format_legacy": "GIF",
                         "file_format": "image/gif",
                         "file_extension": ".gif",
                         "mime": "mimish",
                         "magic": "magical",
                         "features": [
                             {"name": "file_format", "type": "string", "value": "image/gif"},
-                            {"name": "file_format_legacy", "type": "string", "value": "GIF"},
                             {"name": "file_extension", "type": "string", "value": ".gif"},
                             {"name": "magic", "type": "string", "value": "magical"},
                             {"name": "mime", "type": "string", "value": "mimish"},
@@ -552,7 +532,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                                 "ssdeep": "3072:fakessdeepr6QyyjEfQvAqnf5BtZKDLeM93IbsDV:QVUWEh6nyjEIvAqnf5BOnL1V",
                                 "tlsh": "T1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
                                 "size": 5,
-                                "file_format_legacy": "GIF",
                                 "file_format": "image/gif",
                                 "file_extension": ".gif",
                                 "mime": "mimish",
@@ -568,7 +547,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "timestamp": "2020-06-02T11:47:03.200000+00:00",
                         "author": {"category": "user", "name": "high_all", "security": "LOW"},
                         "relationship": {"colour": "blue"},
-                        "file_format_legacy": "GIF",
                         "file_format": "image/gif",
                         "size": 5,
                         "filename": "test.exe",
@@ -649,7 +627,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "timestamp": "2020-06-02T11:47:03.200000Z",
                         "author": {"category": "user", "name": "high_all", "security": "LOW"},
                         "relationship": {"colour": "blue"},
-                        "file_format_legacy": "Text",
                         "file_format": "text/plain",
                         "size": 1024,
                         "track_link": "00000000000000000000000000000000000000000000000000000000000000e1.2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.user.high_all.None",
@@ -661,7 +638,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "key": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.user.high_all.extracted",
                         "author": {"security": "LOW", "category": "user", "name": "high_all"},
                         "action": "extracted",
-                        "num_feature_values": 7,
+                        "num_feature_values": 6,
                     }
                 ],
                 "features": [
@@ -679,16 +656,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "name": "file_format",
                         "type": "string",
                         "value": "image/gif",
-                        "label": [],
-                        "parts": {},
-                        "instances": [
-                            "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824.user.high_all.extracted"
-                        ],
-                    },
-                    {
-                        "name": "file_format_legacy",
-                        "type": "string",
-                        "value": "GIF",
                         "label": [],
                         "parts": {},
                         "instances": [
@@ -745,7 +712,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "ssdeep": "3072:fakessdeepr6QyyjEfQvAqnf5BtZKDLeM93IbsDV:QVUWEh6nyjEIvAqnf5BOnL1V",
                         "tlsh": "T1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
                         "size": 5,
-                        "file_format_legacy": "GIF",
                         "file_format": "image/gif",
                         "file_extension": ".gif",
                         "mime": "mimish",
@@ -767,7 +733,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
         self.assertFormatted(
             dp_events[0],
             {
-                "model_version": 5,
+                "model_version": azm.CURRENT_MODEL_VERSION,
                 "kafka_key": "meta-tmp",
                 "timestamp": "2024-01-22T01:00:00+00:00",
                 "author": {"category": "user", "name": "high_all", "security": "LOW"},
@@ -782,14 +748,12 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "ssdeep": "3072:fakessdeepr6QyyjEfQvAqnf5BtZKDLeM93IbsDV:QVUWEh6nyjEIvAqnf5BOnL1V",
                         "tlsh": "T1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
                         "size": 5,
-                        "file_format_legacy": "GIF",
                         "file_format": "image/gif",
                         "file_extension": ".gif",
                         "mime": "mimish",
                         "magic": "magical",
                         "features": [
                             {"name": "file_format", "type": "string", "value": "image/gif"},
-                            {"name": "file_format_legacy", "type": "string", "value": "GIF"},
                             {"name": "file_extension", "type": "string", "value": ".gif"},
                             {"name": "magic", "type": "string", "value": "magical"},
                             {"name": "mime", "type": "string", "value": "mimish"},
@@ -805,7 +769,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                                 "ssdeep": "3072:fakessdeepr6QyyjEfQvAqnf5BtZKDLeM93IbsDV:QVUWEh6nyjEIvAqnf5BOnL1V",
                                 "tlsh": "T1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
                                 "size": 5,
-                                "file_format_legacy": "GIF",
                                 "file_format": "image/gif",
                                 "file_extension": ".gif",
                                 "mime": "mimish",
@@ -821,7 +784,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "timestamp": "2020-06-02T11:47:03.200000+00:00",
                         "author": {"category": "user", "name": "high_all", "security": "LOW"},
                         "relationship": {"colour": "blue"},
-                        "file_format_legacy": "GIF",
                         "file_format": "image/gif",
                         "size": 5,
                         "filename": "test.exe",
@@ -895,7 +857,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "timestamp": "2020-06-02T11:47:03.200000Z",
                         "author": {"category": "user", "name": "high_all", "security": "LOW"},
                         "relationship": {"colour": "blue"},
-                        "file_format_legacy": "Text",
                         "file_format": "text/plain",
                         "size": 1024,
                         "track_link": "00000000000000000000000000000000000000000000000000000000000000e1.00000000000000000000000000000000000000000000000000000000000000e2.user.high_all.None",
@@ -913,7 +874,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "key": "00000000000000000000000000000000000000000000000000000000000000e2.user.high_all.extracted",
                         "author": {"security": "LOW", "category": "user", "name": "high_all"},
                         "action": "extracted",
-                        "num_feature_values": 7,
+                        "num_feature_values": 6,
                     },
                 ],
                 "features": [
@@ -931,16 +892,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "name": "file_format",
                         "type": "string",
                         "value": "text/plain",
-                        "label": [],
-                        "parts": {},
-                        "instances": [
-                            "00000000000000000000000000000000000000000000000000000000000000e2.user.high_all.extracted"
-                        ],
-                    },
-                    {
-                        "name": "file_format_legacy",
-                        "type": "string",
-                        "value": "Text",
                         "label": [],
                         "parts": {},
                         "instances": [
@@ -1008,7 +959,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "ssdeep": "1:1:1",
                         "tlsh": "T10000000000000000000000000000000000000000000000000000000000000000000000",
                         "size": 1024,
-                        "file_format_legacy": "Text",
                         "file_format": "text/plain",
                         "file_extension": "txt",
                         "mime": "text/plain",
@@ -1030,7 +980,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
         self.assertFormatted(
             dp_events[0],
             {
-                "model_version": 5,
+                "model_version": azm.CURRENT_MODEL_VERSION,
                 "kafka_key": "meta-tmp",
                 "timestamp": "2024-01-22T01:00:00+00:00",
                 "author": {"category": "user", "name": "high_all", "security": "LOW"},
@@ -1045,14 +995,12 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "ssdeep": "1:1:1",
                         "tlsh": "T10000000000000000000000000000000000000000000000000000000000000000000000",
                         "size": 1024,
-                        "file_format_legacy": "Text",
                         "file_format": "text/plain",
                         "file_extension": "txt",
                         "mime": "text/plain",
                         "magic": "ASCII text",
                         "features": [
                             {"name": "file_format", "type": "string", "value": "text/plain"},
-                            {"name": "file_format_legacy", "type": "string", "value": "Text"},
                             {"name": "file_extension", "type": "string", "value": "txt"},
                             {"name": "magic", "type": "string", "value": "ASCII text"},
                             {"name": "mime", "type": "string", "value": "text/plain"},
@@ -1068,7 +1016,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                                 "ssdeep": "1:1:1",
                                 "tlsh": "T10000000000000000000000000000000000000000000000000000000000000000000000",
                                 "size": 1024,
-                                "file_format_legacy": "Text",
                                 "file_format": "text/plain",
                                 "file_extension": "txt",
                                 "mime": "text/plain",
@@ -1084,7 +1031,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "timestamp": "2020-06-02T11:47:03.200000+00:00",
                         "author": {"category": "user", "name": "high_all", "security": "LOW"},
                         "relationship": {"colour": "blue"},
-                        "file_format_legacy": "Text",
                         "file_format": "text/plain",
                         "size": 1024,
                         "filename": "test.exe",
@@ -1195,7 +1141,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "key": "00000000000000000000000000000000000000000000000000000000000000e1.user.high_all.sourced",
                         "author": {"security": "LOW", "category": "user", "name": "high_all"},
                         "action": "sourced",
-                        "num_feature_values": 7,
+                        "num_feature_values": 6,
                     },
                 ],
                 "features": [
@@ -1213,16 +1159,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "name": "file_format",
                         "type": "string",
                         "value": "text/plain",
-                        "label": [],
-                        "parts": {},
-                        "instances": [
-                            "00000000000000000000000000000000000000000000000000000000000000e1.user.high_all.sourced"
-                        ],
-                    },
-                    {
-                        "name": "file_format_legacy",
-                        "type": "string",
-                        "value": "Text",
                         "label": [],
                         "parts": {},
                         "instances": [
@@ -1290,7 +1226,6 @@ class TestBinaryRead(integration_test.BaseRestapi):
                         "ssdeep": "1:1:1",
                         "tlsh": "T10000000000000000000000000000000000000000000000000000000000000000000000",
                         "size": 1024,
-                        "file_format_legacy": "Text",
                         "file_format": "text/plain",
                         "file_extension": "txt",
                         "mime": "text/plain",

@@ -187,15 +187,7 @@ async def async_handle_malpz(async_stream: UploadFile) -> Tuple[bytes, dict]:
         raise
 
 
-# Legacy stream types that are permitted
-LEGACY_PERMITTED_TEXT_TYPES = ["text", "javascript", "powershell", "vba", "batch"]
-
-LEGACY_PERMITTED_IMAGE_TYPES = ["PNG", "JPG", "BMP", "ICO"]
-
-
-def get_attachment_type(
-    file_format_legacy: str, file_format: Optional[str], entity_hash: str, request_hash: str
-) -> Optional[str]:
+def get_attachment_type(file_format: Optional[str], entity_hash: str, request_hash: str) -> Optional[str]:
     """Determines if the specified stream should be permitted to be streamed to a client.
 
     If a filetype should be streamed, a HTTP MIME type will be returned.
@@ -209,7 +201,6 @@ def get_attachment_type(
         or not_null_type.startswith("text/")
         or not_null_type == "application/json"
         or not_null_type == "application/javascript"
-        or file_format_legacy.lower() in LEGACY_PERMITTED_TEXT_TYPES
     ):
         # This is a text file
         return "text/plain"

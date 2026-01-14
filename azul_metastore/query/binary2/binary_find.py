@@ -49,7 +49,6 @@ def _summarise_hashes(
                                         "source.name",
                                         "source.references",
                                         "source.timestamp",
-                                        "file_format_legacy",
                                         "file_format",
                                         "file_extension",
                                         "size",
@@ -90,7 +89,6 @@ def _summarise_hashes(
             src = hit["_source"]
             summaries.append(
                 {
-                    "file_format_legacy": src.get("file_format_legacy"),
                     "file_format": src.get("file_format"),
                     "file_extension": src.get("file_extension"),
                     "file_size": src.get("size"),
@@ -129,7 +127,6 @@ def _summarise_hashes(
             "exists": any([x["exists"] for x in summaries]),
             "has_content": any([x["has_content"] for x in summaries]),
             "sha256": sha256,
-            "file_format_legacy": _any(x["file_format_legacy"] for x in summaries),
             "file_format": _any(x["file_format"] for x in summaries),
             "file_extension": _any(x["file_extension"] for x in summaries),
             "file_size": _any(x["file_size"] for x in summaries),

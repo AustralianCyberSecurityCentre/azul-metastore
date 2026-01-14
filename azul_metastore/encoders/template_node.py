@@ -13,7 +13,6 @@ map_node = {
     "sha256": {"eager_global_ordinals": True, "type": "keyword"},
     "action": {"type": "keyword"},
     "timestamp": {"type": "date"},
-    "file_format_legacy": {"type": "keyword"},
     "file_format": {"type": "keyword"},
     "size": {"type": "unsigned_long"},  # support large files via unsigned_long
     "filename": {"type": "keyword"},

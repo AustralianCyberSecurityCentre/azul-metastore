@@ -67,9 +67,7 @@ class TestEmpty(integration_test.DynamicTestCase):
         self.assertFalse(plugin.get_all_plugins_full(self.writer))
         self.assertFalse(plugin.get_all_plugins(self.writer))
         self.assertFalse(plugin.get_plugin(self.writer, "p1", "1"))
-        self.assertEqual(
-            ["file_format_legacy", "filename", "magic", "mime"], plugin.get_raw_feature_names(self.writer)
-        )
+        self.assertEqual(["filename", "magic", "mime"], plugin.get_raw_feature_names(self.writer))
         self.assertFalse(plugin.find_features(self.writer))
 
     def test_source(self):
