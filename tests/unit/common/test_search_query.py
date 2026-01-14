@@ -245,7 +245,6 @@ class TestSearchQuery(unit_test.BaseUnitTestCase):
                         {"prefix": {"sha512": "test"}},
                         {"prefix": {"ssdeep.hash": "TeSt"}},
                         {"prefix": {"file_format": "TeSt"}},
-                        {"prefix": {"file_format_legacy": "TeSt"}},
                         {"prefix": {"magic": "TeSt"}},
                         {"prefix": {"mime": "TeSt"}},
                     ],

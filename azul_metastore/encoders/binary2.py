@@ -84,7 +84,6 @@ map_common = {
     "mime": {"type": "keyword"},
     "magic": {"type": "keyword"},
     "file_format": {"type": "keyword"},
-    "file_format_legacy": {"type": "keyword"},  # deprecated type identification
     "file_extension": {"type": "keyword"},  # expected file type extension
     "size": {"type": "unsigned_long"},  # support large files via unsigned_long
     # information about all datastreams relevant to current event
@@ -105,7 +104,6 @@ map_common = {
             "mime": {"type": "keyword"},
             "magic": {"type": "keyword"},
             "file_format": {"type": "keyword"},
-            "file_format_legacy": {"type": "keyword"},  # deprecated type identification
             "file_extension": {"type": "keyword"},  # expected file type extension
             "size": {"type": "unsigned_long"},  # support large files via unsigned_long
             # if text, the programming language
@@ -178,7 +176,6 @@ fields_recover_source_binary_node = [
     "action",
     "timestamp",
     "sha256",
-    "file_format_legacy",
     "file_format",
     "size",
     "parent_relationship",
@@ -633,7 +630,6 @@ class Binary2(base_encoder.BaseIndexEncoder):
             "mime",
             "magic",
             "file_format",
-            "file_format_legacy",
             "file_extension",
             "size",
             "datastreams",

@@ -132,7 +132,6 @@ def submit(
                 sha256=entity.sha256,
                 filename=filename,
                 size=entity.size,
-                file_format_legacy=entity.file_format_legacy,
                 file_format=entity.file_format,
                 relationship=relationship,
                 timestamp=timestamp,
