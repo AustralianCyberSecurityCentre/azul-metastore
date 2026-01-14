@@ -1,3 +1,5 @@
+from azul_bedrock import models_network as azm
+
 from azul_metastore.query.binary2 import binary_submit_manual
 from tests.support import gen, integration_test
 
@@ -25,7 +27,7 @@ class TestBasic(integration_test.DynamicTestCase):
         self.assertFormatted(
             ev2[0].model_dump(mode="json", exclude_defaults=True),
             {
-                "model_version": 5,
+                "model_version": azm.CURRENT_MODEL_VERSION,
                 "kafka_key": "meta-tmp",
                 "timestamp": "2021-03-30T21:44:50.703063+00:00",
                 "author": {"category": "user", "name": "user1", "security": "LOW TLP:CLEAR"},
@@ -35,9 +37,7 @@ class TestBasic(integration_test.DynamicTestCase):
                     "sha1": "abababababababababababababababababababab",
                     "md5": "abababababababababababababababab",
                     "size": 121,
-                    "file_format_legacy": "Text",
                     "features": [
-                        {"name": "file_format_legacy", "type": "string", "value": "Text"},
                         {"name": "magic", "type": "string", "value": "ASCII text"},
                         {"name": "mime", "type": "string", "value": "text/plain"},
                     ],
@@ -50,7 +50,6 @@ class TestBasic(integration_test.DynamicTestCase):
                             "ssdeep": "1:1:1",
                             "tlsh": "T10000000000000000000000000000000000000000000000000000000000000000000000",
                             "size": 1024,
-                            "file_format_legacy": "Text",
                             "file_format": "text/plain",
                             "file_extension": "txt",
                             "mime": "text/plain",
@@ -74,7 +73,6 @@ class TestBasic(integration_test.DynamicTestCase):
                                 "version": "1",
                                 "security": "LOW TLP:CLEAR",
                             },
-                            "file_format_legacy": "Text",
                             "file_format": "text/plain",
                             "size": 1024,
                         },
@@ -83,7 +81,6 @@ class TestBasic(integration_test.DynamicTestCase):
                             "action": "sourced",
                             "timestamp": "2020-06-02T11:47:03.200000+00:00",
                             "author": {"category": "user", "name": "user1", "security": "LOW TLP:CLEAR"},
-                            "file_format_legacy": "Text",
                             "size": 121,
                             "filename": "test.txt",
                         },
@@ -100,7 +97,7 @@ class TestBasic(integration_test.DynamicTestCase):
         self.assertFormatted(
             ev2[1].model_dump(mode="json", exclude_defaults=True),
             {
-                "model_version": 5,
+                "model_version": azm.CURRENT_MODEL_VERSION,
                 "kafka_key": "meta-tmp",
                 "timestamp": "2021-03-30T21:44:50.703063+00:00",
                 "author": {"category": "user", "name": "user1", "security": "LOW TLP:CLEAR"},
@@ -110,9 +107,7 @@ class TestBasic(integration_test.DynamicTestCase):
                     "sha1": "abababababababababababababababababababab",
                     "md5": "abababababababababababababababab",
                     "size": 121,
-                    "file_format_legacy": "Text",
                     "features": [
-                        {"name": "file_format_legacy", "type": "string", "value": "Text"},
                         {"name": "magic", "type": "string", "value": "ASCII text"},
                         {"name": "mime", "type": "string", "value": "text/plain"},
                     ],
@@ -125,7 +120,6 @@ class TestBasic(integration_test.DynamicTestCase):
                             "ssdeep": "1:1:1",
                             "tlsh": "T10000000000000000000000000000000000000000000000000000000000000000000000",
                             "size": 1024,
-                            "file_format_legacy": "Text",
                             "file_format": "text/plain",
                             "file_extension": "txt",
                             "mime": "text/plain",
@@ -149,7 +143,6 @@ class TestBasic(integration_test.DynamicTestCase):
                                 "version": "2021-01-01T12:00:00+00:00",
                                 "security": "LOW TLP:CLEAR",
                             },
-                            "file_format_legacy": "Text",
                             "file_format": "text/plain",
                             "size": 1024,
                         },
@@ -158,7 +151,6 @@ class TestBasic(integration_test.DynamicTestCase):
                             "action": "sourced",
                             "timestamp": "2020-06-02T11:47:03.200000+00:00",
                             "author": {"category": "user", "name": "user1", "security": "LOW TLP:CLEAR"},
-                            "file_format_legacy": "Text",
                             "size": 121,
                             "filename": "test.txt",
                         },

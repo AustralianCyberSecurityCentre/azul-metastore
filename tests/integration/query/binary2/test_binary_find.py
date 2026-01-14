@@ -102,7 +102,6 @@ class TestEntityFind(integration_test.DynamicTestCase):
                     )
                 ],
                 file_size=1024,
-                file_format_legacy="Text",
                 file_format="text/plain",
                 file_extension="txt",
                 magic="ASCII text",
@@ -262,7 +261,6 @@ class TestEntityFind(integration_test.DynamicTestCase):
         self.assertEqual(1, len(ret))
         self.assertEqual("e1", ret[0].sha256)
         self.assertEqual(True, ret[0].exists)
-        self.assertEqual("Text", ret[0].file_format_legacy)
         self.assertEqual(1024, ret[0].file_size)
         self.assertEqual("ASCII text", ret[0].magic)
         self.assertEqual("application/sql", ret[0].mime)
@@ -280,7 +278,6 @@ class TestEntityFind(integration_test.DynamicTestCase):
         self.assertEqual(1, len(ret))
         self.assertEqual("e1", ret[0].sha256)
         self.assertEqual(True, ret[0].exists)
-        self.assertEqual("Text", ret[0].file_format_legacy)
         self.assertEqual(1024, ret[0].file_size)
         self.assertEqual("ASCII text", ret[0].magic)
         self.assertEqual("application/sql", ret[0].mime)

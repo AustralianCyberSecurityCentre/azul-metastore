@@ -112,7 +112,6 @@ class TestBinaryFind(integration_test.BaseRestapi):
                                                     {"prefix": {"sha512": "e1"}},
                                                     {"prefix": {"ssdeep.hash": "E1"}},
                                                     {"prefix": {"file_format": "E1"}},
-                                                    {"prefix": {"file_format_legacy": "E1"}},
                                                     {"prefix": {"magic": "E1"}},
                                                     {"prefix": {"mime": "E1"}},
                                                 ],
@@ -166,7 +165,6 @@ class TestBinaryFind(integration_test.BaseRestapi):
                                                     "source.name",
                                                     "source.references",
                                                     "source.timestamp",
-                                                    "file_format_legacy",
                                                     "file_format",
                                                     "file_extension",
                                                     "size",
@@ -329,7 +327,6 @@ class TestBinaryFind(integration_test.BaseRestapi):
                     }
                 ],
                 "file_size": 1024,
-                "file_format_legacy": "Text",
                 "file_format": "text/plain",
                 "file_extension": "txt",
                 "magic": "ASCII text",

@@ -153,7 +153,6 @@ def _submit_binary_event(
                     sha256=entity.sha256,
                     filename=data_common.basename(filename) if filename else None,
                     size=entity.size,
-                    file_format_legacy=entity.file_format_legacy,
                     file_format=entity.file_format,
                 )
             ],
