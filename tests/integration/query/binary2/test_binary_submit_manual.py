@@ -1,3 +1,5 @@
+from azul_bedrock import models_network as azm
+
 from azul_metastore.query.binary2 import binary_submit_manual
 from tests.support import gen, integration_test
 
@@ -25,7 +27,7 @@ class TestBasic(integration_test.DynamicTestCase):
         self.assertFormatted(
             ev2[0].model_dump(mode="json", exclude_defaults=True),
             {
-                "model_version": 5,
+                "model_version": azm.CURRENT_MODEL_VERSION,
                 "kafka_key": "meta-tmp",
                 "timestamp": "2021-03-30T21:44:50.703063+00:00",
                 "author": {"category": "user", "name": "user1", "security": "LOW TLP:CLEAR"},
@@ -95,7 +97,7 @@ class TestBasic(integration_test.DynamicTestCase):
         self.assertFormatted(
             ev2[1].model_dump(mode="json", exclude_defaults=True),
             {
-                "model_version": 5,
+                "model_version": azm.CURRENT_MODEL_VERSION,
                 "kafka_key": "meta-tmp",
                 "timestamp": "2021-03-30T21:44:50.703063+00:00",
                 "author": {"category": "user", "name": "user1", "security": "LOW TLP:CLEAR"},

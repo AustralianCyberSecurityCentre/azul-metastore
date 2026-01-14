@@ -1,3 +1,5 @@
+from azul_bedrock import models_network as azm
+
 from azul_metastore.models import basic_events
 from tests.support import gen, unit_test
 
@@ -9,7 +11,7 @@ class TestPluginEvent(unit_test.BaseUnitTestCase):
             d,
             {
                 "kafka_key": "meta.generic_plugin.2021-01-01T12:00:00+00:00",
-                "model_version": 5,
+                "model_version": azm.CURRENT_MODEL_VERSION,
                 "timestamp": "2000-01-01T01:01:01+00:00",
                 "author": {
                     "category": "plugin",
@@ -36,7 +38,7 @@ class TestStatusEvent(unit_test.BaseUnitTestCase):
         self.assertFormatted(
             d,
             {
-                "model_version": 5,
+                "model_version": azm.CURRENT_MODEL_VERSION,
                 "kafka_key": "meta.meta.4786f82201a89be6c083ce9b06ec41e3.generic_plugin.1.generic_plugin",
                 "timestamp": "2000-01-01T01:01:01+00:00",
                 "author": {
@@ -47,7 +49,7 @@ class TestStatusEvent(unit_test.BaseUnitTestCase):
                 },
                 "entity": {
                     "input": {
-                        "model_version": 5,
+                        "model_version": azm.CURRENT_MODEL_VERSION,
                         "kafka_key": "meta.4786f82201a89be6c083ce9b06ec41e3",
                         "timestamp": "2021-01-01T12:00:00+00:00",
                         "author": {
@@ -129,7 +131,7 @@ class TestBinaryEvent(unit_test.BaseUnitTestCase):
             {
                 "kafka_key": "meta.2248b4a16786fbc2585b83a4ef4e941e",
                 "action": "sourced",
-                "model_version": 5,
+                "model_version": azm.CURRENT_MODEL_VERSION,
                 "timestamp": "2021-01-01T12:00:00+00:00",
                 "source": {
                     "name": "generic_source",

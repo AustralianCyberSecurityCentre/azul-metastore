@@ -159,7 +159,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
         self.assertFormatted(
             dp_events[0],
             {
-                "model_version": 5,
+                "model_version": azm.CURRENT_MODEL_VERSION,
                 "kafka_key": "tmp",
                 "timestamp": "2024-01-22T01:00:00+00:00",
                 "author": {"category": "user", "name": "high_all", "security": "LOW"},
@@ -496,7 +496,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
         self.assertFormatted(
             dp_events[0],
             {
-                "model_version": 5,
+                "model_version": azm.CURRENT_MODEL_VERSION,
                 "kafka_key": "meta-tmp",
                 "timestamp": "2024-01-22T01:00:00+00:00",
                 "author": {"category": "user", "name": "high_all", "security": "LOW"},
@@ -733,7 +733,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
         self.assertFormatted(
             dp_events[0],
             {
-                "model_version": 5,
+                "model_version": azm.CURRENT_MODEL_VERSION,
                 "kafka_key": "meta-tmp",
                 "timestamp": "2024-01-22T01:00:00+00:00",
                 "author": {"category": "user", "name": "high_all", "security": "LOW"},
@@ -980,7 +980,7 @@ class TestBinaryRead(integration_test.BaseRestapi):
         self.assertFormatted(
             dp_events[0],
             {
-                "model_version": 5,
+                "model_version": azm.CURRENT_MODEL_VERSION,
                 "kafka_key": "meta-tmp",
                 "timestamp": "2024-01-22T01:00:00+00:00",
                 "author": {"category": "user", "name": "high_all", "security": "LOW"},

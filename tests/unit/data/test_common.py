@@ -61,7 +61,7 @@ class CommonTestCases(unit_test.DataMockingUnitTest):
         self.assertEqual(
             decoded,
             {
-                "model_version": 5,
+                "model_version": azm.CURRENT_MODEL_VERSION,
                 "kafka_key": "tmp",
                 "timestamp": dummy.isoformat(),
                 "author": {"category": "user", "name": "me", "security": "low"},
@@ -158,7 +158,7 @@ class CommonTestCases(unit_test.DataMockingUnitTest):
         self.assertEqual(
             decoded,
             {
-                "model_version": 5,
+                "model_version": azm.CURRENT_MODEL_VERSION,
                 "kafka_key": "tmp",
                 "timestamp": "2000-01-01T00:00:00",
                 "author": {"category": "user", "name": "me", "security": "low"},
@@ -260,7 +260,7 @@ class CommonTestCases(unit_test.DataMockingUnitTest):
         self.assertEqual(
             decoded,
             {
-                "model_version": 5,
+                "model_version": azm.CURRENT_MODEL_VERSION,
                 "kafka_key": "tmp",
                 "timestamp": "2000-01-01T00:00:00",
                 "author": {"category": "user", "name": "me", "security": "low"},

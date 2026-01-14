@@ -1,6 +1,8 @@
 import hashlib
 from unittest import mock
 
+from azul_bedrock import models_network as azm
+
 from tests.support import unit_test
 
 
@@ -89,7 +91,7 @@ class TestMain(unit_test.DataMockingUnitTest):
                     "timestamp": "2023-07-07T04:00:00Z",
                 },
                 "timestamp": "2023-07-07T18:59:16.464812Z",
-                "model_version": 5,
+                "model_version": azm.CURRENT_MODEL_VERSION,
             }
         ]
 
