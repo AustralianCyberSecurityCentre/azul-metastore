@@ -241,7 +241,7 @@ class TestBinary(integration_test.BaseRestapi):
                 "info": [],
                 "tags": [],
             },
-            "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+            "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": ""},
         }
         self.write_binary_events(
             [
@@ -369,7 +369,7 @@ class TestBinary(integration_test.BaseRestapi):
                 "info": [],
                 "tags": [],
             },
-            "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+            "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": ""},
         }
         self.write_binary_events(
             [
@@ -784,7 +784,7 @@ class TestBinary(integration_test.BaseRestapi):
                     "info": [],
                     "tags": [],
                 },
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": ""},
             },
         )
 
@@ -1089,7 +1089,7 @@ class TestBinary(integration_test.BaseRestapi):
             response.json(),
             {
                 "data": {"documents": {"count": expected["documents"]["count"]}},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": ""},
             },
         )
 
@@ -1099,7 +1099,7 @@ class TestBinary(integration_test.BaseRestapi):
             response.json(),
             {
                 "data": {"documents": expected["documents"]},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": ""},
             },
         )
 
@@ -1109,7 +1109,7 @@ class TestBinary(integration_test.BaseRestapi):
             response.json(),
             {
                 "data": {"documents": {"count": expected["documents"]["count"]}, "security": expected["security"]},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": ""},
             },
         )
 
@@ -1119,7 +1119,7 @@ class TestBinary(integration_test.BaseRestapi):
             response.json(),
             {
                 "data": {"documents": {"count": expected["documents"]["count"]}, "sources": expected["sources"]},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": ""},
             },
         )
 
@@ -1132,7 +1132,7 @@ class TestBinary(integration_test.BaseRestapi):
             response.json(),
             {
                 "data": {"documents": {"count": expected["documents"]["count"]}, "features": expected_features},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": ""},
             },
         )
 
@@ -1145,7 +1145,7 @@ class TestBinary(integration_test.BaseRestapi):
                     "documents": {"count": expected["documents"]["count"]},
                     "info": expected["info"],
                 },
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": ""},
             },
         )
 
@@ -1155,7 +1155,7 @@ class TestBinary(integration_test.BaseRestapi):
             response.json(),
             {
                 "data": {"documents": {"count": expected["documents"]["count"]}, "streams": expected["streams"]},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": ""},
             },
         )
 
@@ -1165,7 +1165,7 @@ class TestBinary(integration_test.BaseRestapi):
             response.json(),
             {
                 "data": {"documents": {"count": expected["documents"]["count"]}, "instances": expected["instances"]},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": ""},
             },
         )
 
@@ -1175,7 +1175,7 @@ class TestBinary(integration_test.BaseRestapi):
             response.json(),
             {
                 "data": {"documents": {"count": expected["documents"]["count"]}, "parents": expected["parents"]},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": ""},
             },
         )
 
@@ -1185,7 +1185,7 @@ class TestBinary(integration_test.BaseRestapi):
             response.json(),
             {
                 "data": {"documents": {"count": expected["documents"]["count"]}, "children": expected["children"]},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": ""},
             },
         )
 
@@ -1195,7 +1195,7 @@ class TestBinary(integration_test.BaseRestapi):
             response.json(),
             {
                 "data": {"documents": {"count": expected["documents"]["count"]}, "tags": expected["tags"]},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": ""},
             },
         )
 
@@ -1205,7 +1205,7 @@ class TestBinary(integration_test.BaseRestapi):
             response.json(),
             {
                 "data": {"documents": {"count": expected["documents"]["count"]}, "features": expected["features"]},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": ""},
             },
         )
 
@@ -1349,6 +1349,6 @@ class TestBinary(integration_test.BaseRestapi):
                         }
                     ],
                 },
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": ""},
             },
         )

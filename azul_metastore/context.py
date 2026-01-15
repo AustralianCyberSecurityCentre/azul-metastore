@@ -66,7 +66,6 @@ def _get_user_access(sd: search_data.SearchData, azsec: sec.Security) -> UserAcc
         includelist=sd.security_include,
         sec_filter=sd.security_filter,
     )
-    print("Summarised access ", ret)
     return ret
 
 
