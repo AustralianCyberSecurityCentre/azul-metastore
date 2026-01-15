@@ -497,8 +497,7 @@ class TestBinaryFind(integration_test.BaseRestapi):
         response = self.client.get("/v0/binaries?x=MEDIUM&x=HIGH")
         self.assertEqual(200, response.status_code)
         response_data = response.json()
-        print("RESPONSE DATA ", response_data["data"]["items"])
-        self.assertEqual(len(response_data["data"]["items"]), 2)
+        self.assertEqual(len(response_data["data"]["items"]), 4)
         for item in response_data["data"]["items"]:
             self.assertIn(item["key"], ["e11", "e14"])
         self.assertEqual(

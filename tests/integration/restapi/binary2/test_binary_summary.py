@@ -1078,7 +1078,7 @@ class TestBinary(integration_test.BaseRestapi):
                         },
                     ],
                 },
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": ""},
             },
         )
         expected = response.json()["data"]
@@ -1330,7 +1330,7 @@ class TestBinary(integration_test.BaseRestapi):
                         },
                     ],
                 },
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": ""},
             },
         )
 

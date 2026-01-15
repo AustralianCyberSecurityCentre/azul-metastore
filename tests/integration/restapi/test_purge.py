@@ -33,7 +33,7 @@ class TestPlugins(integration_test.BaseRestapi):
                 "data": {
                     "events": 1,
                 },
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": ""},
             },
         )
         # simulate with no further filters
@@ -154,7 +154,7 @@ class TestPlugins(integration_test.BaseRestapi):
             resp,
             {
                 "data": {"events_purged": 1, "binaries_kept": 0, "binaries_purged": 0},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": ""},
             },
         )
 
@@ -174,7 +174,7 @@ class TestPlugins(integration_test.BaseRestapi):
             resp,
             {
                 "data": {"events_purged": 1, "binaries_kept": 0, "binaries_purged": 0},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": ""},
             },
         )
 
