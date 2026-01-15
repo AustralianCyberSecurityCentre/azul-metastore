@@ -317,6 +317,9 @@ def get_nearby_binaries(
     if include_cousins == bedr_binaries.IncludeCousinsEnum.No:
         # Don't search for cousins
         data = binary_related.read_nearby(ctx, sha256)
+    elif include_cousins == bedr_binaries.IncludeCousinsEnum.Small:
+        # Search for cousins with some cousins but only one depth.
+        data = binary_related.read_nearby(ctx, sha256, True, max_cousins=100, max_cousin_distance=1)
     elif include_cousins == bedr_binaries.IncludeCousinsEnum.Standard:
         # Search for cousins with the default max_cousins and max_cousin distance.
         data = binary_related.read_nearby(ctx, sha256, True)

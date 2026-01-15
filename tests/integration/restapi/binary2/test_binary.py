@@ -333,6 +333,12 @@ class TestBinary(integration_test.BaseRestapi):
         resp = response.json()
         self.assertEqual(4, len(resp["data"]["links"]))
 
+        # Verify the search also works with the small option missing out the wider cousins.
+        response = self.client.get("/v0/binaries/e100/nearby?include_cousins=yes_small")
+        self.assertEqual(200, response.status_code)
+        resp = response.json()
+        self.assertEqual(6, len(resp["data"]["links"]))
+
         # Widen search to also find cousins: e2 and generic_sourced2
         response = self.client.get("/v0/binaries/e100/nearby?include_cousins=yes_large")
         self.assertEqual(200, response.status_code)
