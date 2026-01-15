@@ -494,11 +494,10 @@ class TestBinaryFind(integration_test.BaseRestapi):
         response_data = response.json()
         self.assertEqual(len(response_data["data"]["items"]), 4)
 
-        response = self.client.get("/v0/binaries?x=MEDIUM&x=HIGH")
+        response = self.client.get("/v0/binaries?x=MEDIUM&x=HIGH&f=AND")
         self.assertEqual(200, response.status_code)
         response_data = response.json()
-        self.assertEqual(len(response_data["data"]["items"]), 4)
-        print("RESPONSE ", response_data["data"]["items"])
+        self.assertEqual(len(response_data["data"]["items"]), 2)
         for item in response_data["data"]["items"]:
             self.assertIn(item["key"], ["e11", "e14"])
         self.assertEqual(
@@ -510,7 +509,7 @@ class TestBinaryFind(integration_test.BaseRestapi):
             "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR",
         )
 
-        response = self.client.get("/v0/binaries?x=TOP%20HIGH&x=REL:APPLE")
+        response = self.client.get("/v0/binaries?x=TOP%20HIGH&x=REL:APPLE&f=AND")
         self.assertEqual(200, response.status_code)
         response_data = response.json()
         self.assertEqual(len(response_data["data"]["items"]), 2)
@@ -520,7 +519,7 @@ class TestBinaryFind(integration_test.BaseRestapi):
             "HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:BEE,CAR",
         )
 
-        response = self.client.get("/v0/binaries?x=MOD1")
+        response = self.client.get("/v0/binaries?x=MOD1&f=AND")
         self.assertEqual(200, response.status_code)
         response_data = response.json()
         self.assertEqual(len(response_data["data"]["items"]), 3)
@@ -532,7 +531,7 @@ class TestBinaryFind(integration_test.BaseRestapi):
             "TOP HIGH MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR",
         )
 
-        response = self.client.get("/v0/binaries?x=LOW")
+        response = self.client.get("/v0/binaries?x=LOW&f=AND")
         self.assertEqual(200, response.status_code)
         response_data = response.json()
         self.assertEqual(len(response_data["data"]["items"]), 2)
@@ -547,7 +546,7 @@ class TestBinaryFind(integration_test.BaseRestapi):
             "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR",
         )
 
-        response = self.client.get("/v0/binaries?x=TLP:GREEN")
+        response = self.client.get("/v0/binaries?x=TLP:GREEN&f=AND")
         self.assertEqual(200, response.status_code)
         response_data = response.json()
         self.assertEqual(len(response_data["data"]["items"]), 3)
@@ -562,7 +561,7 @@ class TestBinaryFind(integration_test.BaseRestapi):
             "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR",
         )
 
-        response = self.client.get("/v0/binaries?x=LOW&x=MEDIUM&x=HIGH&x=TOP%20HIGH&x=TLP:AMBER%2BSTRICT")
+        response = self.client.get("/v0/binaries?x=LOW&x=MEDIUM&x=HIGH&x=TOP%20HIGH&x=TLP:AMBER%2BSTRICT&f=AND")
         self.assertEqual(200, response.status_code)
         response_data = response.json()
         self.assertEqual(len(response_data["data"]["items"]), 0)
