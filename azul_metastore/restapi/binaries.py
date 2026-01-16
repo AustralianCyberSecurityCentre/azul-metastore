@@ -68,7 +68,6 @@ def find_binaries(
     If hashes specified in body, rows will be returned in same order as hashes.
     Missing hashes will still return a row. Duplicate hashes will have after-first-entry omitted.
     """
-    print("THIS IS CTX: ", ctx)
     try:
         data = binary_find.find_binaries(
             ctx,
