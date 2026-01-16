@@ -299,7 +299,6 @@ class Wrapper:
         if sd.security_exclude:
             # convert to safe format
             safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
-            print("SAFES ", safes)
             if sd.security_filter == "OR":
                 tmp["must_not"] += [
                     {"terms": {"encoded_security.inclusive": safes}},
