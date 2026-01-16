@@ -300,7 +300,7 @@ class Wrapper:
         if sd.security_exclude:
             # convert to safe format
             safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
-            if not sd.security_include:
+            if sd.security_filter == "OR":
                 tmp["must_not"] += [
                     {"terms": {"encoded_security.inclusive": safes}},
                     {"terms": {"encoded_security.exclusive": safes}},
@@ -333,7 +333,7 @@ class Wrapper:
                     {"terms": {"encoded_security.markings": safes}},
                 ]
 
-        if sd.security_include:  # user has specified AND search based on RELs
+        if sd.security_filter == "AND":  # user has specified AND search based on RELs
             if has_child:
                 # Convert to safe format and build AND-style term clauses
                 musts = utils.azsec().unsafe_to_safe(sd.security_include)
@@ -393,7 +393,8 @@ class Wrapper:
             tmp["must"] = [tmp["must"]]
         tmp.setdefault("filter", [])
 
-        if sd.security_exclude and not sd.security_include:
+        #if sd.security_exclude and not sd.security_include:
+        if sd.security_filter == "OR":
             # convert to safe format
             safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
             tmp["must_not"] += [
@@ -401,7 +402,7 @@ class Wrapper:
                 {"terms": {"encoded_security.exclusive": safes}},
                 {"terms": {"encoded_security.markings": safes}},
             ]
-        elif sd.security_exclude:
+        elif sd.security_filter == "AND":
             # convert to safe format
             safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
             tmp["must_not"] += [
@@ -413,7 +414,7 @@ class Wrapper:
                 if "-rel-" in value:
                     tmp["must_not"].append({"term": {"encoded_security.inclusive": value}})
 
-        if sd.security_include:  # user has specified AND search based on RELs
+        if sd.security_filter == "AND":  # user has specified AND search based on RELs
             # Convert to safe format and build AND-style term clauses
             musts = utils.azsec().unsafe_to_safe(sd.security_include)
             for m in musts:
