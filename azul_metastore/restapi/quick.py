@@ -26,12 +26,7 @@ def _get_base() -> context.Context:
 
 @cachetools.cached(
     cache=memcache.get_ttl_cache("restapi_get_subctx"),
-    key=lambda x, y, z, f: (
-    x.credentials.unique
-    + "." + ".".join(y)
-    + "." + ".".join(z)
-    + "." + ".".join(f or [])
-),
+    key=lambda x, y, z, f: (x.credentials.unique + "." + ".".join(y) + "." + ".".join(z) + "." + ".".join(f or [])),
 )
 def _get_subctx_cached(
     user_info: UserInfo,
@@ -63,7 +58,6 @@ def _get_subctx(
             enable_log_es_queries=settings.get().log_opensearch_queries,
         ),
     )
-
 
     # verify that we have minimum required access
     try:
@@ -127,7 +121,14 @@ class QuickRefs:
 
         return bedr_basic.Response(data=data, meta=meta)
 
-    def subctx(self, user_info: UserInfo, security_exclude: list[str], security_include: list[str], security_filter: str, no_cache: bool):
+    def subctx(
+        self,
+        user_info: UserInfo,
+        security_exclude: list[str],
+        security_include: list[str],
+        security_filter: str,
+        no_cache: bool,
+    ):
         """Return ctx for current user (overwriteable)."""
         if no_cache:
             ctx = _get_subctx(user_info, security_exclude, security_include, security_filter)

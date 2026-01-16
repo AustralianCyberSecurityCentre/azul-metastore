@@ -393,7 +393,7 @@ class Wrapper:
             tmp["must"] = [tmp["must"]]
         tmp.setdefault("filter", [])
 
-        #if sd.security_exclude and not sd.security_include:
+        # if sd.security_exclude and not sd.security_include:
         if sd.security_filter == "OR":
             # convert to safe format
             safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
