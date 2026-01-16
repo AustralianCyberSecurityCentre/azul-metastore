@@ -236,7 +236,6 @@ def find_binaries(
         raise wrapper.InvalidSearchException("max entities too large")
     if not hashes:
         hashes = []
-
     # create custom sort parameters from input
     asc_or_desc = "asc" if sort_asc else "desc"
 

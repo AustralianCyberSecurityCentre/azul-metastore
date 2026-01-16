@@ -21,7 +21,9 @@ class TestWrapper(unit_test.BaseUnitTestCase):
         w = wrapper.Wrapper("", "encoded", {}, [], {}, 1)
 
         # check exclusive filter works
-        sd = search_data.SearchData(credentials={}, security_exclude=["HIGH"], security_include=[])
+        sd = search_data.SearchData(
+            credentials={}, security_exclude=["HIGH"], security_include=[], security_filter="OR"
+        )
         query = {}
         query = w._limit_search(sd, query)
         self.assertEqual(
@@ -65,7 +67,9 @@ class TestWrapper(unit_test.BaseUnitTestCase):
         w = wrapper.Wrapper("", "encoded", {}, [], {}, 1)
 
         # check exclusive filter works
-        sd = search_data.SearchData(credentials={}, security_exclude=["HIGH"], security_include=["REL:APPLE"])
+        sd = search_data.SearchData(
+            credentials={}, security_exclude=["HIGH"], security_include=["REL:APPLE"], security_filter="AND"
+        )
         query = {}
         query = w._limit_search(sd, query)
         self.assertEqual(
@@ -107,7 +111,9 @@ class TestWrapper(unit_test.BaseUnitTestCase):
         w = wrapper.Wrapper("", "encoded", {}, [], {}, 1)
 
         # check exclusive filter works
-        sd = search_data.SearchData(credentials={}, security_exclude=["HIGH"], security_include=[])
+        sd = search_data.SearchData(
+            credentials={}, security_exclude=["HIGH"], security_include=[], security_filter="OR"
+        )
         query = {
             "query": {
                 "bool": {
@@ -138,20 +144,33 @@ class TestWrapper(unit_test.BaseUnitTestCase):
                 "bool": {
                     "filter": [
                         {"terms": {"genuine.rolodex": "true"}},
-                        {"has_child": {"type": "metadata", "query": {"exists": {"field": "source.name"}}}},
+                        {
+                            "has_child": {
+                                "type": "metadata",
+                                "query": {"bool": {"must": [{"exists": {"field": "source.name"}}], "must_not": []}},
+                            }
+                        },
                     ],
                     "should": [],
                 }
             },
         }
         query = w._limit_search_complex(sd, query)
+        print(query)
         self.assertEqual(
             {
                 "query": {
                     "bool": {
                         "filter": [
                             {"terms": {"genuine.rolodex": "true"}},
-                            {"has_child": {"type": "metadata", "query": {"exists": {"field": "source.name"}}}},
+                            {
+                                "has_child": {
+                                    "type": "metadata",
+                                    "query": {
+                                        "bool": {"must": [{"exists": {"field": "source.name"}}], "must_not": []}
+                                    },
+                                }
+                            },
                         ],
                         "should": [],
                         "must_not": [
@@ -171,7 +190,7 @@ class TestWrapper(unit_test.BaseUnitTestCase):
 
         # check exclusive filter works
         sd = search_data.SearchData(
-            credentials={}, security_exclude=["REL:CAR", "HIGH"], security_include=["REL:APPLE"]
+            credentials={}, security_exclude=["REL:CAR", "HIGH"], security_include=["REL:APPLE"], security_filter="AND"
         )
         query = {
             "query": {
@@ -235,11 +254,11 @@ class TestWrapper(unit_test.BaseUnitTestCase):
                                     "type": "metadata",
                                     "query": {
                                         "bool": {
-                                            "must_not": [{"term": {"encoded_security.inclusive": "s-rel-car"}}],
                                             "must": [
                                                 {"exists": {"field": "source.name"}},
                                                 {"term": {"encoded_security.inclusive": "s-rel-apple"}},
                                             ],
+                                            "must_not": [{"term": {"encoded_security.inclusive": "s-rel-car"}}],
                                         }
                                     },
                                 }
