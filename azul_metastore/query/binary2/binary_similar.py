@@ -4,6 +4,7 @@ from ctypes import CDLL, create_string_buffer
 from typing import Iterable
 
 import pendulum
+from azul_bedrock.exceptions import HTTPException
 
 from azul_metastore.common.tlsh import encode_tlsh_into_vector, strip_tlsh_version
 from azul_metastore.context import Context
@@ -114,7 +115,7 @@ def read_similar_from_ssdeep(ctx: Context, fuzzyHash: str, maxCount: int) -> lis
         blockSizeStr, chunk, doubleChunk = fuzzyHash.split(":")
         blockSize = int(blockSizeStr)
     except ValueError:
-        raise Exception(f"ssdeep could not be parsed {fuzzyHash}")
+        raise HTTPException(status_code=422, detail=f"ssdeep could not be parsed {fuzzyHash}")
 
     body = {
         "_source": {"includes": ["sha256", "ssdeep"]},

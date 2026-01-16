@@ -62,8 +62,12 @@ def find_all_binaries(
         },
     }
     if after:
+        try:
+            json_loaded_after = json.loads(after)
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=422, detail=f"Invalid after provided '{after}', after must be valid JSON!")
         # resume pagination of existing search
-        body["aggs"]["COMPOSITE"]["composite"]["after"] = json.loads(after)
+        body["aggs"]["COMPOSITE"]["composite"]["after"] = json_loaded_after
     else:
         # first request so count expected number of records
         body["aggs"]["TOTAL"] = {"cardinality": {"field": "sha256", "precision_threshold": 1000}}
@@ -168,8 +172,12 @@ def find_all_family_binaries(
     }
 
     if after:
+        try:
+            json_loaded_after = json.loads(after)
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=422, detail=f"Invalid after provided '{after}', after must be valid JSON!")
         # resume pagination of existing search
-        body["aggs"]["FAMILY"]["composite"]["after"] = json.loads(after)
+        body["aggs"]["FAMILY"]["composite"]["after"] = json_loaded_after
     else:
         # first request so count expected number of records
         body["aggs"]["TOTAL"] = {"cardinality": {"field": sha256_field, "precision_threshold": 1000}}
