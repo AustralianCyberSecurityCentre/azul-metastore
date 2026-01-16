@@ -114,8 +114,14 @@ class QuickRefs:
             meta.queries = ctx.sd.captured_es_queries
 
         # get current security context for the query
+        print("Getting user's current security!")
         meta.security = ctx.get_user_current_security()
+<<<<<<< Updated upstream
         meta.sec_filter = ctx.sd.security_filter
+=======
+        meta.security_includes = ctx.sd.security_include
+        print("I got ", meta.security)
+>>>>>>> Stashed changes
         # ensure response has a http header with accurate security info
         cls.set_security_headers(ctx, response, meta.security)
 

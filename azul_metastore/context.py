@@ -38,11 +38,10 @@ def _get_user_access(sd: search_data.SearchData, azsec: sec.Security) -> UserAcc
     else:
         ret.security_enabled = True
         ret.account_info = opensearch.get_user_account(sd.access())
-
+        
         # read internal roles as security labels translated by opensearch
         # i.e. 'ACCESS2' on JWT is translated to 's-rel-apple' role by opensearch
         ret.roles = sorted(set(ret.account_info["roles"]))
-
         # filter out generic opensearch roles
         generic_roles = ["own_index"]
         ret.roles = [x for x in ret.roles if x not in generic_roles]
@@ -58,6 +57,7 @@ def _get_user_access(sd: search_data.SearchData, azsec: sec.Security) -> UserAcc
                 azsec.get_enforceable_markings(list(azsec.get_labels_markings()))
             )
             security_labels = sorted(azsec.safe_to_unsafe(ret.roles, drop_mismatch=True) + list(open_markings))
+<<<<<<< Updated upstream
 
     # ret.security = azsec.summarise_user_access(labels=security_labels, denylist=sd.security_exclude)
     ret.security = azsec.summarise_user_access(
@@ -67,6 +67,10 @@ def _get_user_access(sd: search_data.SearchData, azsec: sec.Security) -> UserAcc
         sec_filter=sd.security_filter,
     )
     print("Summarised access ", ret)
+=======
+    ret.security = azsec.summarise_user_access(labels=security_labels, denylist=sd.security_exclude, includelist=sd.security_include)
+    print("THIS IS SECURITY BEFORE MAXIG ", ret)
+>>>>>>> Stashed changes
     return ret
 
 
@@ -111,7 +115,11 @@ class Context:
 
     def get_user_current_security(self) -> str:
         """Return security string for current users access."""
+<<<<<<< Updated upstream
         print("USER ACCESS ", self.get_user_access())
+=======
+        #return self.get_user_access().security.max_access
+>>>>>>> Stashed changes
         return self.get_user_access().security.max_access
 
     def get_user_security_unique(self) -> str:

@@ -11,7 +11,7 @@ from azul_metastore.query import purge as qpurge
 logger = logging.getLogger(__name__)
 
 
-def _render_simulation(sum: bedr_purge.PurgeSimulation):
+def git_render_simulation(sum: bedr_purge.PurgeSimulation):
     # we use black to format the string for convenience
     click.echo(f"simulation results:\n{black.format_str(repr(sum), mode=black.Mode())}")
 

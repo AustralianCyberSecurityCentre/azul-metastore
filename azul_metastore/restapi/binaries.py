@@ -94,6 +94,7 @@ def find_binaries(
                 detail=f"The following term query key{opt_s} could not be found: [{', '.join(invalid_keys)}]. "
                 + f"Either the key{opt_s} are related to results and temporarily missing or the query is invalid.",
             )
+    print("Responce ", qr.fr(ctx, data, resp))
     return qr.fr(ctx, data, resp)
 
 
