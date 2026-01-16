@@ -8,7 +8,9 @@ import types
 from typing import Any, Iterable
 
 import opensearchpy
+from azul_bedrock.exceptions import HTTPException
 from azul_bedrock.models_restapi.basic import QueryInfo
+from azul_security import exceptions as security_exception
 from opensearchpy import helpers
 
 from azul_metastore.common import search_data, utils
@@ -299,7 +301,12 @@ class Wrapper:
 
         if sd.security_exclude:
             # convert to safe format
-            safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
+            try:
+                safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
+            except security_exception.SecurityException as e:
+                raise HTTPException(
+                    status_code=422, detail=f"Bad security provided in security_exclude {sd.security_exclude}" + str(e)
+                )
             if not sd.security_include:
                 tmp["must_not"] += [
                     {"terms": {"encoded_security.inclusive": safes}},
@@ -336,7 +343,13 @@ class Wrapper:
         if sd.security_include:  # user has specified AND search based on RELs
             if has_child:
                 # Convert to safe format and build AND-style term clauses
-                musts = utils.azsec().unsafe_to_safe(sd.security_include)
+                try:
+                    musts = utils.azsec().unsafe_to_safe(sd.security_include)
+                except security_exception.SecurityException as e:
+                    raise HTTPException(
+                        status_code=422,
+                        detail=f"Bad security provided in security_include {sd.security_include}" + str(e),
+                    )
                 must_clauses = [{"term": {"encoded_security.inclusive": value}} for value in musts]
 
                 for f in body["query"]["bool"]["filter"]:
@@ -393,29 +406,40 @@ class Wrapper:
             tmp["must"] = [tmp["must"]]
         tmp.setdefault("filter", [])
 
-        if sd.security_exclude and not sd.security_include:
+        if sd.security_exclude:
             # convert to safe format
-            safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
-            tmp["must_not"] += [
-                {"terms": {"encoded_security.inclusive": safes}},
-                {"terms": {"encoded_security.exclusive": safes}},
-                {"terms": {"encoded_security.markings": safes}},
-            ]
-        elif sd.security_exclude:
-            # convert to safe format
-            safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
-            tmp["must_not"] += [
-                {"terms": {"encoded_security.exclusive": safes}},
-                {"terms": {"encoded_security.markings": safes}},
-            ]
+            try:
+                safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
+            except security_exception.SecurityException as e:
+                raise HTTPException(
+                    status_code=422, detail=f"Bad security provided in security_exclude {sd.security_exclude}" + str(e)
+                )
 
-            for value in safes:
-                if "-rel-" in value:
-                    tmp["must_not"].append({"term": {"encoded_security.inclusive": value}})
+            if not sd.security_include:
+                tmp["must_not"] += [
+                    {"terms": {"encoded_security.inclusive": safes}},
+                    {"terms": {"encoded_security.exclusive": safes}},
+                    {"terms": {"encoded_security.markings": safes}},
+                ]
+            else:
+                tmp["must_not"] += [
+                    {"terms": {"encoded_security.exclusive": safes}},
+                    {"terms": {"encoded_security.markings": safes}},
+                ]
+
+                for value in safes:
+                    if "-rel-" in value:
+                        tmp["must_not"].append({"term": {"encoded_security.inclusive": value}})
 
         if sd.security_include:  # user has specified AND search based on RELs
             # Convert to safe format and build AND-style term clauses
-            musts = utils.azsec().unsafe_to_safe(sd.security_include)
+            try:
+                musts = utils.azsec().unsafe_to_safe(sd.security_include)
+            except security_exception.SecurityException as e:
+                raise HTTPException(
+                    status_code=422, detail=f"Bad security provided in security_include {sd.security_include}" + str(e)
+                )
+
             for m in musts:
                 tmp["must"].append({"term": {"encoded_security.inclusive": m}})
 

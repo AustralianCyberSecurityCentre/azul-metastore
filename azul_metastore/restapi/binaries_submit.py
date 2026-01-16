@@ -285,7 +285,7 @@ async def submit_binary_to_source_dataless(
     request: Request,
     resp: Response,
     # dataless submission
-    sha256: str = Form(None, description="sha256 of file if binary data not present"),
+    sha256: str = Form(None, description="sha256 of file if binary data not present", pattern="[a-fA-F0-9]{64}"),
     # source submission
     source_id: Optional[str] = Form(None, description="Source/grouping to submit the file into"),
     references: SubmissionReferences = Depends(SubmissionReferences.as_form),
@@ -357,7 +357,7 @@ async def submit_child_binary_to_source(
     # data submission
     binary: UploadFile = File(description="File to submit"),
     # child submission
-    parent_sha256: str = Form(description="Parent entity id"),
+    parent_sha256: str = Form(description="Parent entity id", pattern="[a-fA-F0-9]{64}"),
     relationship: SubmissionRelationship = Depends(SubmissionRelationship.as_form),
     settings: SubmissionSettings = Depends(SubmissionSettings.as_form),
     # archives
@@ -412,7 +412,7 @@ async def submit_child_binary_to_source_dataless(
     request: Request,
     resp: Response,
     # dataless submission
-    sha256: str = Form(description="sha256 of file if binary data not present"),
+    sha256: str = Form(description="sha256 of file if binary data not present", pattern="[a-fA-F0-9]{64}"),
     # child submission
     parent_sha256: str = Form(description="Parent entity id"),
     relationship: SubmissionRelationship = Depends(SubmissionRelationship.as_form),

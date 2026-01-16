@@ -15,6 +15,7 @@ from fastapi import (
     Body,
     Depends,
     HTTPException,
+    Path,
     Query,
     Response,
 )
@@ -142,7 +143,7 @@ def find_all_binaries(
 @router.post("/v0/binaries/all/parents", response_model=qr.gr(bedr_binaries.EntityFindSimpleFamily), **qr.kw)
 def find_all_parents(
     resp: Response,
-    family_sha256: str,
+    family_sha256: str = Query(..., pattern="[a-fA-F0-9]{64}"),
     after: str | None = Body(None, embed=True),
     ctx: context.Context = Depends(qr.ctx),
 ):
@@ -173,7 +174,7 @@ def find_all_parents(
 @router.post("/v0/binaries/all/children", response_model=qr.gr(bedr_binaries.EntityFindSimpleFamily), **qr.kw)
 def find_all_children(
     resp: Response,
-    family_sha256: str,
+    family_sha256: str = Query(..., pattern="[a-fA-F0-9]{64}"),
     after: str | None = Body(None, embed=True),
     ctx: context.Context = Depends(qr.ctx),
 ):
@@ -219,7 +220,11 @@ def find_autocomplete(resp: Response, term: str, offset: int, ctx: context.Conte
 
 
 @router.head("/v0/binaries/{sha256}", **qr.kw)
-def check_metadata_exists(resp: Response, sha256: str, ctx: context.Context = Depends(qr.ctx_without_queries)):
+def check_metadata_exists(
+    resp: Response,
+    sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"),
+    ctx: context.Context = Depends(qr.ctx_without_queries),
+):
     """Return 404 if entity not found, 200 if entity found."""
     data = binary_read.check_binaries(ctx, [sha256])[0]
 
@@ -233,7 +238,7 @@ def check_metadata_exists(resp: Response, sha256: str, ctx: context.Context = De
 @router.get("/v0/binaries/{sha256}", response_model=qr.gr(bedr_binaries.BinaryMetadata), **qr.kw)
 def get_metadata(
     resp: Response,
-    sha256: str,
+    sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"),
     detail: list[bedr_binaries.BinaryMetadataDetail] = Query(
         [], description="Properties about binary that should be returned"
     ),
@@ -262,7 +267,12 @@ def get_metadata(
 
 
 @router.get("/v0/binaries/{sha256}/new", response_model=qr.gr(bedr_binaries.BinaryDocuments), **qr.kw)
-def get_has_newer_metadata(resp: Response, sha256: str, timestamp: str, ctx: context.Context = Depends(qr.ctx)):
+def get_has_newer_metadata(
+    resp: Response,
+    timestamp: str,
+    sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"),
+    ctx: context.Context = Depends(qr.ctx),
+):
     """Retrieve timestamp of newest result doc for entity."""
     data = binary_read.get_binary_newer(ctx, sha256, timestamp)
     return qr.fr(ctx, data, resp)
@@ -294,7 +304,11 @@ def get_similar_ssdeep_binaries(
 
 @router.get("/v0/binaries/{sha256}/similar", response_model=qr.gr(bedr_binaries.SimilarMatch), **qr.kw)
 def get_similar_feature_binaries(
-    resp: Response, sha256: str, bt: BackgroundTasks, recalculate: bool = False, ctx: context.Context = Depends(qr.ctx)
+    resp: Response,
+    bt: BackgroundTasks,
+    sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"),
+    recalculate: bool = False,
+    ctx: context.Context = Depends(qr.ctx),
 ):
     """Return info about similar entities."""
     gen = binary_similar.read_similar_from_features(ctx, sha256, recalculate=recalculate)
@@ -306,7 +320,7 @@ def get_similar_feature_binaries(
 @router.get("/v0/binaries/{sha256}/nearby", response_model=qr.gr(bedr_binaries.ReadNearby), **qr.kw)
 def get_nearby_binaries(
     resp: Response,
-    sha256: str,
+    sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"),
     include_cousins: bedr_binaries.IncludeCousinsEnum = Query(
         bedr_binaries.IncludeCousinsEnum.Standard,
         description=".",
@@ -337,7 +351,9 @@ def get_nearby_binaries(
 
 
 @router.get("/v0/binaries/{sha256}/tags", response_model=qr.gr(bedr_binaries.ReadAllEntityTags), **qr.kw)
-def get_binary_tags(resp: Response, sha256: str, ctx: context.Context = Depends(qr.ctx)):
+def get_binary_tags(
+    resp: Response, sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"), ctx: context.Context = Depends(qr.ctx)
+):
     """Return tags for entity."""
     data = annotation.read_binary_tags(ctx, sha256)
     return qr.fr(ctx, {"items": data}, resp)
@@ -346,8 +362,8 @@ def get_binary_tags(resp: Response, sha256: str, ctx: context.Context = Depends(
 @router.post("/v0/binaries/{sha256}/tags/{tag}", **qr.kw)
 def create_tag_on_binary(
     resp: Response,
-    sha256: str,
     tag: str,
+    sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"),
     security: str = Body(None, embed=True),
     ctx: context.Context = Depends(qr.ctx),
 ):
@@ -385,7 +401,12 @@ def create_tag_on_binary(
 
 
 @router.delete("/v0/binaries/{sha256}/tags/{tag}", response_model=qr.gr(bedr_binaries.AnnotationUpdated), **qr.kw)
-def delete_tag_on_binary(resp: Response, sha256: str, tag: str, ctx: context.Context = Depends(qr.ctx)):
+def delete_tag_on_binary(
+    resp: Response,
+    tag: str,
+    sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"),
+    ctx: context.Context = Depends(qr.ctx),
+):
     """Delete a tag from an entity."""
     tag = unquote(tag) if tag else None
     try:
@@ -399,7 +420,9 @@ def delete_tag_on_binary(resp: Response, sha256: str, tag: str, ctx: context.Con
 
 
 @router.get("/v0/binaries/{sha256}/statuses", response_model=qr.gr(bedr_binaries.Status), **qr.kw)
-def get_binary_status(resp: Response, sha256: str, ctx: context.Context = Depends(qr.ctx)):
+def get_binary_status(
+    resp: Response, sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"), ctx: context.Context = Depends(qr.ctx)
+):
     """Status messages for all plugins that have run on the entity, including if they have timed out.
 
     :param sha256:
@@ -416,7 +439,7 @@ def get_binary_status(resp: Response, sha256: str, ctx: context.Context = Depend
 @router.get("/v0/binaries/{sha256}/events", response_model=qr.gr(bedr_binaries.OpensearchDocuments), **qr.kw)
 def get_binary_documents(
     resp: Response,
-    sha256: str,
+    sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"),
     event_type: Optional[azm.BinaryAction] = Query(None, description="Filter out all but the specified event type."),
     size: int = Query(
         1000,
