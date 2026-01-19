@@ -408,7 +408,6 @@ class Wrapper:
                 {"terms": {"encoded_security.markings": safes}},
             ]
             # Return filter type used back to webui
-            print("IT'S OR")
             sd.security_filter = "OR"
         elif sd.security_exclude:
             # convert to safe format
@@ -424,13 +423,11 @@ class Wrapper:
 
         if sd.security_include:  # user has specified AND search based on RELs
             # Convert to safe format and build AND-style term clauses
-            print("IT'S AND")
             musts = utils.azsec().unsafe_to_safe(sd.security_include)
             for m in musts:
                 tmp["must"].append({"term": {"encoded_security.inclusive": m}})
             # Return filter type used back to webui
             sd.security_filter = "AND"
-        print("Returning filter type: ", sd.security_filter)
         return body
 
     def count(self, sd: search_data.SearchData, body: dict, *args, **kwargs):
