@@ -307,7 +307,6 @@ class Wrapper:
                     {"terms": {"encoded_security.markings": safes}},
                 ]
                 # Return filter type used back to webui
-                print("IT'S OR")
                 sd.security_filter = "OR"
             else:
                 # add must_not clause to children
@@ -371,7 +370,6 @@ class Wrapper:
                         # only add to one has_child in the query
                         break
             # Return filter type used back to webui
-            print("IT'S AND")
             sd.security_filter = "AND"
 
         return body
