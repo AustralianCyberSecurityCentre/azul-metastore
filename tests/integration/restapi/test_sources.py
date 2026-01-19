@@ -131,7 +131,7 @@ class TestSources(integration_test.BaseRestapi):
                     },
                 ]
             },
-            "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": ""},
+            "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
         }
 
         # No filtering works

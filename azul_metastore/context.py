@@ -63,7 +63,6 @@ def _get_user_access(sd: search_data.SearchData, azsec: sec.Security) -> UserAcc
         labels=security_labels,
         denylist=sd.security_exclude,
         includelist=sd.security_include,
-        sec_filter=sd.security_filter,
     )
     return ret
 

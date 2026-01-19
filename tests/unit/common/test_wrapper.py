@@ -21,9 +21,7 @@ class TestWrapper(unit_test.BaseUnitTestCase):
         w = wrapper.Wrapper("", "encoded", {}, [], {}, 1)
 
         # check exclusive filter works
-        sd = search_data.SearchData(
-            credentials={}, security_exclude=["HIGH"], security_include=[], security_filter="OR"
-        )
+        sd = search_data.SearchData(credentials={}, security_exclude=["HIGH"], security_include=[])
         query = {}
         query = w._limit_search(sd, query)
         self.assertEqual(
@@ -67,9 +65,7 @@ class TestWrapper(unit_test.BaseUnitTestCase):
         w = wrapper.Wrapper("", "encoded", {}, [], {}, 1)
 
         # check exclusive filter works
-        sd = search_data.SearchData(
-            credentials={}, security_exclude=["HIGH"], security_include=["REL:APPLE"], security_filter="AND"
-        )
+        sd = search_data.SearchData(credentials={}, security_exclude=["HIGH"], security_include=["REL:APPLE"])
         query = {}
         query = w._limit_search(sd, query)
         self.assertEqual(
@@ -111,9 +107,7 @@ class TestWrapper(unit_test.BaseUnitTestCase):
         w = wrapper.Wrapper("", "encoded", {}, [], {}, 1)
 
         # check exclusive filter works
-        sd = search_data.SearchData(
-            credentials={}, security_exclude=["HIGH"], security_include=[], security_filter="OR"
-        )
+        sd = search_data.SearchData(credentials={}, security_exclude=["HIGH"], security_include=[])
         query = {
             "query": {
                 "bool": {
@@ -190,7 +184,7 @@ class TestWrapper(unit_test.BaseUnitTestCase):
 
         # check exclusive filter works
         sd = search_data.SearchData(
-            credentials={}, security_exclude=["REL:CAR", "HIGH"], security_include=["REL:APPLE"], security_filter="AND"
+            credentials={}, security_exclude=["REL:CAR", "HIGH"], security_include=["REL:APPLE"]
         )
         query = {
             "query": {
