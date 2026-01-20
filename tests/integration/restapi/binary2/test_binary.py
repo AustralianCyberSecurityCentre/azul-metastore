@@ -16,8 +16,10 @@ def mock_user_security(self):
 @mock.patch.object(Context, "get_user_current_security", mock_user_security)
 class TestBinary(integration_test.BaseRestapi):
     def test_status_find(self):
-        self.write_status_events([gen.status(eid="e1")])
-        response = self.client.get("/v0/binaries/e1/statuses")
+        self.write_status_events([gen.status(eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")])
+        response = self.client.get(
+            "/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/statuses"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(0, resp["data"]["items"][0]["completed"])
@@ -25,27 +27,27 @@ class TestBinary(integration_test.BaseRestapi):
     def test_entity_check_exists(self):
         self.write_binary_events(
             [
-                gen.binary_event(eid="e1"),
+                gen.binary_event(eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
             ]
         )
-        response = self.client.head("/v0/binaries/e1")
+        response = self.client.head("/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
         self.assertEqual(200, response.status_code)
 
-        response = self.client.head("/v0/binaries/E1")
+        response = self.client.head("/v0/binaries/E1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
         self.assertEqual(200, response.status_code)
 
         response = self.client.head("/v0/binaries/invalid1")
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(422, response.status_code)
 
     def test_entity_read(self):
         self.write_binary_events(
             [
-                gen.binary_event(eid="e1"),
+                gen.binary_event(eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
             ]
         )
 
         # Without the detail flag
-        response = self.client.get("/v0/binaries/e1")
+        response = self.client.get("/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
         self.assertEqual(200, response.status_code)
         resp = response.json()
 
@@ -73,8 +75,16 @@ class TestBinary(integration_test.BaseRestapi):
         # Test to check if plugins that specify filter_max_content_size of 0 are are not filtered/in the warnings list
         self.write_binary_events(
             [
-                gen.binary_event(eid="e1", post_patch={"entity": {"size": 1024}}, data_patch={"size": 1024}),
-                gen.binary_event(eid="e2", post_patch={"entity": {"size": 102400000}}, data_patch={"size": 102400000}),
+                gen.binary_event(
+                    eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    post_patch={"entity": {"size": 1024}},
+                    data_patch={"size": 1024},
+                ),
+                gen.binary_event(
+                    eid="e2ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    post_patch={"entity": {"size": 102400000}},
+                    data_patch={"size": 102400000},
+                ),
             ]
         )
 
@@ -88,7 +98,7 @@ class TestBinary(integration_test.BaseRestapi):
             ]
         )
 
-        response = self.client.get("/v0/binaries/e1")
+        response = self.client.get("/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
         self.assertEqual(200, response.status_code)
         resp = response.json()
 
@@ -98,8 +108,16 @@ class TestBinary(integration_test.BaseRestapi):
         # Test to check if plugins that specify filter_max_content_size of 0 are are not filtered/in the warnings list
         self.write_binary_events(
             [
-                gen.binary_event(eid="e1", post_patch={"entity": {"size": 1024}}, data_patch={"size": 1024}),
-                gen.binary_event(eid="e2", post_patch={"entity": {"size": 102400000}}, data_patch={"size": 102400000}),
+                gen.binary_event(
+                    eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    post_patch={"entity": {"size": 1024}},
+                    data_patch={"size": 1024},
+                ),
+                gen.binary_event(
+                    eid="e2ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    post_patch={"entity": {"size": 102400000}},
+                    data_patch={"size": 102400000},
+                ),
             ]
         )
 
@@ -113,7 +131,7 @@ class TestBinary(integration_test.BaseRestapi):
             ]
         )
 
-        response = self.client.get("/v0/binaries/e1")
+        response = self.client.get("/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
         self.assertEqual(200, response.status_code)
         resp = response.json()
 
@@ -122,8 +140,16 @@ class TestBinary(integration_test.BaseRestapi):
     def test_binary_read_detail(self):
         self.write_binary_events(
             [
-                gen.binary_event(eid="e1", post_patch={"entity": {"size": 1024}}, data_patch={"size": 1024}),
-                gen.binary_event(eid="e2", post_patch={"entity": {"size": 102400000}}, data_patch={"size": 102400000}),
+                gen.binary_event(
+                    eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    post_patch={"entity": {"size": 1024}},
+                    data_patch={"size": 1024},
+                ),
+                gen.binary_event(
+                    eid="e2ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    post_patch={"entity": {"size": 102400000}},
+                    data_patch={"size": 102400000},
+                ),
             ]
         )
 
@@ -141,7 +167,7 @@ class TestBinary(integration_test.BaseRestapi):
         )
 
         # Small binary
-        response = self.client.get("/v0/binaries/e1")
+        response = self.client.get("/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
         self.assertEqual(200, response.status_code)
         resp = response.json()
         print("RESPONSE:")
@@ -151,7 +177,7 @@ class TestBinary(integration_test.BaseRestapi):
         self.assertNotIn("diagnostics", resp["data"])
 
         # Larger binary
-        response = self.client.get("/v0/binaries/e2")
+        response = self.client.get("/v0/binaries/e2ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
         self.assertEqual(200, response.status_code)
         resp = response.json()
 
@@ -164,11 +190,16 @@ class TestBinary(integration_test.BaseRestapi):
         s = settings.get()
 
         # Generate many events for the same binary that don't overlap in IDs
-        events = [gen.binary_event(eid="e1", authornv=(f"test.{id}", "1")) for id in range(0, s.warn_on_event_count)]
+        events = [
+            gen.binary_event(
+                eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", authornv=(f"test.{id}", "1")
+            )
+            for id in range(0, s.warn_on_event_count)
+        ]
         self.write_binary_events(events)
 
         # Larger binary
-        response = self.client.get("/v0/binaries/e1")
+        response = self.client.get("/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
         self.assertEqual(200, response.status_code)
         resp = response.json()
 
@@ -180,20 +211,26 @@ class TestBinary(integration_test.BaseRestapi):
     def test_binary_read_new(self):
         self.write_binary_events(
             [
-                gen.binary_event(eid="e1"),
+                gen.binary_event(eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
             ]
         )
-        response = self.client.get("/v0/binaries/e1/new?timestamp=2000-01-01T12:00%2B00:00")
+        response = self.client.get(
+            "/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/new?timestamp=2000-01-01T12:00%2B00:00"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(True, bool(resp["data"]["count"]))
 
-        response = self.client.get("/v0/binaries/E1/new?timestamp=2000-01-01T12:00%2B00:00")
+        response = self.client.get(
+            "/v0/binaries/E1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/new?timestamp=2000-01-01T12:00%2B00:00"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(True, bool(resp["data"]["count"]))
 
-        response = self.client.get("/v0/binaries/e1/new?timestamp=2100-01-01T12:00%2B00:00")
+        response = self.client.get(
+            "/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/new?timestamp=2100-01-01T12:00%2B00:00"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(False, bool(resp["data"]["count"]))
@@ -201,10 +238,12 @@ class TestBinary(integration_test.BaseRestapi):
     def test_binary_read_new_query_logs(self):
         self.write_binary_events(
             [
-                gen.binary_event(eid="e1"),
+                gen.binary_event(eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
             ]
         )
-        response = self.client.get("/v0/binaries/e1/new?timestamp=2000-01-01T12:00:00&include_queries=true")
+        response = self.client.get(
+            "/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/new?timestamp=2000-01-01T12:00:00&include_queries=true"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(1, len(resp["meta"]["queries"]))
@@ -276,15 +315,25 @@ class TestBinary(integration_test.BaseRestapi):
     def test_binary_read_similar(self):
         self.write_binary_events(
             [
-                gen.binary_event(eid="e1", fvl=[("f1", f"v{x}") for x in range(10)]),
-                gen.binary_event(eid="e2", fvl=[("f1", f"v{x}") for x in range(10)]),
+                gen.binary_event(
+                    eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    fvl=[("f1", f"v{x}") for x in range(10)],
+                ),
+                gen.binary_event(
+                    eid="e2ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    fvl=[("f1", f"v{x}") for x in range(10)],
+                ),
             ]
         )
-        response = self.client.get("/v0/binaries/e1/similar")
+        response = self.client.get(
+            "/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/similar"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
 
-        response = self.client.get("/v0/binaries/E1/similar")
+        response = self.client.get(
+            "/v0/binaries/E1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/similar"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
 
@@ -299,42 +348,100 @@ class TestBinary(integration_test.BaseRestapi):
         a = ("a1", "1")
         self.write_binary_events(
             [
-                gen.binary_event(eid="e1", spathl=[]),
-                gen.binary_event(eid="e10", spathl=[("e1", a)]),
-                gen.binary_event(eid="e100", spathl=[("e1", a), ("e10", a)]),
-                gen.binary_event(eid="e2", spathl=[]),
-                gen.binary_event(eid="e20", spathl=[("e2", a)]),
-                gen.binary_event(eid="e200", spathl=[("e2", a), ("e20", a)]),
-                gen.binary_event(eid="e1000", authornv=("a2", "1"), spathl=[("e2", a), ("e20", a), ("e200", a)]),
-                gen.binary_event(eid="e1000", authornv=("a1", "1"), spathl=[("e1", a), ("e10", a), ("e100", a)]),
-                gen.binary_event(eid="e300", spathl=[("e1", a), ("e10", a)]),
+                gen.binary_event(eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", spathl=[]),
+                gen.binary_event(
+                    eid="e10fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    spathl=[("e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", a)],
+                ),
+                gen.binary_event(
+                    eid="e100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    spathl=[
+                        ("e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", a),
+                        ("e10fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", a),
+                    ],
+                ),
+                gen.binary_event(eid="e2ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", spathl=[]),
+                gen.binary_event(
+                    eid="e20fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    spathl=[("e2ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", a)],
+                ),
+                gen.binary_event(
+                    eid="e200ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    spathl=[
+                        ("e2ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", a),
+                        ("e20fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", a),
+                    ],
+                ),
+                gen.binary_event(
+                    eid="e1000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    authornv=("a2", "1"),
+                    spathl=[
+                        ("e2ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", a),
+                        ("e20fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", a),
+                        ("e200ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", a),
+                    ],
+                ),
+                gen.binary_event(
+                    eid="e1000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    authornv=("a1", "1"),
+                    spathl=[
+                        ("e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", a),
+                        ("e10fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", a),
+                        ("e100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", a),
+                    ],
+                ),
+                gen.binary_event(
+                    eid="e300",
+                    spathl=[
+                        ("e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", a),
+                        ("e10fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", a),
+                    ],
+                ),
             ]
         )
         # Base case, links are parent: generic_source, e1, e10 child: e1000, cousins: e300, e200, e20
-        response = self.client.get("/v0/binaries/e100/nearby")
+        response = self.client.get(
+            "/v0/binaries/e100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/nearby"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(7, len(resp["data"]["links"]))
 
-        response = self.client.get("/v0/binaries/E100/nearby")
+        response = self.client.get(
+            "/v0/binaries/E100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/nearby"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(7, len(resp["data"]["links"]))
 
         # Check cousins
-        response = self.client.get("/v0/binaries/e100/nearby?include_cousins=yes")
+        response = self.client.get(
+            "/v0/binaries/e100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/nearby?include_cousins=yes"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(7, len(resp["data"]["links"]))
 
         # Find only parents, and children
-        response = self.client.get("/v0/binaries/e100/nearby?include_cousins=no")
+        response = self.client.get(
+            "/v0/binaries/e100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/nearby?include_cousins=no"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(4, len(resp["data"]["links"]))
 
+        # Verify the search also works with the small option missing out the wider cousins.
+        response = self.client.get(
+            "/v0/binaries/e100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/nearby?include_cousins=yes_small"
+        )
+        self.assertEqual(200, response.status_code)
+        resp = response.json()
+        self.assertEqual(6, len(resp["data"]["links"]))
+
         # Widen search to also find cousins: e2 and generic_sourced2
-        response = self.client.get("/v0/binaries/e100/nearby?include_cousins=yes_large")
+        response = self.client.get(
+            "/v0/binaries/e100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/nearby?include_cousins=yes_large"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(9, len(resp["data"]["links"]))
@@ -342,34 +449,44 @@ class TestBinary(integration_test.BaseRestapi):
     def test_binary_read_tags(self):
         self.write_binary_events(
             [
-                gen.binary_event(eid="e1"),
+                gen.binary_event(eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
             ]
         )
         self.write_entity_tags(
             [
-                gen.entity_tag(eid="e1", tag="t1"),
-                gen.entity_tag(eid="e1", tag="t2"),
+                gen.entity_tag(eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", tag="t1"),
+                gen.entity_tag(eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", tag="t2"),
             ]
         )
-        response = self.client.get("/v0/binaries/e1/tags")
+        response = self.client.get(
+            "/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/tags"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(2, len(resp["data"]["items"]))
-        response = self.client.get("/v0/binaries/E1/tags")
+        response = self.client.get(
+            "/v0/binaries/E1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/tags"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(2, len(resp["data"]["items"]))
 
     def test_entity_tags_create_delete(self):
-        response = self.client.post("/v0/binaries/e1/tags/hello.world", json=dict(security="low"))
+        response = self.client.post(
+            "/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/tags/hello.world",
+            json=dict(security="low"),
+        )
         self.assertEqual(400, response.status_code)
         response = self.client.post(
-            "/v0/binaries/e1/tags/helloworldhelloworldhelloworldhelloworldhelloworldhelloworld",
+            "/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/tags/helloworldhelloworldhelloworldhelloworldhelloworldhelloworld",
             json=dict(security="low"),
         )
         self.assertEqual(400, response.status_code)
 
-        response = self.client.post("/v0/binaries/e1/tags/t1", json=dict(security="low"))
+        response = self.client.post(
+            "/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/tags/t1",
+            json=dict(security="low"),
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(None, resp)
@@ -380,7 +497,9 @@ class TestBinary(integration_test.BaseRestapi):
         self.assertEqual(1, len(resp["data"]["tags"]))
         self.assertEqual("t1", resp["data"]["tags"][0]["tag"])
 
-        response = self.client.delete("/v0/binaries/e1/tags/t1")
+        response = self.client.delete(
+            "/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/tags/t1"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         # Check that the tag was "updated" as we are not deleting tags due to audit
@@ -392,37 +511,54 @@ class TestBinary(integration_test.BaseRestapi):
         self.assertEqual(0, len(resp["data"]["tags"]))
 
     def test_entity_tag_casing(self):
-        response = self.client.post("/v0/binaries/E1/tags/t1", json=dict(security="low"))
+        response = self.client.post(
+            "/v0/binaries/E1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/tags/t1",
+            json=dict(security="low"),
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(None, resp)
 
-        response = self.client.get("/v0/binaries/e1/tags")
+        response = self.client.get(
+            "/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/tags"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(1, len(resp["data"]["items"]))
-        self.assertEqual("e1", resp["data"]["items"][0]["sha256"])
+        self.assertEqual(
+            "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", resp["data"]["items"][0]["sha256"]
+        )
         self.assertEqual("t1", resp["data"]["items"][0]["tag"])
 
-        response = self.client.get("/v0/binaries/E1/tags")
+        response = self.client.get(
+            "/v0/binaries/E1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/tags"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(1, len(resp["data"]["items"]))
-        self.assertEqual("e1", resp["data"]["items"][0]["sha256"])
+        self.assertEqual(
+            "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", resp["data"]["items"][0]["sha256"]
+        )
         self.assertEqual("t1", resp["data"]["items"][0]["tag"])
 
-        response = self.client.delete("/v0/binaries/E1/tags/t1")
+        response = self.client.delete(
+            "/v0/binaries/E1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/tags/t1"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         # Check that the tag was "updated" as we are not deleting tags due to audit
         self.assertEqual(1, resp["data"]["updated"])
 
-        response = self.client.get("/v0/binaries/E1/tags")
+        response = self.client.get(
+            "/v0/binaries/E1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/tags"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual([], resp["data"]["items"])
 
-        response = self.client.get("/v0/binaries/e1/tags")
+        response = self.client.get(
+            "/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/tags"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual([], resp["data"]["items"])
@@ -443,18 +579,28 @@ class TestBinary(integration_test.BaseRestapi):
         self.assertEqual(server_pairs["magic"], "keyword")
 
     def test_security_tag(self):
-        response = self.client.post("/v0/binaries/E1/tags/t1", json=dict(security="high"))
+        response = self.client.post(
+            "/v0/binaries/E1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/tags/t1",
+            json=dict(security="high"),
+        )
         self.assertEqual(200, response.status_code)
-        response = self.client.post("/v0/binaries/E1/tags/t1", json=dict(security="medium"))
+        response = self.client.post(
+            "/v0/binaries/E1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/tags/t1",
+            json=dict(security="medium"),
+        )
         self.assertEqual(200, response.status_code)
 
         user = "low"
         response = self.client.post(
-            "/v0/binaries/E1/tags/t1", json=dict(security="high"), headers={"x-test-user": user}
+            "/v0/binaries/E1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/tags/t1",
+            json=dict(security="high"),
+            headers={"x-test-user": user},
         )
         self.assertEqual(422, response.status_code)
         response = self.client.post(
-            "/v0/binaries/E1/tags/t1", json=dict(security="medium"), headers={"x-test-user": user}
+            "/v0/binaries/E1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/tags/t1",
+            json=dict(security="medium"),
+            headers={"x-test-user": user},
         )
         self.assertEqual(422, response.status_code)
 
@@ -464,50 +610,63 @@ class TestBinary(integration_test.BaseRestapi):
             [
                 gen.binary_event(
                     {"action": azm.BinaryAction.Sourced},
-                    eid="e1",
+                    eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                     sourceit=("s2", "2021-02-01T11:00:00+00:00"),
                 ),
                 gen.binary_event(
                     {"action": azm.BinaryAction.Sourced},
-                    eid="e1",
+                    eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                     sourceit=("s3", "2021-03-01T11:00:00+00:00"),
                 ),
                 gen.binary_event(
                     {"action": azm.BinaryAction.Sourced},
-                    eid="e1",
+                    eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                     sourceit=("s4", "2021-04-01T11:00:00+00:00"),
                 ),
                 gen.binary_event(
-                    {"action": azm.BinaryAction.Mapped}, eid="e1", sourceit=("s5", "2021-05-01T11:00:00+00:00")
+                    {"action": azm.BinaryAction.Mapped},
+                    eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    sourceit=("s5", "2021-05-01T11:00:00+00:00"),
                 ),
             ]
         )
 
-        response = self.client.get(f"/v0/binaries/e1/events?event_type={azm.BinaryAction.Sourced}")
+        response = self.client.get(
+            f"/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/events?event_type={azm.BinaryAction.Sourced}"
+        )
+        print(response.json())
         self.assertEqual(200, response.status_code)
         resp = bedr_binaries.OpensearchDocuments(**response.json()["data"])
         self.assertEqual(3, len(resp.items))
         self.assertEqual(3, resp.total_docs)
 
-        response = self.client.get(f"/v0/binaries/e1/events?event_type={azm.BinaryAction.Mapped}")
+        response = self.client.get(
+            f"/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/events?event_type={azm.BinaryAction.Mapped}"
+        )
         self.assertEqual(200, response.status_code)
         resp = bedr_binaries.OpensearchDocuments(**response.json()["data"])
         self.assertEqual(1, len(resp.items))
         self.assertEqual(1, resp.total_docs)
 
-        response = self.client.get("/v0/binaries/e1/events")
+        response = self.client.get(
+            "/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/events"
+        )
         self.assertEqual(200, response.status_code)
         resp = bedr_binaries.OpensearchDocuments(**response.json()["data"])
         self.assertEqual(4, len(resp.items))
         self.assertEqual(4, resp.total_docs)
 
-        response = self.client.get("/v0/binaries/e1/events?size=1")
+        response = self.client.get(
+            "/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/events?size=1"
+        )
         self.assertEqual(200, response.status_code)
         resp = bedr_binaries.OpensearchDocuments(**response.json()["data"])
         self.assertEqual(1, len(resp.items))
         self.assertEqual(4, resp.total_docs)
 
-        response = self.client.get("/v0/binaries/e2/events")
+        response = self.client.get(
+            "/v0/binaries/e2ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/events"
+        )
         self.assertEqual(404, response.status_code)
 
     def test_binary_autocomplete(self):

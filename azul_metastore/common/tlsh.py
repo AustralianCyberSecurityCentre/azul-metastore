@@ -2,6 +2,8 @@
 
 from typing import Optional
 
+from azul_bedrock.exceptions import HTTPException
+
 
 def strip_tlsh_version(tlsh_hash: str) -> str:
     """Strips the prefix from a TLSH hash if it exists."""
@@ -10,7 +12,7 @@ def strip_tlsh_version(tlsh_hash: str) -> str:
             return tlsh_hash[2:]
         else:
             # Unsupported TLSH version
-            raise Exception(f"Invalid TLSH version in: '{tlsh_hash}'")
+            raise HTTPException(status_code=422, detail=f"Invalid TLSH version in: '{tlsh_hash}'")
     else:
         return tlsh_hash
 
@@ -30,7 +32,7 @@ def _tlsh_to_array(tlsh_str: str) -> list[int]:
     tlsh_str = strip_tlsh_version(tlsh_str)
 
     if len(tlsh_str) != 70:
-        raise Exception(f"Invalid TLSH length in: '{tlsh_str}'")
+        raise HTTPException(status_code=422, detail=f"Invalid TLSH length in: '{tlsh_str}'")
 
     data = bytearray.fromhex(tlsh_str)
 
