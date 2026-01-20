@@ -7,6 +7,7 @@ import logging
 import re
 
 from azul_bedrock import models_restapi
+from fastapi import HTTPException
 from pydantic import TypeAdapter
 
 from azul_metastore import context
@@ -308,8 +309,14 @@ def find_feature_values(
         }
 
         if after:
+            try:
+                json_loaded_after = json.loads(after)
+            except json.JSONDecodeError:
+                raise HTTPException(
+                    status_code=422, detail=f"Invalid after provided '{after}', after must be valid JSON!"
+                )
             # resume pagination of existing search
-            body["aggs"]["COMPOSITE"]["composite"]["after"] = json.loads(after)
+            body["aggs"]["COMPOSITE"]["composite"]["after"] = json_loaded_after
         else:
             # first request so count expected number of records
             body["aggs"]["TOTAL"] = {"cardinality": {"field": f"features_map.{feature}", "precision_threshold": 1000}}

@@ -74,7 +74,7 @@ class TestMain(unit_test.DataMockingUnitTest):
         sha256a = "e10fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         sha256b = "e100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         respx.get(f"{self.end}/api/v3/stream/source/{azm.DataLabel.TEST}/{sha256a}").mock(
-            return_value=httpx.Response(status_code=404)
+            return_value=httpx.Response(status_code=422)
         )
         respx.get(f"{self.end}/api/v3/stream/source/{azm.DataLabel.TEST}/{sha256b}").mock(
             return_value=httpx.Response(status_code=200, content=content)
@@ -95,14 +95,14 @@ class TestMain(unit_test.DataMockingUnitTest):
         self.assertEqual(200, response.status_code)
         self.assertEqual(content, response.content)
         response = self.client.get(f"/v0/binaries/{sha256b}/content/{sha256a}")
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(422, response.status_code)
 
         # check case sensitivity
         response = self.client.get(f"/v0/binaries/{sha256a.upper()}/content/{sha256b.upper()}")
         self.assertEqual(200, response.status_code)
         self.assertEqual(content, response.content)
         response = self.client.get(f"/v0/binaries/{sha256b.upper()}/content/{sha256a.upper()}")
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(422, response.status_code)
 
         # bad type
         fs.return_value = (
@@ -216,9 +216,12 @@ class TestMain(unit_test.DataMockingUnitTest):
 
         # check missing
         response = self.client.post("/v0/binaries/content/bulk", json={"binaries": ["grthnrthtrt"]})
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(422, response.status_code)
 
-        response = self.client.post("/v0/binaries/content/bulk", json={"binaries": [sha256a, "grthnrthtrt"]})
+        response = self.client.post(
+            "/v0/binaries/content/bulk",
+            json={"binaries": [sha256a, "aaaaaabbbbffffffffffffffffffffffffffffffffffffffffffffffffffffff"]},
+        )
         self.assertEqual(200, response.status_code)
         istream = io.BytesIO(response.content)
         self.assertTrue(pyzipper.is_zipfile(istream))
