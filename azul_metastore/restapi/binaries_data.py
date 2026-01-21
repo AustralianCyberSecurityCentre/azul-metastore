@@ -499,6 +499,12 @@ async def get_strings(
                     raise
             next_offset = 0
 
+            # Need to verify there are any search.strings before attempting to check for offset so this occurs first.
+            if len(search.strings) == 0:
+                search.has_more = False
+                search.next_offset = next_offset
+                break
+
             if last_processed_offset < search.strings[-1].offset:
                 has_more = True
 
@@ -525,9 +531,6 @@ async def get_strings(
 
             # Updating search.strings with filtered results
             search.strings = string_filter.filter_search_results(search.strings, ai_filtered_strings)
-
-            if len(search.strings) == 0:
-                break
 
             search.has_more = has_more
             search.next_offset = next_offset
