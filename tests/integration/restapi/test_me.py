@@ -28,6 +28,7 @@ class TestOpensearchAccess(integration_test.BaseRestapi):
                 "roles": ["azul_write"],
                 "security": {
                     "labels": [
+                        "",
                         "HANOVERLAP",
                         "HIGH",
                         "LOW",
@@ -60,7 +61,7 @@ class TestOpensearchAccess(integration_test.BaseRestapi):
                         "TOP HIGH",
                     ],
                     "labels_markings": ["TLP:AMBER", "TLP:AMBER+STRICT", "TLP:CLEAR", "TLP:GREEN"],
-                    "unique": "69066aead6c0eb13bcb9ca4323cd10a1",
+                    "unique": "f36849d48a0253ef968e35f8d219140f",
                     "max_access": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR",
                     "allowed_presets": ["LOW", "MEDIUM", "HIGH", "MEDIUM REL:APPLE,BEE", "MEDIUM REL:APPLE"],
                 },
@@ -92,11 +93,11 @@ class TestOpensearchAccess(integration_test.BaseRestapi):
                     "s-official",
                 ],
                 "security": {
-                    "labels": ["LOW", "TLP:AMBER", "TLP:AMBER+STRICT", "TLP:CLEAR", "TLP:GREEN"],
+                    "labels": ["", "LOW", "TLP:AMBER", "TLP:AMBER+STRICT", "TLP:CLEAR", "TLP:GREEN"],
                     "labels_inclusive": [],
                     "labels_exclusive": ["LOW"],
                     "labels_markings": ["TLP:AMBER", "TLP:AMBER+STRICT", "TLP:CLEAR", "TLP:GREEN"],
-                    "unique": "1b150459d481d5c197570266cf16abef",
+                    "unique": "6a21e70a47711b4113841eb30a488143",
                     "max_access": "LOW TLP:AMBER+STRICT",
                     "allowed_presets": ["LOW"],
                 },
@@ -131,6 +132,7 @@ class TestOpensearchAccess(integration_test.BaseRestapi):
                 ],
                 "security": {
                     "labels": [
+                        "",
                         "LOW",
                         "MEDIUM",
                         "REL:APPLE",
@@ -142,7 +144,7 @@ class TestOpensearchAccess(integration_test.BaseRestapi):
                     "labels_inclusive": ["REL:APPLE"],
                     "labels_exclusive": ["LOW", "MEDIUM"],
                     "labels_markings": ["TLP:AMBER", "TLP:AMBER+STRICT", "TLP:CLEAR", "TLP:GREEN"],
-                    "unique": "cf3922e819a7838fe97e664e2d3dfda4",
+                    "unique": "579985f579abc7c7d46ae299f7610396",
                     "max_access": "MEDIUM REL:APPLE",
                     "allowed_presets": ["LOW", "MEDIUM", "MEDIUM REL:APPLE,BEE", "MEDIUM REL:APPLE"],
                 },
@@ -179,6 +181,7 @@ class TestOpensearchAccess(integration_test.BaseRestapi):
                 ],
                 "security": {
                     "labels": [
+                        "",
                         "HIGH",
                         "LOW",
                         "MEDIUM",
@@ -192,7 +195,7 @@ class TestOpensearchAccess(integration_test.BaseRestapi):
                     "labels_inclusive": ["REL:BEE"],
                     "labels_exclusive": ["HIGH", "LOW", "MEDIUM", "MOD1"],
                     "labels_markings": ["TLP:AMBER", "TLP:AMBER+STRICT", "TLP:CLEAR", "TLP:GREEN"],
-                    "unique": "a135d2d5b8b07ad56b9b296d35dbdbaa",
+                    "unique": "ca2682936e5dade3b903d6ecdbbbc482",
                     "max_access": "HIGH MOD1 REL:BEE",
                     "allowed_presets": ["LOW", "MEDIUM", "HIGH", "MEDIUM REL:APPLE,BEE"],
                 },
