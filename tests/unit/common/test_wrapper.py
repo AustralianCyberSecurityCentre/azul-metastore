@@ -150,7 +150,6 @@ class TestWrapper(unit_test.BaseUnitTestCase):
             },
         }
         query = w._limit_search_complex(sd, query)
-        print(query)
         self.assertEqual(
             {
                 "query": {
