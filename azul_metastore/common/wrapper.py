@@ -313,6 +313,8 @@ class Wrapper:
                     {"terms": {"encoded_security.exclusive": safes}},
                     {"terms": {"encoded_security.markings": safes}},
                 ]
+                # Return filter type used back to webui
+                sd.security_filter = "OR"
             else:
                 # add must_not clause to children
                 must_not_clause = []
@@ -380,6 +382,8 @@ class Wrapper:
 
                         # only add to one has_child in the query
                         break
+            # Return filter type used back to webui
+            sd.security_filter = "AND"
 
         return body
 
@@ -430,6 +434,8 @@ class Wrapper:
                 for value in safes:
                     if "-rel-" in value:
                         tmp["must_not"].append({"term": {"encoded_security.inclusive": value}})
+                        # Return filter type used back to webui
+            sd.security_filter = "OR"
 
         if sd.security_include:  # user has specified AND search based on RELs
             # Convert to safe format and build AND-style term clauses
@@ -442,7 +448,8 @@ class Wrapper:
 
             for m in musts:
                 tmp["must"].append({"term": {"encoded_security.inclusive": m}})
-
+            # Return filter type used back to webui
+            sd.security_filter = "AND"
         return body
 
     def count(self, sd: search_data.SearchData, body: dict, *args, **kwargs):

@@ -30,10 +30,8 @@ class TestPlugins(integration_test.BaseRestapi):
         self.assertFormatted(
             resp,
             {
-                "data": {
-                    "events": 1,
-                },
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "data": {"events": 1},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
             },
         )
         # simulate with no further filters
@@ -48,7 +46,7 @@ class TestPlugins(integration_test.BaseRestapi):
             resp,
             {
                 "data": {"events_purged": 1, "binaries_kept": 0, "binaries_purged": 0},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
             },
         )
         self.flush()
@@ -142,7 +140,7 @@ class TestPlugins(integration_test.BaseRestapi):
                 "data": {
                     "events": 1,
                 },
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
             },
         )
         self.flush()
@@ -154,7 +152,7 @@ class TestPlugins(integration_test.BaseRestapi):
             resp,
             {
                 "data": {"events_purged": 1, "binaries_kept": 0, "binaries_purged": 0},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
             },
         )
 
@@ -174,7 +172,7 @@ class TestPlugins(integration_test.BaseRestapi):
             resp,
             {
                 "data": {"events_purged": 1, "binaries_kept": 0, "binaries_purged": 0},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
             },
         )
 

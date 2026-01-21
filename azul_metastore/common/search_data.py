@@ -59,6 +59,7 @@ class SearchData:
     credentials: dict
     security_exclude: list[str]  # list of user-specified security exclusions to apply to documents.
     security_include: list[str]  # list of user-specified security included RELS to apply to documents using AND.
+    security_filter: str | None = None
     # log opensearch queries and responses to python logger
     enable_log_es_queries: bool = False
     # Store the run es queries so that they can be reviewed after being run.
