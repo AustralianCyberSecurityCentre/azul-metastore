@@ -98,16 +98,15 @@ class QuickRefs:
     def format_response(cls, ctx: context.Context, data, response: Response):
         """Wrap the responses in a common model and add information about the request."""
         meta = bedr_basic.Meta()
-
         # add opensearch query info to response
         if ctx.sd is not None and ctx.sd.enable_capture_es_queries:
             meta.queries = ctx.sd.captured_es_queries
 
         # get current security context for the query
         meta.security = ctx.get_user_current_security()
+        meta.sec_filter = ctx.sd.security_filter
         # ensure response has a http header with accurate security info
         cls.set_security_headers(ctx, response, meta.security)
-
         return bedr_basic.Response(data=data, meta=meta)
 
     def subctx(self, user_info: UserInfo, security_exclude: list[str], security_include: list[str], no_cache: bool):

@@ -118,6 +118,11 @@ async def download_binaries(
     try:
         to_download = []
         for sha256 in binaries:
+            if not re.match(r"[a-fA-F0-9]{64}", sha256):
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"One of the provided sha256s '{sha256}' is invalid and the request cannot be processed.",
+                )
             exists, source, label = binary_read.find_stream_references(ctx, sha256)
             if exists:
                 to_download.append((source, label, sha256))

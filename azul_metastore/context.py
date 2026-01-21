@@ -59,7 +59,11 @@ def _get_user_access(sd: search_data.SearchData, azsec: sec.Security) -> UserAcc
             )
             security_labels = sorted(azsec.safe_to_unsafe(ret.roles, drop_mismatch=True) + list(open_markings))
 
-    ret.security = azsec.summarise_user_access(labels=security_labels, denylist=sd.security_exclude)
+    ret.security = azsec.summarise_user_access(
+        labels=security_labels,
+        denylist=sd.security_exclude,
+        includelist=sd.security_include,
+    )
     return ret
 
 

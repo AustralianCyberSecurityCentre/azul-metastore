@@ -138,7 +138,12 @@ class TestWrapper(unit_test.BaseUnitTestCase):
                 "bool": {
                     "filter": [
                         {"terms": {"genuine.rolodex": "true"}},
-                        {"has_child": {"type": "metadata", "query": {"exists": {"field": "source.name"}}}},
+                        {
+                            "has_child": {
+                                "type": "metadata",
+                                "query": {"bool": {"must": [{"exists": {"field": "source.name"}}], "must_not": []}},
+                            }
+                        },
                     ],
                     "should": [],
                 }
@@ -151,7 +156,14 @@ class TestWrapper(unit_test.BaseUnitTestCase):
                     "bool": {
                         "filter": [
                             {"terms": {"genuine.rolodex": "true"}},
-                            {"has_child": {"type": "metadata", "query": {"exists": {"field": "source.name"}}}},
+                            {
+                                "has_child": {
+                                    "type": "metadata",
+                                    "query": {
+                                        "bool": {"must": [{"exists": {"field": "source.name"}}], "must_not": []}
+                                    },
+                                }
+                            },
                         ],
                         "should": [],
                         "must_not": [
@@ -235,11 +247,11 @@ class TestWrapper(unit_test.BaseUnitTestCase):
                                     "type": "metadata",
                                     "query": {
                                         "bool": {
-                                            "must_not": [{"term": {"encoded_security.inclusive": "s-rel-car"}}],
                                             "must": [
                                                 {"exists": {"field": "source.name"}},
                                                 {"term": {"encoded_security.inclusive": "s-rel-apple"}},
                                             ],
+                                            "must_not": [{"term": {"encoded_security.inclusive": "s-rel-car"}}],
                                         }
                                     },
                                 }

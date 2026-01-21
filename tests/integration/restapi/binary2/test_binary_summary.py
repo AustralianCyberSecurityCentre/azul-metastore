@@ -10,22 +10,35 @@ class TestBinary(integration_test.BaseRestapi):
     def test_streams(self):
         self.write_binary_events(
             [
-                gen.binary_event(eid="e1", datas=[gen.data(hash="e1"), gen.data({"label": azm.DataLabel.TEST})]),
-                gen.binary_event(eid="e2", datas=[gen.data(hash="e3")]),
-                gen.binary_event(eid="e2", authornv=("p1", "1"), datas=[gen.data({"label": azm.DataLabel.TEST})]),
+                gen.binary_event(
+                    eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    datas=[
+                        gen.data(hash="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+                        gen.data({"label": azm.DataLabel.TEST}),
+                    ],
+                ),
+                gen.binary_event(
+                    eid="e2ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    datas=[gen.data(hash="e3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")],
+                ),
+                gen.binary_event(
+                    eid="e2ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    authornv=("p1", "1"),
+                    datas=[gen.data({"label": azm.DataLabel.TEST})],
+                ),
             ],
         )
 
-        response = self.client.get("/v0/binaries/e1")
+        response = self.client.get("/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
         self.assertEqual(200, response.status_code)
         self.assertFormatted(
             response.json()["data"]["streams"],
             [
                 {
-                    "md5": "000000000000000000000000000000e1",
-                    "sha1": "00000000000000000000000000000000000000e1",
-                    "sha256": "e1",
-                    "sha512": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e1",
+                    "sha256": "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    "sha512": "0000000000000000000000000000000000000000000000000000000000000000e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    "sha1": "e1ffffffffffffffffffffffffffffffffffffff",
+                    "md5": "e1ffffffffffffffffffffffffffffff",
                     "ssdeep": "1:1:1",
                     "tlsh": "T10000000000000000000000000000000000000000000000000000000000000000000000",
                     "size": 1024,
@@ -35,13 +48,15 @@ class TestBinary(integration_test.BaseRestapi):
                     "magic": "ASCII text",
                     "identify_version": 1,
                     "label": ["content"],
-                    "instances": ["e1.plugin.generic_plugin.sourced"],
+                    "instances": [
+                        "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.sourced"
+                    ],
                 },
                 {
-                    "md5": "000000000000000000000000000000ab",
-                    "sha1": "00000000000000000000000000000000000000ab",
                     "sha256": "00000000000000000000000000000000000000000000000000000000000000ab",
                     "sha512": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ab",
+                    "sha1": "00000000000000000000000000000000000000ab",
+                    "md5": "000000000000000000000000000000ab",
                     "ssdeep": "1:1:1",
                     "tlsh": "T10000000000000000000000000000000000000000000000000000000000000000000000",
                     "size": 1024,
@@ -51,20 +66,22 @@ class TestBinary(integration_test.BaseRestapi):
                     "magic": "ASCII text",
                     "identify_version": 1,
                     "label": ["test"],
-                    "instances": ["e1.plugin.generic_plugin.sourced"],
+                    "instances": [
+                        "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.sourced"
+                    ],
                 },
             ],
         )
-        response = self.client.get("/v0/binaries/e2")
+        response = self.client.get("/v0/binaries/e2ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
         self.assertEqual(200, response.status_code)
         self.assertFormatted(
             response.json()["data"]["streams"],
             [
                 {
-                    "md5": "000000000000000000000000000000e3",
-                    "sha1": "00000000000000000000000000000000000000e3",
-                    "sha256": "e3",
-                    "sha512": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e3",
+                    "sha256": "e3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    "sha512": "0000000000000000000000000000000000000000000000000000000000000000e3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    "sha1": "e3ffffffffffffffffffffffffffffffffffffff",
+                    "md5": "e3ffffffffffffffffffffffffffffff",
                     "ssdeep": "1:1:1",
                     "tlsh": "T10000000000000000000000000000000000000000000000000000000000000000000000",
                     "size": 1024,
@@ -74,13 +91,15 @@ class TestBinary(integration_test.BaseRestapi):
                     "magic": "ASCII text",
                     "identify_version": 1,
                     "label": ["content"],
-                    "instances": ["e2.plugin.generic_plugin.sourced"],
+                    "instances": [
+                        "e2ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.sourced"
+                    ],
                 },
                 {
-                    "md5": "000000000000000000000000000000ab",
-                    "sha1": "00000000000000000000000000000000000000ab",
                     "sha256": "00000000000000000000000000000000000000000000000000000000000000ab",
                     "sha512": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ab",
+                    "sha1": "00000000000000000000000000000000000000ab",
+                    "md5": "000000000000000000000000000000ab",
                     "ssdeep": "1:1:1",
                     "tlsh": "T10000000000000000000000000000000000000000000000000000000000000000000000",
                     "size": 1024,
@@ -90,28 +109,33 @@ class TestBinary(integration_test.BaseRestapi):
                     "magic": "ASCII text",
                     "identify_version": 1,
                     "label": ["test"],
-                    "instances": ["e2.plugin.p1.sourced"],
+                    "instances": [
+                        "e2ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.p1.sourced"
+                    ],
                 },
             ],
         )
 
         # should get a 404 since we had bad submission - no label
-        response = self.client.get("/v0/binaries/e3")
+        response = self.client.get("/v0/binaries/e3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
         self.assertEqual(404, response.status_code)
 
     def test_feature_labels(self):
         self.write_binary_events(
             [
-                gen.binary_event(eid="e1", features=[gen.feature({"label": "serendipitous"}, fv=("f", "1"))]),
                 gen.binary_event(
-                    eid="e2",
+                    eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    features=[gen.feature({"label": "serendipitous"}, fv=("f", "1"))],
+                ),
+                gen.binary_event(
+                    eid="e2ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                     features=[
                         gen.feature({"label": "serendipitous"}, fv=("f", "1")),
                         gen.feature({"label": ""}, fv=("f", "1")),
                     ],
                 ),
                 gen.binary_event(
-                    eid="e3",
+                    eid="e3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                     features=[
                         gen.feature({"label": "serendipitous"}, fv=("f", "1")),
                         gen.feature({"label": ""}, fv=("f", "2")),
@@ -119,7 +143,7 @@ class TestBinary(integration_test.BaseRestapi):
                 ),
             ]
         )
-        response = self.client.get("/v0/binaries/e1")
+        response = self.client.get("/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
         self.assertEqual(200, response.status_code)
         self.assertFormatted(
             response.json()["data"]["features"],
@@ -130,12 +154,14 @@ class TestBinary(integration_test.BaseRestapi):
                     "type": "string",
                     "label": ["serendipitous"],
                     "parts": {},
-                    "instances": ["e1.plugin.generic_plugin.sourced"],
+                    "instances": [
+                        "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.sourced"
+                    ],
                 }
             ],
         )
 
-        response = self.client.get("/v0/binaries/e2")
+        response = self.client.get("/v0/binaries/e2ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
         self.assertEqual(200, response.status_code)
         self.assertFormatted(
             response.json()["data"]["features"],
@@ -146,12 +172,14 @@ class TestBinary(integration_test.BaseRestapi):
                     "type": "string",
                     "label": ["serendipitous"],
                     "parts": {},
-                    "instances": ["e2.plugin.generic_plugin.sourced"],
+                    "instances": [
+                        "e2ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.sourced"
+                    ],
                 }
             ],
         )
 
-        response = self.client.get("/v0/binaries/e3")
+        response = self.client.get("/v0/binaries/e3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
         self.assertEqual(200, response.status_code)
         self.assertFormatted(
             response.json()["data"]["features"],
@@ -162,7 +190,9 @@ class TestBinary(integration_test.BaseRestapi):
                     "type": "string",
                     "label": ["serendipitous"],
                     "parts": {},
-                    "instances": ["e3.plugin.generic_plugin.sourced"],
+                    "instances": [
+                        "e3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.sourced"
+                    ],
                 },
                 {
                     "name": "f",
@@ -170,7 +200,9 @@ class TestBinary(integration_test.BaseRestapi):
                     "type": "string",
                     "label": [],
                     "parts": {},
-                    "instances": ["e3.plugin.generic_plugin.sourced"],
+                    "instances": [
+                        "e3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.sourced"
+                    ],
                 },
             ],
         )
@@ -199,7 +231,7 @@ class TestBinary(integration_test.BaseRestapi):
                 "children": [],
                 "instances": [
                     {
-                        "key": "e1.plugin.generic_plugin.sourced",
+                        "key": "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.sourced",
                         "author": {
                             "security": "LOW TLP:CLEAR",
                             "category": "plugin",
@@ -217,15 +249,17 @@ class TestBinary(integration_test.BaseRestapi):
                         "value": "generic_value",
                         "label": [],
                         "parts": {},
-                        "instances": ["e1.plugin.generic_plugin.sourced"],
+                        "instances": [
+                            "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.sourced"
+                        ],
                     }
                 ],
                 "streams": [
                     {
-                        "sha256": "e1",
-                        "sha512": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e1",
-                        "sha1": "00000000000000000000000000000000000000e1",
-                        "md5": "000000000000000000000000000000e1",
+                        "sha256": "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                        "sha512": "0000000000000000000000000000000000000000000000000000000000000000e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                        "sha1": "e1ffffffffffffffffffffffffffffffffffffff",
+                        "md5": "e1ffffffffffffffffffffffffffffff",
                         "ssdeep": "1:1:1",
                         "tlsh": "T10000000000000000000000000000000000000000000000000000000000000000000000",
                         "size": 1024,
@@ -235,33 +269,37 @@ class TestBinary(integration_test.BaseRestapi):
                         "magic": "ASCII text",
                         "identify_version": 1,
                         "label": ["content"],
-                        "instances": ["e1.plugin.generic_plugin.sourced"],
+                        "instances": [
+                            "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.sourced"
+                        ],
                     }
                 ],
                 "info": [],
                 "tags": [],
             },
-            "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+            "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
         }
         self.write_binary_events(
             [
-                gen.binary_event(eid="e1"),
+                gen.binary_event(eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
             ]
         )
-        response = self.client.get("/v0/binaries/e1")
+        response = self.client.get("/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
         self.assertEqual(200, response.status_code)
         self.assertFormatted(response.json(), expected)
 
-        response = self.client.get("/v0/binaries/E1")
+        response = self.client.get("/v0/binaries/E1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
         self.assertEqual(200, response.status_code)
         self.assertFormatted(response.json(), expected)
 
-        response = self.client.get("/v0/binaries/E1?features_size=1")
+        response = self.client.get(
+            "/v0/binaries/E1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff?features_size=1"
+        )
         self.assertEqual(200, response.status_code)
         self.assertFormatted(response.json(), expected)
 
         response = self.client.get("/v0/binaries/invalid1")
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(422, response.status_code)
 
     def test_basic_various_feature_types(self):
         expected = {
@@ -287,7 +325,7 @@ class TestBinary(integration_test.BaseRestapi):
                 "children": [],
                 "instances": [
                     {
-                        "key": "e1.plugin.generic_plugin.sourced",
+                        "key": "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.sourced",
                         "author": {
                             "security": "LOW TLP:CLEAR",
                             "category": "plugin",
@@ -305,7 +343,9 @@ class TestBinary(integration_test.BaseRestapi):
                         "value": "generic_value",
                         "label": [],
                         "parts": {},
-                        "instances": ["e1.plugin.generic_plugin.sourced"],
+                        "instances": [
+                            "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.sourced"
+                        ],
                     },
                     {
                         "name": "generic_feature_bad_string",
@@ -313,7 +353,9 @@ class TestBinary(integration_test.BaseRestapi):
                         "value": "1.123",
                         "label": [],
                         "parts": {},
-                        "instances": ["e1.plugin.generic_plugin.sourced"],
+                        "instances": [
+                            "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.sourced"
+                        ],
                     },
                     {
                         "name": "generic_feature_binary",
@@ -321,7 +363,9 @@ class TestBinary(integration_test.BaseRestapi):
                         "value": "generic_byte_value",
                         "label": [],
                         "parts": {"binary_string": "ޮ'\x1bׯj["},
-                        "instances": ["e1.plugin.generic_plugin.sourced"],
+                        "instances": [
+                            "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.sourced"
+                        ],
                     },
                     {
                         "name": "generic_feature_date",
@@ -329,7 +373,9 @@ class TestBinary(integration_test.BaseRestapi):
                         "value": "2000-01-01T01:01:00",
                         "label": [],
                         "parts": {"datetime": "2000-01-01T01:01:00"},
-                        "instances": ["e1.plugin.generic_plugin.sourced"],
+                        "instances": [
+                            "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.sourced"
+                        ],
                     },
                     {
                         "name": "generic_feature_float",
@@ -337,7 +383,9 @@ class TestBinary(integration_test.BaseRestapi):
                         "value": "1.123",
                         "label": [],
                         "parts": {"float": "1.123"},
-                        "instances": ["e1.plugin.generic_plugin.sourced"],
+                        "instances": [
+                            "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.sourced"
+                        ],
                     },
                     {
                         "name": "generic_feature_int",
@@ -345,15 +393,17 @@ class TestBinary(integration_test.BaseRestapi):
                         "value": "123",
                         "label": [],
                         "parts": {"integer": "123"},
-                        "instances": ["e1.plugin.generic_plugin.sourced"],
+                        "instances": [
+                            "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.sourced"
+                        ],
                     },
                 ],
                 "streams": [
                     {
-                        "sha256": "e1",
-                        "sha512": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e1",
-                        "sha1": "00000000000000000000000000000000000000e1",
-                        "md5": "000000000000000000000000000000e1",
+                        "sha256": "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                        "sha512": "0000000000000000000000000000000000000000000000000000000000000000e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                        "sha1": "e1ffffffffffffffffffffffffffffffffffffff",
+                        "md5": "e1ffffffffffffffffffffffffffffff",
                         "ssdeep": "1:1:1",
                         "tlsh": "T10000000000000000000000000000000000000000000000000000000000000000000000",
                         "size": 1024,
@@ -363,18 +413,20 @@ class TestBinary(integration_test.BaseRestapi):
                         "magic": "ASCII text",
                         "identify_version": 1,
                         "label": ["content"],
-                        "instances": ["e1.plugin.generic_plugin.sourced"],
+                        "instances": [
+                            "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.sourced"
+                        ],
                     }
                 ],
                 "info": [],
                 "tags": [],
             },
-            "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+            "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
         }
         self.write_binary_events(
             [
                 gen.binary_event(
-                    eid="e1",
+                    eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                     features=[
                         {
                             "name": "generic_feature",
@@ -410,7 +462,7 @@ class TestBinary(integration_test.BaseRestapi):
                 ),
             ]
         )
-        response = self.client.get("/v0/binaries/e1")
+        response = self.client.get("/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
         self.assertEqual(200, response.status_code)
         self.assertFormatted(response.json(), expected)
 
@@ -418,20 +470,26 @@ class TestBinary(integration_test.BaseRestapi):
         a = ("a1", "1")
         self.write_binary_events(
             [
-                gen.binary_event(eid="e1", spathl=[]),
-                gen.binary_event(eid="e10", spathl=[("e1", a)]),
-                gen.binary_event(eid="e100", spathl=[("e10", a)]),
-                gen.binary_event(eid="e2", spathl=[]),
+                gen.binary_event(eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", spathl=[]),
+                gen.binary_event(
+                    eid="e10fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    spathl=[("e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", a)],
+                ),
+                gen.binary_event(
+                    eid="e100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    spathl=[("e10fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", a)],
+                ),
+                gen.binary_event(eid="e2ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", spathl=[]),
             ]
         )
-        response = self.client.get("/v0/binaries/e1")
+        response = self.client.get("/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertFormatted(
             resp["data"]["children"],
             [
                 {
-                    "sha256": "e10",
+                    "sha256": "e10fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                     "action": "extracted",
                     "timestamp": "2021-01-01T12:00:00Z",
                     "author": {
@@ -443,12 +501,12 @@ class TestBinary(integration_test.BaseRestapi):
                     "relationship": {"random": "data", "action": "extracted", "label": "within"},
                     "file_format": "text/plain",
                     "size": 1024,
-                    "track_link": "e1.e10.plugin.generic_plugin.2021-01-01T12:00:00+00:00",
+                    "track_link": "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.e10fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.2021-01-01T12:00:00+00:00",
                 }
             ],
         )
 
-        response = self.client.get("/v0/binaries/E1")
+        response = self.client.get("/v0/binaries/E1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertFormatted(
@@ -464,10 +522,10 @@ class TestBinary(integration_test.BaseRestapi):
                     "action": "extracted",
                     "timestamp": "2021-01-01T12:00:00Z",
                     "relationship": {"random": "data", "action": "extracted", "label": "within"},
-                    "sha256": "e10",
+                    "sha256": "e10fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                     "size": 1024,
                     "file_format": "text/plain",
-                    "track_link": "e1.e10.plugin.generic_plugin.2021-01-01T12:00:00+00:00",
+                    "track_link": "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.e10fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.2021-01-01T12:00:00+00:00",
                 }
             ],
         )
@@ -478,7 +536,7 @@ class TestBinary(integration_test.BaseRestapi):
         self.write_binary_events(
             [
                 gen.binary_event(
-                    eid="ebucket1",
+                    eid="ebacfe11ffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                     sourceit=("s1", f"2000-01-{x+1:02d}T01:02:01Z"),
                     authornv=(f"a{x}", "1"),
                     fvl=[(f"f{x}", f"v{x}")],
@@ -492,12 +550,12 @@ class TestBinary(integration_test.BaseRestapi):
                     eid=f"echild{x}",
                     sourceit=("s1", f"2000-01-{x+1:02d}T01:02:01Z"),
                     authornv=("author1", "1"),
-                    spathl=[("ebucket1", ("a1", "1"))],
+                    spathl=[("ebacfe11ffffffffffffffffffffffffffffffffffffffffffffffffffffffff", ("a1", "1"))],
                 )
                 for x in range(20)
             ]
         )
-        response = self.client.get("/v0/binaries/ebucket1")
+        response = self.client.get("/v0/binaries/ebacfe11ffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
         self.assertEqual(200, response.status_code)
         self.assertEqual(len(response.json()["data"]["features"]), 20)
         self.assertEqual(len(response.json()["data"]["info"]), 20)
@@ -508,7 +566,9 @@ class TestBinary(integration_test.BaseRestapi):
         self.assertEqual(len(response.json()["data"]["children"]), 20)
 
         # BUCKET_SIZE 1
-        response = self.client.get("/v0/binaries/ebucket1?bucket_size=1")
+        response = self.client.get(
+            "/v0/binaries/ebacfe11ffffffffffffffffffffffffffffffffffffffffffffffffffffffff?bucket_size=1"
+        )
         warnings = response.json()["data"]["diagnostics"]
         # Check warnings
         self.assertFormatted(
@@ -583,7 +643,9 @@ class TestBinary(integration_test.BaseRestapi):
         self.assertEqual(len(response.json()["data"]["streams"]), 1)
 
         # BUCKET_SIZE 4
-        response = self.client.get("/v0/binaries/ebucket1?bucket_size=4")
+        response = self.client.get(
+            "/v0/binaries/ebacfe11ffffffffffffffffffffffffffffffffffffffffffffffffffffffff?bucket_size=4"
+        )
         warnings = response.json()["data"]["diagnostics"]
 
         # Check Warnings
@@ -644,15 +706,41 @@ class TestBinary(integration_test.BaseRestapi):
     def test_include_queries(self):
         self.write_binary_events(
             [
-                gen.binary_event(eid="equery", authornv=("a1", "1"), fvl=[("f1", f"v{x}") for x in range(10)]),
-                gen.binary_event(eid="equery", fvl=[("f1", "v2")]),
-                gen.binary_event(eid="equery", sourceit=("s2", "2000-01-01T01:01:01Z"), fvl=[("f1", "v3")]),
-                gen.binary_event(eid="equery", sourceit=("s1", "2000-01-01T01:01:01Z"), fvl=[("f1", "v4")]),
-                gen.binary_event(eid="equery", authornv=("a1", "1"), fvl=[("f1", "v5")]),
-                gen.binary_event(eid="equery", authornv=("a1", "1"), info={"ssdeep": None}),
-                gen.binary_event(eid="equery", authornv=("a2", "2"), info={"other": None}),
                 gen.binary_event(
-                    eid="equery",
+                    eid="eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    authornv=("a1", "1"),
+                    fvl=[("f1", f"v{x}") for x in range(10)],
+                ),
+                gen.binary_event(
+                    eid="eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff", fvl=[("f1", "v2")]
+                ),
+                gen.binary_event(
+                    eid="eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    sourceit=("s2", "2000-01-01T01:01:01Z"),
+                    fvl=[("f1", "v3")],
+                ),
+                gen.binary_event(
+                    eid="eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    sourceit=("s1", "2000-01-01T01:01:01Z"),
+                    fvl=[("f1", "v4")],
+                ),
+                gen.binary_event(
+                    eid="eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    authornv=("a1", "1"),
+                    fvl=[("f1", "v5")],
+                ),
+                gen.binary_event(
+                    eid="eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    authornv=("a1", "1"),
+                    info={"ssdeep": None},
+                ),
+                gen.binary_event(
+                    eid="eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    authornv=("a2", "2"),
+                    info={"other": None},
+                ),
+                gen.binary_event(
+                    eid="eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                     authornv=("a3", "3"),
                     info={"xyz": None},
                     datas=[gen.data({"label": azm.DataLabel.TEST})],
@@ -663,12 +751,27 @@ class TestBinary(integration_test.BaseRestapi):
         # serialization issues. (json.dumps can't serialize sets.)
         self.write_binary_events(
             [
-                gen.binary_event(eid="equery", datas=[gen.data(hash="e1"), gen.data({"label": azm.DataLabel.TEST})]),
-                gen.binary_event(eid="equery", datas=[gen.data(hash="e3")]),
-                gen.binary_event(eid="equery", authornv=("p1", "1"), datas=[gen.data({"label": azm.DataLabel.TEST})]),
+                gen.binary_event(
+                    eid="eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    datas=[
+                        gen.data(hash="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+                        gen.data({"label": azm.DataLabel.TEST}),
+                    ],
+                ),
+                gen.binary_event(
+                    eid="eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    datas=[gen.data(hash="e3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")],
+                ),
+                gen.binary_event(
+                    eid="eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    authornv=("p1", "1"),
+                    datas=[gen.data({"label": azm.DataLabel.TEST})],
+                ),
             ],
         )
-        response = self.client.get("/v0/binaries/equery?include_queries=true")
+        response = self.client.get(
+            "/v0/binaries/eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff?include_queries=true"
+        )
         self.assertEqual(response.status_code, 200)
         queries = response.json()["meta"]["queries"]
         self.assertGreater(len(queries), 3)
@@ -677,13 +780,22 @@ class TestBinary(integration_test.BaseRestapi):
         a = ("p1", "1")
         self.write_binary_events(
             [
-                gen.binary_event(eid="e1", spathl=[]),
-                gen.binary_event(eid="e10", spathl=[("e1", a)]),
-                gen.binary_event(eid="e100", spathl=[("e1", a), ("e10", a)]),
+                gen.binary_event(eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", spathl=[]),
+                gen.binary_event(
+                    eid="e10fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    spathl=[("e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", a)],
+                ),
+                gen.binary_event(
+                    eid="e100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    spathl=[
+                        ("e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", a),
+                        ("e10fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", a),
+                    ],
+                ),
             ]
         )
 
-        response = self.client.get("/v0/binaries/e10")
+        response = self.client.get("/v0/binaries/e10fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
         self.assertEqual(200, response.status_code)
         self.assertFormatted(
             response.json(),
@@ -708,7 +820,7 @@ class TestBinary(integration_test.BaseRestapi):
                     ],
                     "parents": [
                         {
-                            "sha256": "e1",
+                            "sha256": "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                             "action": "extracted",
                             "timestamp": "2021-01-01T12:00:00Z",
                             "author": {
@@ -720,12 +832,12 @@ class TestBinary(integration_test.BaseRestapi):
                             "relationship": {"random": "data", "action": "extracted", "label": "within"},
                             "file_format": "text/plain",
                             "size": 1024,
-                            "track_link": "e1.e10.plugin.generic_plugin.2021-01-01T12:00:00+00:00",
+                            "track_link": "e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.e10fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.2021-01-01T12:00:00+00:00",
                         }
                     ],
                     "children": [
                         {
-                            "sha256": "e100",
+                            "sha256": "e100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                             "action": "extracted",
                             "timestamp": "2021-01-01T12:00:00Z",
                             "author": {
@@ -737,12 +849,12 @@ class TestBinary(integration_test.BaseRestapi):
                             "relationship": {"random": "data", "action": "extracted", "label": "within"},
                             "file_format": "text/plain",
                             "size": 1024,
-                            "track_link": "e10.e100.plugin.generic_plugin.2021-01-01T12:00:00+00:00",
+                            "track_link": "e10fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.e100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.2021-01-01T12:00:00+00:00",
                         }
                     ],
                     "instances": [
                         {
-                            "key": "e10.plugin.generic_plugin.extracted",
+                            "key": "e10fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.extracted",
                             "author": {
                                 "security": "LOW TLP:CLEAR",
                                 "category": "plugin",
@@ -760,15 +872,17 @@ class TestBinary(integration_test.BaseRestapi):
                             "value": "generic_value",
                             "label": [],
                             "parts": {},
-                            "instances": ["e10.plugin.generic_plugin.extracted"],
+                            "instances": [
+                                "e10fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.extracted"
+                            ],
                         }
                     ],
                     "streams": [
                         {
-                            "sha256": "e10",
-                            "sha512": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e10",
-                            "sha1": "0000000000000000000000000000000000000e10",
-                            "md5": "00000000000000000000000000000e10",
+                            "sha256": "e10fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                            "sha512": "0000000000000000000000000000000000000000000000000000000000000000e10fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                            "sha1": "e10fffffffffffffffffffffffffffffffffffff",
+                            "md5": "e10fffffffffffffffffffffffffffff",
                             "ssdeep": "1:1:1",
                             "tlsh": "T10000000000000000000000000000000000000000000000000000000000000000000000",
                             "size": 1024,
@@ -778,13 +892,15 @@ class TestBinary(integration_test.BaseRestapi):
                             "magic": "ASCII text",
                             "identify_version": 1,
                             "label": ["content"],
-                            "instances": ["e10.plugin.generic_plugin.extracted"],
+                            "instances": [
+                                "e10fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.generic_plugin.extracted"
+                            ],
                         }
                     ],
                     "info": [],
                     "tags": [],
                 },
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
             },
         )
 
@@ -792,22 +908,29 @@ class TestBinary(integration_test.BaseRestapi):
         self.write_binary_events(
             [
                 gen.binary_event(
-                    eid="equery",
+                    eid="eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                     authornv=("a1", "1"),
                     fvl=[("f1", f"v{x}") for x in range(10)],
                     info={"ssdeep": None},
-                    datas=[gen.data(hash="e3")],
+                    datas=[gen.data(hash="e3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")],
                 ),
                 gen.binary_event(
-                    eid="equery",
+                    eid="eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                     authornv=("a3", "1"),
                     sourceit=("s2", "2000-01-01T01:01:01Z"),
                     fvl=[("f5", "v3")],
                     info={"other": None},
                     spathl=[("eparent", ("me", "1"))],
-                    datas=[gen.data({"label": azm.DataLabel.TEST}), gen.data(hash="e3")],
+                    datas=[
+                        gen.data({"label": azm.DataLabel.TEST}),
+                        gen.data(hash="e3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+                    ],
                 ),
-                gen.binary_event(eid="echild", authornv=("a10", "1"), spathl=[("equery", ("me", "1"))]),
+                gen.binary_event(
+                    eid="echild",
+                    authornv=("a10", "1"),
+                    spathl=[("eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff", ("me", "1"))],
+                ),
                 gen.binary_event(eid="eparent", authornv=("a11", "1")),
             ]
         )
@@ -818,13 +941,13 @@ class TestBinary(integration_test.BaseRestapi):
         )
         self.write_entity_tags(
             [
-                gen.entity_tag(eid="equery", tag="t1"),
-                gen.entity_tag(eid="equery", tag="t2"),
+                gen.entity_tag(eid="eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff", tag="t1"),
+                gen.entity_tag(eid="eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff", tag="t2"),
             ]
         )
 
         # get overall info to compare with results of each item
-        response = self.client.get("/v0/binaries/equery")
+        response = self.client.get("/v0/binaries/eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
         self.assertEqual(response.status_code, 200)
         self.assertFormatted(
             response.json(),
@@ -874,7 +997,7 @@ class TestBinary(integration_test.BaseRestapi):
                             "relationship": {"random": "data", "action": "extracted", "label": "within"},
                             "file_format": "text/plain",
                             "size": 1024,
-                            "track_link": "eparent.equery.plugin.a3.1",
+                            "track_link": "eparent.eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.a3.1",
                         }
                     ],
                     "children": [
@@ -891,12 +1014,12 @@ class TestBinary(integration_test.BaseRestapi):
                             "relationship": {"random": "data", "action": "extracted", "label": "within"},
                             "file_format": "text/plain",
                             "size": 1024,
-                            "track_link": "equery.echild.plugin.a10.1",
+                            "track_link": "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.echild.plugin.a10.1",
                         }
                     ],
                     "instances": [
                         {
-                            "key": "equery.plugin.a1.sourced",
+                            "key": "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.a1.sourced",
                             "author": {
                                 "security": "LOW TLP:CLEAR",
                                 "category": "plugin",
@@ -907,7 +1030,7 @@ class TestBinary(integration_test.BaseRestapi):
                             "num_feature_values": 10,
                         },
                         {
-                            "key": "equery.plugin.a3.extracted",
+                            "key": "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.a3.extracted",
                             "author": {
                                 "security": "LOW TLP:CLEAR",
                                 "category": "plugin",
@@ -925,7 +1048,9 @@ class TestBinary(integration_test.BaseRestapi):
                             "value": "v0",
                             "label": [],
                             "parts": {},
-                            "instances": ["equery.plugin.a1.sourced"],
+                            "instances": [
+                                "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.a1.sourced"
+                            ],
                         },
                         {
                             "name": "f1",
@@ -933,7 +1058,9 @@ class TestBinary(integration_test.BaseRestapi):
                             "value": "v1",
                             "label": [],
                             "parts": {},
-                            "instances": ["equery.plugin.a1.sourced"],
+                            "instances": [
+                                "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.a1.sourced"
+                            ],
                             "tags": [
                                 {
                                     "feature_name": "f1",
@@ -952,7 +1079,9 @@ class TestBinary(integration_test.BaseRestapi):
                             "value": "v2",
                             "label": [],
                             "parts": {},
-                            "instances": ["equery.plugin.a1.sourced"],
+                            "instances": [
+                                "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.a1.sourced"
+                            ],
                         },
                         {
                             "name": "f1",
@@ -960,7 +1089,9 @@ class TestBinary(integration_test.BaseRestapi):
                             "value": "v3",
                             "label": [],
                             "parts": {},
-                            "instances": ["equery.plugin.a1.sourced"],
+                            "instances": [
+                                "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.a1.sourced"
+                            ],
                         },
                         {
                             "name": "f1",
@@ -968,7 +1099,9 @@ class TestBinary(integration_test.BaseRestapi):
                             "value": "v4",
                             "label": [],
                             "parts": {},
-                            "instances": ["equery.plugin.a1.sourced"],
+                            "instances": [
+                                "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.a1.sourced"
+                            ],
                         },
                         {
                             "name": "f1",
@@ -976,7 +1109,9 @@ class TestBinary(integration_test.BaseRestapi):
                             "value": "v5",
                             "label": [],
                             "parts": {},
-                            "instances": ["equery.plugin.a1.sourced"],
+                            "instances": [
+                                "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.a1.sourced"
+                            ],
                         },
                         {
                             "name": "f1",
@@ -984,7 +1119,9 @@ class TestBinary(integration_test.BaseRestapi):
                             "value": "v6",
                             "label": [],
                             "parts": {},
-                            "instances": ["equery.plugin.a1.sourced"],
+                            "instances": [
+                                "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.a1.sourced"
+                            ],
                         },
                         {
                             "name": "f1",
@@ -992,7 +1129,9 @@ class TestBinary(integration_test.BaseRestapi):
                             "value": "v7",
                             "label": [],
                             "parts": {},
-                            "instances": ["equery.plugin.a1.sourced"],
+                            "instances": [
+                                "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.a1.sourced"
+                            ],
                         },
                         {
                             "name": "f1",
@@ -1000,7 +1139,9 @@ class TestBinary(integration_test.BaseRestapi):
                             "value": "v8",
                             "label": [],
                             "parts": {},
-                            "instances": ["equery.plugin.a1.sourced"],
+                            "instances": [
+                                "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.a1.sourced"
+                            ],
                         },
                         {
                             "name": "f1",
@@ -1008,7 +1149,9 @@ class TestBinary(integration_test.BaseRestapi):
                             "value": "v9",
                             "label": [],
                             "parts": {},
-                            "instances": ["equery.plugin.a1.sourced"],
+                            "instances": [
+                                "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.a1.sourced"
+                            ],
                         },
                         {
                             "name": "f5",
@@ -1016,15 +1159,17 @@ class TestBinary(integration_test.BaseRestapi):
                             "value": "v3",
                             "label": [],
                             "parts": {},
-                            "instances": ["equery.plugin.a3.extracted"],
+                            "instances": [
+                                "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.a3.extracted"
+                            ],
                         },
                     ],
                     "streams": [
                         {
-                            "sha256": "e3",
-                            "sha512": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e3",
-                            "sha1": "00000000000000000000000000000000000000e3",
-                            "md5": "000000000000000000000000000000e3",
+                            "sha256": "e3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                            "sha512": "0000000000000000000000000000000000000000000000000000000000000000e3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                            "sha1": "e3ffffffffffffffffffffffffffffffffffffff",
+                            "md5": "e3ffffffffffffffffffffffffffffff",
                             "ssdeep": "1:1:1",
                             "tlsh": "T10000000000000000000000000000000000000000000000000000000000000000000000",
                             "size": 1024,
@@ -1034,7 +1179,10 @@ class TestBinary(integration_test.BaseRestapi):
                             "magic": "ASCII text",
                             "identify_version": 1,
                             "label": ["content"],
-                            "instances": ["equery.plugin.a1.sourced", "equery.plugin.a3.extracted"],
+                            "instances": [
+                                "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.a1.sourced",
+                                "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.a3.extracted",
+                            ],
                         },
                         {
                             "sha256": "00000000000000000000000000000000000000000000000000000000000000ab",
@@ -1050,16 +1198,24 @@ class TestBinary(integration_test.BaseRestapi):
                             "magic": "ASCII text",
                             "identify_version": 1,
                             "label": ["test"],
-                            "instances": ["equery.plugin.a3.extracted"],
+                            "instances": [
+                                "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.a3.extracted"
+                            ],
                         },
                     ],
                     "info": [
-                        {"info": {"ssdeep": None}, "instance": "equery.plugin.a1.sourced"},
-                        {"info": {"other": None}, "instance": "equery.plugin.a3.extracted"},
+                        {
+                            "info": {"ssdeep": None},
+                            "instance": "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.a1.sourced",
+                        },
+                        {
+                            "info": {"other": None},
+                            "instance": "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.a3.extracted",
+                        },
                     ],
                     "tags": [
                         {
-                            "sha256": "equery",
+                            "sha256": "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                             "tag": "t1",
                             "type": "entity_tag",
                             "owner": "generic_owner",
@@ -1068,7 +1224,7 @@ class TestBinary(integration_test.BaseRestapi):
                             "num_entities": 1,
                         },
                         {
-                            "sha256": "equery",
+                            "sha256": "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                             "tag": "t2",
                             "type": "entity_tag",
                             "owner": "generic_owner",
@@ -1078,52 +1234,62 @@ class TestBinary(integration_test.BaseRestapi):
                         },
                     ],
                 },
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
             },
         )
         expected = response.json()["data"]
 
-        response = self.client.get("/v0/binaries/equery?detail=total_hits")
+        response = self.client.get(
+            "/v0/binaries/eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff?detail=total_hits"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertFormatted(
             response.json(),
             {
                 "data": {"documents": {"count": expected["documents"]["count"]}},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
             },
         )
 
-        response = self.client.get("/v0/binaries/equery?detail=documents")
+        response = self.client.get(
+            "/v0/binaries/eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff?detail=documents"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertFormatted(
             response.json(),
             {
                 "data": {"documents": expected["documents"]},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
             },
         )
 
-        response = self.client.get("/v0/binaries/equery?detail=security")
+        response = self.client.get(
+            "/v0/binaries/eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff?detail=security"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertFormatted(
             response.json(),
             {
                 "data": {"documents": {"count": expected["documents"]["count"]}, "security": expected["security"]},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
             },
         )
 
-        response = self.client.get("/v0/binaries/equery?detail=sources")
+        response = self.client.get(
+            "/v0/binaries/eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff?detail=sources"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertFormatted(
             response.json(),
             {
                 "data": {"documents": {"count": expected["documents"]["count"]}, "sources": expected["sources"]},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
             },
         )
 
-        response = self.client.get("/v0/binaries/equery?detail=features")
+        response = self.client.get(
+            "/v0/binaries/eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff?detail=features"
+        )
         expected_features = copy.deepcopy(expected["features"])
         for x in expected_features:
             x.pop("tags", None)
@@ -1132,11 +1298,13 @@ class TestBinary(integration_test.BaseRestapi):
             response.json(),
             {
                 "data": {"documents": {"count": expected["documents"]["count"]}, "features": expected_features},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
             },
         )
 
-        response = self.client.get("/v0/binaries/equery?detail=info")
+        response = self.client.get(
+            "/v0/binaries/eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff?detail=info"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertFormatted(
             response.json(),
@@ -1145,67 +1313,79 @@ class TestBinary(integration_test.BaseRestapi):
                     "documents": {"count": expected["documents"]["count"]},
                     "info": expected["info"],
                 },
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
             },
         )
 
-        response = self.client.get("/v0/binaries/equery?detail=datastreams")
+        response = self.client.get(
+            "/v0/binaries/eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff?detail=datastreams"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertFormatted(
             response.json(),
             {
                 "data": {"documents": {"count": expected["documents"]["count"]}, "streams": expected["streams"]},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
             },
         )
 
-        response = self.client.get("/v0/binaries/equery?detail=instances")
+        response = self.client.get(
+            "/v0/binaries/eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff?detail=instances"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertFormatted(
             response.json(),
             {
                 "data": {"documents": {"count": expected["documents"]["count"]}, "instances": expected["instances"]},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
             },
         )
 
-        response = self.client.get("/v0/binaries/equery?detail=parents")
+        response = self.client.get(
+            "/v0/binaries/eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff?detail=parents"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertFormatted(
             response.json(),
             {
                 "data": {"documents": {"count": expected["documents"]["count"]}, "parents": expected["parents"]},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
             },
         )
 
-        response = self.client.get("/v0/binaries/equery?detail=children")
+        response = self.client.get(
+            "/v0/binaries/eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff?detail=children"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertFormatted(
             response.json(),
             {
                 "data": {"documents": {"count": expected["documents"]["count"]}, "children": expected["children"]},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
             },
         )
 
-        response = self.client.get("/v0/binaries/equery?detail=tags")
+        response = self.client.get(
+            "/v0/binaries/eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff?detail=tags"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertFormatted(
             response.json(),
             {
                 "data": {"documents": {"count": expected["documents"]["count"]}, "tags": expected["tags"]},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
             },
         )
 
-        response = self.client.get("/v0/binaries/equery?detail=feature_tags")
+        response = self.client.get(
+            "/v0/binaries/eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff?detail=feature_tags"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertFormatted(
             response.json(),
             {
                 "data": {"documents": {"count": expected["documents"]["count"]}, "features": expected["features"]},
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
             },
         )
 
@@ -1213,7 +1393,7 @@ class TestBinary(integration_test.BaseRestapi):
         self.write_binary_events(
             [
                 gen.binary_event(
-                    eid="equery",
+                    eid="eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                     authornv=("entropy", "1"),
                     info={"entropy": {"idk": True, "blocks": [1, 2, 8, 4, 5, 6, 7]}},
                 ),
@@ -1221,7 +1401,9 @@ class TestBinary(integration_test.BaseRestapi):
         )
 
         # test reading for specific author
-        response = self.client.get("/v0/binaries/equery?author=entropy")
+        response = self.client.get(
+            "/v0/binaries/eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff?author=entropy"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertFormatted(
             response.json(),
@@ -1259,12 +1441,12 @@ class TestBinary(integration_test.BaseRestapi):
                             "relationship": {"random": "data", "action": "extracted", "label": "within"},
                             "file_format": "text/plain",
                             "size": 1024,
-                            "track_link": "equery.echild.plugin.a10.1",
+                            "track_link": "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.echild.plugin.a10.1",
                         }
                     ],
                     "instances": [
                         {
-                            "key": "equery.plugin.entropy.sourced",
+                            "key": "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.entropy.sourced",
                             "author": {
                                 "security": "LOW TLP:CLEAR",
                                 "category": "plugin",
@@ -1282,15 +1464,17 @@ class TestBinary(integration_test.BaseRestapi):
                             "value": "generic_value",
                             "label": [],
                             "parts": {},
-                            "instances": ["equery.plugin.entropy.sourced"],
+                            "instances": [
+                                "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.entropy.sourced"
+                            ],
                         }
                     ],
                     "streams": [
                         {
-                            "sha256": "equery",
-                            "sha512": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000equery",
-                            "sha1": "0000000000000000000000000000000000equery",
-                            "md5": "00000000000000000000000000equery",
+                            "sha256": "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                            "sha512": "0000000000000000000000000000000000000000000000000000000000000000eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                            "sha1": "eeeeeeefffffffffffffffffffffffffffffffff",
+                            "md5": "eeeeeeefffffffffffffffffffffffff",
                             "ssdeep": "1:1:1",
                             "tlsh": "T10000000000000000000000000000000000000000000000000000000000000000000000",
                             "size": 1024,
@@ -1300,18 +1484,20 @@ class TestBinary(integration_test.BaseRestapi):
                             "magic": "ASCII text",
                             "identify_version": 1,
                             "label": ["content"],
-                            "instances": ["equery.plugin.entropy.sourced"],
+                            "instances": [
+                                "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.entropy.sourced"
+                            ],
                         }
                     ],
                     "info": [
                         {
                             "info": {"entropy": {"idk": True, "blocks": [1, 2, 8, 4, 5, 6, 7]}},
-                            "instance": "equery.plugin.entropy.sourced",
+                            "instance": "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.entropy.sourced",
                         }
                     ],
                     "tags": [
                         {
-                            "sha256": "equery",
+                            "sha256": "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                             "tag": "t1",
                             "type": "entity_tag",
                             "owner": "generic_owner",
@@ -1320,7 +1506,7 @@ class TestBinary(integration_test.BaseRestapi):
                             "num_entities": 1,
                         },
                         {
-                            "sha256": "equery",
+                            "sha256": "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                             "tag": "t2",
                             "type": "entity_tag",
                             "owner": "generic_owner",
@@ -1330,12 +1516,14 @@ class TestBinary(integration_test.BaseRestapi):
                         },
                     ],
                 },
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
             },
         )
 
         # test reading info for specific author
-        response = self.client.get("/v0/binaries/equery?detail=info&author=entropy")
+        response = self.client.get(
+            "/v0/binaries/eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff?detail=info&author=entropy"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertFormatted(
             response.json(),
@@ -1345,10 +1533,10 @@ class TestBinary(integration_test.BaseRestapi):
                     "info": [
                         {
                             "info": {"entropy": {"idk": True, "blocks": [1, 2, 8, 4, 5, 6, 7]}},
-                            "instance": "equery.plugin.entropy.sourced",
+                            "instance": "eeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffff.plugin.entropy.sourced",
                         }
                     ],
                 },
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
             },
         )
