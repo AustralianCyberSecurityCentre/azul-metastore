@@ -416,7 +416,9 @@ async def get_strings(
     filter: str | None = Query(None, description="Case-insensitive search string to filter strings with"),
     regex: str | None = Query(None, description="Regex pattern to search strings with"),
     ctx: context.Context = Depends(qr.ctx),
-    file_format: str | None = Query(None, description="Optional file type for AI string filter."),
+    file_format: str | None = Query(
+        None, description="File type for AI string filter (required if using the ai filter)."
+    ),
 ) -> bedr_binaries_data.BinaryStrings:
     """Return strings found in the binary.
 
@@ -436,7 +438,7 @@ async def get_strings(
     s = settings.get()
 
     is_ai_filtering = False
-    if file_format is not None and s.smart_string_filter_url:
+    if file_format and s.smart_string_filter_url:
         logger.info("eligible string filter is online")
         is_ai_filtering = True
 
@@ -469,7 +471,7 @@ async def get_strings(
     # timeout field for if ai string filter takes too long to process
     time_out = False
 
-    if file_format is not None and s.smart_string_filter_url:
+    if file_format and s.smart_string_filter_url:
         while True:
             last_processed_offset = 0
             batch_size = 2000
@@ -484,8 +486,7 @@ async def get_strings(
                     batch = search.strings[i : i + current_batch_size]  # Slice the list into batches
                     # call the AI string filter pod
                     response = string_filter.call_string_filter(file_format, batch, s.smart_string_filter_url)
-                    if response is not None:
-                        ai_filtered_strings.extend(response.json())
+                    ai_filtered_strings.extend(response)
                     safe_index = i + min(batch_size, len(search.strings) - i) - 1
                     last_processed_offset = search.strings[safe_index].offset
                     if len(ai_filtered_strings) >= MAX_STRINGS_TO_FIND:
@@ -497,6 +498,12 @@ async def get_strings(
                     qr.set_security_headers(ctx, resp, ex=e)
                     raise
             next_offset = 0
+
+            # Need to verify there are any search.strings before attempting to check for offset so this occurs first.
+            if len(search.strings) == 0:
+                search.has_more = False
+                search.next_offset = next_offset
+                break
 
             if last_processed_offset < search.strings[-1].offset:
                 has_more = True
@@ -524,9 +531,6 @@ async def get_strings(
 
             # Updating search.strings with filtered results
             search.strings = string_filter.filter_search_results(search.strings, ai_filtered_strings)
-
-            if len(search.strings) == 0:
-                break
 
             search.has_more = has_more
             search.next_offset = next_offset

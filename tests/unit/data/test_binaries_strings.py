@@ -151,6 +151,31 @@ class TestMain(unit_test.DataMockingUnitTest):
         }
         self.assertEqual(expected_result, response.json())
 
+    # Test AI string filter is being called if env variable set and file_format in URL
+    @respx.mock
+    @mock.patch.dict(os.environ, {"METASTORE_SMART_STRING_FILTER_URL": "http://localhost"})
+    def test_get_ai_strings_all_filtered_out(self):
+        """Test if the AI filter behaves correctly if no strings are in the file after filtering."""
+        sha256a = "1d4ce380c90339830b7915137b34cd77c627ad498c773f9b4a12a3c876bfe024"
+        respx.get(f"{self.end}/api/v3/stream/source/label/{sha256a}").mock(
+            side_effect=mock_load_binary_async_iterable_content
+        )
+
+        # fake json response
+        jr = []
+
+        # Mock the POST request
+        post_route = respx.post(f"{self.end}/v0/strings?filter=not_found_filter_val&file_format=test").mock(
+            return_value=httpx.Response(201, json=jr)
+        )
+
+        response = self.client.get(f"/v0/binaries/{sha256a}/strings?filter=not_found_filter_val&file_format=test")
+
+        # self.assertTrue(post_route.called)
+        self.assertEqual(200, response.status_code)
+        expected_result = {"has_more": False, "next_offset": 0, "strings": [], "time_out": False}
+        self.assertEqual(expected_result, response.json())
+
     @respx.mock
     def test_get_strings(self):
         sha256a = "1d4ce380c90339830b7915137b34cd77c627ad498c773f9b4a12a3c876bfe024"

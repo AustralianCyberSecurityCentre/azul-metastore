@@ -4,6 +4,7 @@ import logging
 
 import httpx
 from azul_bedrock import models_restapi
+from azul_bedrock.exceptions import ApiException
 
 logger = logging.getLogger(__name__)
 
@@ -13,11 +14,22 @@ def call_string_filter(
 ) -> list[dict[str, int]]:
     """Call the AI string filter."""
     base_url = f"{filter_url}/v0/strings?file_format={file_format}"
-    strings = extract_string_and_offset(strings)
+    modified_strings = extract_string_and_offset(strings)
     logger.debug("calling ai string filter with URL %s", base_url)
-    response = httpx.post(base_url, json=strings, timeout=30)
+    response = httpx.post(base_url, json=modified_strings, timeout=30)
 
-    return response
+    if response.is_error:
+        error_message = f"AI filter failed with error: {response.content}"
+        logger.warning(error_message)
+        raise ApiException(
+            status_code=response.status_code,
+            ref=error_message,
+            internal="string_filter_error",
+        )
+
+    if response is not None:
+        return response.json()
+    return []
 
 
 def extract_string_and_offset(searchResult: list[models_restapi.SearchResult]) -> list[dict[str, int]]:
