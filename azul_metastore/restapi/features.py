@@ -145,7 +145,7 @@ def create_feature_value_tag(
             ref="security was not valid",
             external=f"security was not valid ({security})",
             internal="upload_bad_security",
-        )
+        ) from None
 
     tag = dict(
         security=security,
@@ -174,7 +174,7 @@ def delete_feature_value_tag(
     except FileNotFoundError:
         e = HTTPException(status_code=404)
         qr.set_security_headers(ctx, resp, ex=e)
-        raise e
+        raise e from None
 
 
 @router.get("/v0/features", response_model=qr.gr(bedr_features.Features), **qr.kw)

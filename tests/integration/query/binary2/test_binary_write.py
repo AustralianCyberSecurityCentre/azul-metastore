@@ -5,7 +5,6 @@ from tests.support import gen, integration_test
 
 
 class TestSearchEntity(integration_test.DynamicTestCase):
-
     def test_legacy_relationship_none(self):
         # test edge case from older things
         tmp = gen.binary_event(eid="e1", authornv=("a1", "1"))

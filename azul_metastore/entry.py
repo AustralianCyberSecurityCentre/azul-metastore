@@ -134,7 +134,6 @@ def apply_opensearch_config(print_only: bool, rolesmapping: bool, no_input: bool
 
         while not selected:
             try:
-
                 int_val = click.prompt(
                     text="For auth please select" + f" from the following options (enter the number) {options}",
                     type=int,
@@ -143,7 +142,7 @@ def apply_opensearch_config(print_only: bool, rolesmapping: bool, no_input: bool
             except Exception:
                 click.echo(
                     f"Provided input option was invalid '{int_val}' is not a"
-                    + f" valid option must be one of {", ".join([str(x.value) for x in AuthOptions])}."
+                    + f" valid option must be one of {', '.join([str(x.value) for x in AuthOptions])}."
                 )
 
         credentials = None

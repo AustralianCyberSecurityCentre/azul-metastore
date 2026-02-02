@@ -26,9 +26,9 @@ def credentials_to_access(c: dict) -> dict:
         elif format == "jwt":
             access["headers"] = {"Authorization": c["token"]}
         elif format == "oauth":
-            access["headers"] = {"Authorization": f'Bearer {c["token"]}'}
+            access["headers"] = {"Authorization": f"Bearer {c['token']}"}
         else:
-            raise BadCredentialsException(f'unrecognised credential format: {c["format"]}')
+            raise BadCredentialsException(f"unrecognised credential format: {c['format']}")
     except KeyError as e:
         raise BadCredentialsException(f"missing/bad parameter: {str(e)}") from e
 
@@ -86,4 +86,8 @@ class SearchData:
 
 def get_writer_search_data() -> SearchData:
     """Return search data for writer user."""
-    return SearchData(credentials=settings.get_writer_creds(), security_exclude=[], security_include=[])
+    return SearchData(
+        credentials=settings.get_writer_creds(),
+        security_exclude=[],
+        security_include=[],
+    )

@@ -22,7 +22,9 @@ from azul_metastore.common.query_info import IngestError
 
 prom_ingest = Counter("azul_ingest", "Ingestion events for Azul metadata", ["type", "status", "plugin"])
 prom_duplicates = Counter(
-    "azul_ingest_duplicates", "Number of dropped duplicate ingestion events for Azul metadata", ["type", "plugin"]
+    "azul_ingest_duplicates",
+    "Number of dropped duplicate ingestion events for Azul metadata",
+    ["type", "plugin"],
 )
 logger = logging.getLogger(__name__)
 
@@ -99,7 +101,9 @@ def chunker(iterator: list, max_items: int = 100) -> Iterable[list]:
 def capture_write_stats(format: str):
     """Capture stats about event creation."""
 
-    def _capture_write_stats(func: Callable[[], tuple[list[IngestError], list[azm.BaseEvent]]]):
+    def _capture_write_stats(
+        func: Callable[[], tuple[list[IngestError], list[azm.BaseEvent]]],
+    ):
         def _stats_inner(ctx, docs, *args, **kwargs) -> tuple[int, int]:
             bad_docs, duplicate_docs = func(ctx, docs, *args, **kwargs)
 
@@ -127,7 +131,9 @@ def capture_write_stats(format: str):
                     )
                     # record failure in prometheus
                     prom_ingest.labels(
-                        type=format, status=err.error_type, plugin=info.get("author", {}).get("name", "unknown")
+                        type=format,
+                        status=err.error_type,
+                        plugin=info.get("author", {}).get("name", "unknown"),
                     ).inc()
                 except Exception as e:
                     logger.error(

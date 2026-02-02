@@ -157,7 +157,6 @@ def find_all_parents(
     appear or disappear. For this reason, paging backwards to previous keys may provide different results.
     """
     try:
-
         data = binary_find_paginate.find_all_family_binaries(
             ctx,
             family_sha256,
@@ -188,7 +187,6 @@ def find_all_children(
     appear or disappear. For this reason, paging backwards to previous keys may provide different results.
     """
     try:
-
         data = binary_find_paginate.find_all_family_binaries(
             ctx,
             family_sha256,
@@ -375,7 +373,7 @@ def create_tag_on_binary(
             status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref="Must provide valid security string.",
             internal="invalid_security_string",
-        )
+        ) from None
     except SecurityAccessException as e:
         raise ApiException(
             status_code=HTTP_422_UNPROCESSABLE_CONTENT,
@@ -397,7 +395,7 @@ def create_tag_on_binary(
     try:
         annotation.create_binary_tags(qr.writer, ctx.user_info.username, [tag])
     except InvalidAnnotation as e:
-        raise HTTPException(status_code=400, detail=repr(e))
+        raise HTTPException(status_code=400, detail=repr(e)) from None
 
 
 @router.delete("/v0/binaries/{sha256}/tags/{tag}", response_model=qr.gr(bedr_binaries.AnnotationUpdated), **qr.kw)
@@ -412,7 +410,7 @@ def delete_tag_on_binary(
     try:
         data = annotation.delete_binary_tag(qr.writer, sha256, tag)
     except FileNotFoundError:
-        raise HTTPException(status_code=404)
+        raise HTTPException(status_code=404) from None
     finally:
         qr.set_security_headers(ctx, resp)
 

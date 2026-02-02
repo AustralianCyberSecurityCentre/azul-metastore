@@ -5,7 +5,6 @@ from tests.support import integration_test as etb
 
 
 class TestEntityGroups(etb.DynamicTestCase):
-
     def test_access(self):
         self.write_binary_events(
             [

@@ -53,7 +53,7 @@ def _get_subctx(user_info: UserInfo, security_exclude: list[str], security_inclu
     try:
         ctx.get_user_access()
     except SecurityAccessException as e:
-        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail=str(e))
+        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail=str(e)) from None
     return ctx
 
 

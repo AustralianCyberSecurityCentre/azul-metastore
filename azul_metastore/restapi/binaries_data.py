@@ -432,7 +432,7 @@ async def get_strings(
         if regex is not None:
             exported_regex = re.compile(regex)
     except Exception:
-        raise ApiException(status_code=HTTP_400_BAD_REQUEST, ref="Invalid regex pattern", internal="")
+        raise ApiException(status_code=HTTP_400_BAD_REQUEST, ref="Invalid regex pattern", internal="") from None
 
     # If AI string filter is enabled; call it to add file type labels to strings
     s = settings.get()
@@ -583,7 +583,7 @@ async def search_hex(
         try:
             filter_bytes = bytes(bytearray.fromhex(filter))
         except Exception:
-            raise ApiException(status_code=HTTP_400_BAD_REQUEST, ref="Invalid hex pattern", internal="")
+            raise ApiException(status_code=HTTP_400_BAD_REQUEST, ref="Invalid hex pattern", internal="") from None
 
         return await data_hex.get_hex_hits(data_stream, current_offset, take_n_hits, filter_bytes)
 

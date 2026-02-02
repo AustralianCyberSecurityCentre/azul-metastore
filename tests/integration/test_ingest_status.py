@@ -10,7 +10,6 @@ from tests.support import gen, integration_test
 @mock.patch("azul_metastore.ingestor.BaseIngestor.is_done")
 @mock.patch("azul_metastore.ingestor.BaseIngestor.get_data")
 class TestIngestor(integration_test.DynamicTestCase):
-
     def test_status(self, _get_data, _done):
         tmp = _get_data.return_value = [
             gen.status(eid="e1", authorsec=gen.g1_1),

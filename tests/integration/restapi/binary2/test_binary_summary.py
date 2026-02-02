@@ -537,7 +537,7 @@ class TestBinary(integration_test.BaseRestapi):
             [
                 gen.binary_event(
                     eid="ebacfe11ffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-                    sourceit=("s1", f"2000-01-{x+1:02d}T01:02:01Z"),
+                    sourceit=("s1", f"2000-01-{x + 1:02d}T01:02:01Z"),
                     authornv=(f"a{x}", "1"),
                     fvl=[(f"f{x}", f"v{x}")],
                     info={f"ssdeep{x}": None},
@@ -548,7 +548,7 @@ class TestBinary(integration_test.BaseRestapi):
             + [
                 gen.binary_event(
                     eid=f"echild{x}",
-                    sourceit=("s1", f"2000-01-{x+1:02d}T01:02:01Z"),
+                    sourceit=("s1", f"2000-01-{x + 1:02d}T01:02:01Z"),
                     authornv=("author1", "1"),
                     spathl=[("ebacfe11ffffffffffffffffffffffffffffffffffffffffffffffffffffffff", ("a1", "1"))],
                 )

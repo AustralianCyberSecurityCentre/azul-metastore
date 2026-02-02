@@ -5,7 +5,6 @@ from tests.support import gen, integration_test
 
 
 class TestStream(integration_test.DynamicTestCase):
-
     def test_find(self):
         self.write_binary_events([gen.binary_event(eid="e1")])
 

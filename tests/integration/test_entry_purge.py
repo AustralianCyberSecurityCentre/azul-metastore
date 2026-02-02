@@ -100,7 +100,6 @@ class TestDelete(integration_test.DynamicTestCase):
         self.assertEqual(2, self.count_binary_events("e4"))
 
     def test_link(self):
-
         evs = [
             gen.binary_event(eid="e2", authoru="apple"),
             gen.binary_event(eid="e1", authoru="apple"),

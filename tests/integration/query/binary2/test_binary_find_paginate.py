@@ -3,7 +3,6 @@ from tests.support import gen, integration_test
 
 
 class TestEntityFind(integration_test.DynamicTestCase):
-
     def test_read_entities_quick(self):
         self.write_binary_events(
             [gen.binary_event(eid=f"e{x}", authornv=("a1", "1"), fvl=[("f1", "v1")]) for x in range(100)]

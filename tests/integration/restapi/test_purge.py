@@ -4,7 +4,6 @@ from tests.support import gen, integration_test
 
 
 class TestPlugins(integration_test.BaseRestapi):
-
     def tearDown(self):
         # Ensure header modifications (like added writer user don't live on past the test they're declared in)
         self.client.headers.clear()

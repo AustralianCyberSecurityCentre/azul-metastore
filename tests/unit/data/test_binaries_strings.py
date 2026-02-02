@@ -55,7 +55,7 @@ class TestMain(unit_test.DataMockingUnitTest):
             return_value=httpx.Response(201, json={"test": "value", "test1": "value"})
         )
         # test retrieve all
-        response = self.client.get(f"/v0/binaries/{sha256a}/strings?file_format={"test"}")
+        response = self.client.get(f"/v0/binaries/{sha256a}/strings?file_format={'test'}")
         self.assertEqual(200, response.status_code)
         expected_result = {
             "strings": [

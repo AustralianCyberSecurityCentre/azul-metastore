@@ -32,14 +32,17 @@ def call_string_filter(
     return []
 
 
-def extract_string_and_offset(searchResult: list[models_restapi.SearchResult]) -> list[dict[str, int]]:
+def extract_string_and_offset(
+    searchResult: list[models_restapi.SearchResult],
+) -> list[dict[str, int]]:
     """Extract the string and offset from each SearchResult.strings."""
     filtered_results = [{"string": sr.string, "offset": sr.offset} for sr in searchResult]
     return filtered_results
 
 
 def filter_search_results(
-    full_search_object: list[models_restapi.SearchResult], partial_search_object: list[dict[str, int]]
+    full_search_object: list[models_restapi.SearchResult],
+    partial_search_object: list[dict[str, int]],
 ) -> list[models_restapi.SearchResult]:
     """Filters out results not returned by ai string filter in SearchResult.strings."""
     valid_pairs = {(item["offset"], item["string"]) for item in partial_search_object}

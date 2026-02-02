@@ -107,7 +107,7 @@ def summarise_parents(ctx: Context):
         submissions = raw["SUBMISSIONS"]["doc_count"]
         links = raw["LINKS"]["doc_count"]
         results = raw["RESULTS"]["doc_count"]
-        ret.append(f'{raw["key"]} -> {submissions=} {links=} {results=}')
+        ret.append(f"{raw['key']} -> {submissions=} {links=} {results=}")
 
     print("summarised parents")
     print("\n".join(ret))
@@ -127,7 +127,7 @@ def summarise_submissions(ctx: Context):
         source = hit["source"]
         child = hit["sha256"]
         ret.append(
-            f'{raw["_source"]["track_source_references"]} | source={source["name"]} -> sha256={child} {json.dumps(source["references"])}'
+            f"{raw['_source']['track_source_references']} | source={source['name']} -> sha256={child} {json.dumps(source['references'])}"
         )
 
     print("summarised submissions")
@@ -147,7 +147,7 @@ def summarise_links(ctx: Context):
         hit = raw["_source"]
         parent = hit["parent"]["sha256"]
         ret.append(
-            f'{raw["_source"]["track_link"]} | {parent} --{hit["action"]}-{hit["author"]["name"]}--> {hit["sha256"]}'
+            f"{raw['_source']['track_link']} | {parent} --{hit['action']}-{hit['author']['name']}--> {hit['sha256']}"
         )
 
     print("summarised links")
@@ -171,7 +171,7 @@ def summarise_results(ctx: Context):
         hit = raw["_source"]
         author = hit["author"]
         ret.append(
-            f'{raw["_source"]["track_author"]} | {raw["_source"]['sha256']}-{hit["action"]} from {author["name"]}:{author["version"]}'
+            f"{raw['_source']['track_author']} | {raw['_source']['sha256']}-{hit['action']} from {author['name']}:{author['version']}"
         )
 
     print("summarised results")

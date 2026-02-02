@@ -51,9 +51,9 @@ class Annotation(base_encoder.BaseIndexEncoder):
         if not safe_tag.match(event.get("tag", "")):
             raise InvalidAnnotation(f"bad characters in tag: {event['tag']}")
         if len(event.get("tag", "")) > 25:
-            raise InvalidAnnotation(f'tag too long: {event["tag"]}')
+            raise InvalidAnnotation(f"tag too long: {event['tag']}")
         if len(event.get("comment", "")) > 1000:
-            raise InvalidAnnotation(f'comment too long: {event["comment"]}')
+            raise InvalidAnnotation(f"comment too long: {event['comment']}")
 
         event["timestamp"] = to_utc(event["timestamp"])
         cls._encode_security(event)

@@ -174,7 +174,7 @@ class Wrapper:
         try:
             existing_template = sd.es().indices.get_template(name=self.alias, ignore=[404]).get(self.alias, {})
         except opensearchpy.AuthenticationException as e:
-            raise InitFailure(f"{self.alias} {e.error}")
+            raise InitFailure(f"{self.alias} {e.error}") from None
 
         # Check if the version is absent or the configured number of shards and replicas has changed and
         # update index template if required.
@@ -197,7 +197,7 @@ class Wrapper:
             # do not replace automatically unless forced
             # this indicates that data needs to be reindexed
             raise InitFailure(
-                f'{self.alias} template ({existing_template["version"]}) does not match metastore ({self.version}). '
+                f"{self.alias} template ({existing_template['version']}) does not match metastore ({self.version}). "
                 "Consider using a new metastore partition and reindexing data."
             )
         else:
@@ -306,7 +306,7 @@ class Wrapper:
             except security_exception.SecurityException as e:
                 raise HTTPException(
                     status_code=422, detail=f"Bad security provided in security_exclude {sd.security_exclude}" + str(e)
-                )
+                ) from None
             if not sd.security_include:
                 tmp["must_not"] += [
                     {"terms": {"encoded_security.inclusive": safes}},
@@ -351,7 +351,7 @@ class Wrapper:
                     raise HTTPException(
                         status_code=422,
                         detail=f"Bad security provided in security_include {sd.security_include}" + str(e),
-                    )
+                    ) from None
                 must_clauses = [{"term": {"encoded_security.inclusive": value}} for value in musts]
 
                 for f in body["query"]["bool"]["filter"]:
@@ -417,7 +417,7 @@ class Wrapper:
             except security_exception.SecurityException as e:
                 raise HTTPException(
                     status_code=422, detail=f"Bad security provided in security_exclude {sd.security_exclude}" + str(e)
-                )
+                ) from None
 
             if not sd.security_include:
                 tmp["must_not"] += [
@@ -444,7 +444,7 @@ class Wrapper:
             except security_exception.SecurityException as e:
                 raise HTTPException(
                     status_code=422, detail=f"Bad security provided in security_include {sd.security_include}" + str(e)
-                )
+                ) from None
 
             for m in musts:
                 tmp["must"].append({"term": {"encoded_security.inclusive": m}})
@@ -501,7 +501,7 @@ class Wrapper:
             logger.warning(f"{alias=} no indices")
             return docs_removed
         if resp.get("error") is not None:
-            logger.warning(f"{alias=} failed to delete documents with error {resp["error"]}")
+            logger.warning(f"{alias=} failed to delete documents with error {resp['error']}")
             return docs_removed
 
         # Process response metadata if no errors.
@@ -566,7 +566,6 @@ class Wrapper:
                 # always goes into secure zone (expecting parent-child relationship)
                 index = self.index_shut
             else:
-
                 # make decision if goes to dls or non-dls index
                 check_open = frozenset(
                     doc["encoded_security"].get("exclusive", [])

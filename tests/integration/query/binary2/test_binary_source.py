@@ -10,7 +10,6 @@ from tests.support import gen, integration_test
 
 
 class TestSearchEntity(integration_test.DynamicTestCase):
-
     @classmethod
     def alter_environment(cls):
         super().alter_environment()

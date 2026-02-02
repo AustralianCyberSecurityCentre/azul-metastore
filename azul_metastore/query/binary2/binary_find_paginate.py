@@ -65,7 +65,9 @@ def find_all_binaries(
         try:
             json_loaded_after = json.loads(after)
         except json.JSONDecodeError:
-            raise HTTPException(status_code=422, detail=f"Invalid after provided '{after}', after must be valid JSON!")
+            raise HTTPException(
+                status_code=422, detail=f"Invalid after provided '{after}', after must be valid JSON!"
+            ) from None
         # resume pagination of existing search
         body["aggs"]["COMPOSITE"]["composite"]["after"] = json_loaded_after
     else:
@@ -77,7 +79,7 @@ def find_all_binaries(
         try:
             parse_ast = parse(term)
         except UnexpectedInput as e:
-            raise HTTPException(status_code=400, detail="Failed to parse term: " + str(e))
+            raise HTTPException(status_code=400, detail="Failed to parse term: " + str(e)) from None
 
         if parse_ast is not None:
             result, _extra_info = az_query_to_opensearch(ctx, parse_ast)
@@ -175,7 +177,9 @@ def find_all_family_binaries(
         try:
             json_loaded_after = json.loads(after)
         except json.JSONDecodeError:
-            raise HTTPException(status_code=422, detail=f"Invalid after provided '{after}', after must be valid JSON!")
+            raise HTTPException(
+                status_code=422, detail=f"Invalid after provided '{after}', after must be valid JSON!"
+            ) from None
         # resume pagination of existing search
         body["aggs"]["FAMILY"]["composite"]["after"] = json_loaded_after
     else:

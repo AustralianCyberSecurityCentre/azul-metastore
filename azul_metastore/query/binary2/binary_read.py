@@ -131,7 +131,7 @@ def check_binaries(ctx: Context, sha256s: list[str]) -> list[dict]:
         )
     ret = []
     allresp = ctx.man.binary2.w.msearch(ctx.sd, searches=searches)
-    for sha256, resp in zip(sha256s, allresp["responses"]):
+    for sha256, resp in zip(sha256s, allresp["responses"], strict=False):
         exists = resp["hits"]["total"]["value"] > 0
         ret.append({"sha256": sha256, "exists": exists})
     return ret

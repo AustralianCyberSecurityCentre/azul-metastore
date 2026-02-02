@@ -287,7 +287,7 @@ def find_binaries(
         try:
             parse_ast = parse(term)
         except UnexpectedInput as e:
-            raise HTTPException(status_code=400, detail="Failed to parse term: " + str(e))
+            raise HTTPException(status_code=400, detail="Failed to parse term: " + str(e)) from None
 
         if parse_ast is not None:
             result, extra_info = az_query_to_opensearch(ctx, parse_ast)

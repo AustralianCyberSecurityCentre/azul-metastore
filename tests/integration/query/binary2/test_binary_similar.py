@@ -9,7 +9,6 @@ def it(x):
 
 
 class TestEntitySearch(etb.DynamicTestCase):
-
     def test_binary_similar_ssdeep(self):
         hash_same = "192:9p2BHR9woCmKMGRZUCsA7knmxs1yxXMdYKMNbp:j2BHR3DGQ1msyx8M"
         hash_added = (

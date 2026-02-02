@@ -16,7 +16,7 @@ class TestFeatures(integration_test.BaseRestapi):
         )
 
         self.assertEqual(200, response.status_code)
-        print(f"Expected: {response.json()["data"]}")
+        print(f"Expected: {response.json()['data']}")
         self.assertEqual(
             {
                 "feature_value_counts": [],
@@ -59,7 +59,7 @@ class TestFeatures(integration_test.BaseRestapi):
         )
 
         self.assertEqual(200, response.status_code)
-        print(f"Expected: {response.json()["data"]}")
+        print(f"Expected: {response.json()['data']}")
         self.assertEqual(
             {
                 "feature_value_counts": [
@@ -89,7 +89,7 @@ class TestFeatures(integration_test.BaseRestapi):
         )
 
         self.assertEqual(200, response.status_code)
-        print(f"Expected: {response.json()["data"]}")
+        print(f"Expected: {response.json()['data']}")
         self.assertEqual(
             {"feature_value_counts": [], "incomplete_query": False, "reason": ""},
             response.json()["data"],
@@ -106,7 +106,7 @@ class TestFeatures(integration_test.BaseRestapi):
         )
 
         self.assertEqual(200, response.status_code)
-        print(f"Expected: {response.json()["data"]}")
+        print(f"Expected: {response.json()['data']}")
         self.assertEqual(
             {
                 "feature_value_counts": [

@@ -99,7 +99,6 @@ class TestSearch(integration_test.DynamicTestCase):
 
 
 class TestManager(integration_test.DynamicTestCase):
-
     # Disable cache for test case.
     @mock.patch("azul_metastore.settings.get", settings.Metastore)
     def setUp(self):

@@ -5,7 +5,6 @@ from tests.support import gen, integration_test
 
 
 class TestBasic(integration_test.DynamicTestCase):
-
     def test_manual_insert(self):
         event = gen.manual_insert()
         ev2 = list(binary_submit_manual._stream_append_manual_insert(self.writer, event, {}))

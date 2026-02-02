@@ -246,7 +246,7 @@ async def submit_binary_to_source(
                 internal="upload_bad_stream_data_labels",
             )
         augstreams = []
-        for stream, label in zip(stream_data, stream_labels):
+        for stream, label in zip(stream_data, stream_labels, strict=False):
             augstreams.append((label, stream))
 
         qr.set_security_headers(ctx, resp, security)
@@ -319,7 +319,7 @@ async def submit_binary_to_source_dataless(
                 internal="upload_bad_stream_data_labels",
             )
         augstreams = []
-        for stream, label in zip(stream_data, stream_labels):
+        for stream, label in zip(stream_data, stream_labels, strict=False):
             augstreams.append((label, stream))
 
         qr.set_security_headers(ctx, resp, security)
