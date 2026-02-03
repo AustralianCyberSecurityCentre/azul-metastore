@@ -54,7 +54,7 @@ class NonUniqueDispatcherIdException(Exception):
 
 def md5(text: str):
     """Return string md5 representing incoming text."""
-    return hashlib.md5(text.encode()).hexdigest()  # noqa: S303 # nosec B303, B324
+    return hashlib.md5(text.encode()).hexdigest()  # noqa: S303, S324
 
 
 @cachetools.cached(cache=memcache.get_lru_cache("azsec"))
