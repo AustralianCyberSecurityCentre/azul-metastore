@@ -3,7 +3,6 @@ from tests.support import gen, integration_test
 
 
 class TestBinaryRead(integration_test.DynamicTestCase):
-
     def test_stream_dispatcher(self):
         self.write_binary_events(
             [

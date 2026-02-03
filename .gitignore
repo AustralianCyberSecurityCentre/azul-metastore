@@ -214,3 +214,7 @@ dmypy.json
 
 # End of https://www.gitignore.io/api/python,pycharm
 .vscode/
+
+.ruff_cache
+# FUTURE UV IS USEFUL
+uv.lock

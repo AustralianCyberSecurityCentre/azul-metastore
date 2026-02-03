@@ -314,7 +314,7 @@ def find_feature_values(
             except json.JSONDecodeError:
                 raise HTTPException(
                     status_code=422, detail=f"Invalid after provided '{after}', after must be valid JSON!"
-                )
+                ) from None
             # resume pagination of existing search
             body["aggs"]["COMPOSITE"]["composite"]["after"] = json_loaded_after
         else:

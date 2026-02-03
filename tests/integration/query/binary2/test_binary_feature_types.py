@@ -2,7 +2,6 @@ from tests.support import gen, integration_test
 
 
 class TestSearchEntity(integration_test.DynamicTestCase):
-
     def test_offset(self):
         self.write_binary_events(
             [

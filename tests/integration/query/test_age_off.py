@@ -16,7 +16,6 @@ longago = pendulum.parse("1995-10-10T10:10:10Z")
 
 
 class TestAgeOff(integration_test.DynamicTestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.origin_max_delete_for_ageoff = wrapper.MAX_DOCS_DELETED_PER_QUERY
@@ -118,7 +117,6 @@ class TestAgeOff(integration_test.DynamicTestCase):
             self.assertFormatted(deleted_docs, {})
 
         with mock.patch("pendulum.now", lambda: pendulum.parse("2000-01-01T10:10:10Z")):
-
             _, deleted_docs, deleted_annotation_count = age_off.do_age_off()
             self.assertFormatted(deleted_docs, {})
 

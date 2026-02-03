@@ -23,7 +23,7 @@ class TestMain(unit_test.DataMockingUnitTest):
                         {
                             "label": "content",
                             "md5": "ef090a5c998861a5917bd3e976594f8f",
-                            "magic": "PE32 executable (GUI) Intel 80386 " "Mono/.Net assembly, for MS Windows",
+                            "magic": "PE32 executable (GUI) Intel 80386 Mono/.Net assembly, for MS Windows",
                             "mime": "application/x-dosexec",
                             "sha1": "f40825d0089a923ce635ee39c981eefb9fd1f3bb",
                             "sha256": "acae1918dbee5d579b5cdfdd05d9c57f714efa50c2937999f475c569ff4d9cc5",
@@ -40,7 +40,7 @@ class TestMain(unit_test.DataMockingUnitTest):
                         {
                             "name": "magic",
                             "type": "string",
-                            "value": "PE32 executable (GUI) Intel 80386 " "Mono/.Net assembly, for MS Windows",
+                            "value": "PE32 executable (GUI) Intel 80386 Mono/.Net assembly, for MS Windows",
                         },
                         {
                             "name": "mime",

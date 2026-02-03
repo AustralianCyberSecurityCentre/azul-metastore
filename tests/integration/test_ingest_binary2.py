@@ -12,7 +12,6 @@ from . import trivial
 
 
 class TestIngestor(integration_test.DynamicTestCase):
-
     @classmethod
     def alter_environment(cls):
         super().alter_environment()

@@ -600,7 +600,7 @@ def generate_event_id(
     """
     s = ""
     if plugin:
-        return f"meta.{ plugin.entity.name }.{plugin.entity.version}"
+        return f"meta.{plugin.entity.name}.{plugin.entity.version}"
     elif status:
         return f"meta.{status.entity.input.dequeued}.{status.author.name}"
     elif insert:

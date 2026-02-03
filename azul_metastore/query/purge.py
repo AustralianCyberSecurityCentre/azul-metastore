@@ -253,9 +253,7 @@ class Purger:
             binaries_kept, binaries_purged = self._purge_path_deletion(ctx, purge_path)
             ret.binaries_kept += binaries_kept
             ret.binaries_purged += binaries_purged
-            logger.info(
-                f"round {i + 1} of opensearch purging complete, " f"deleted {events_purged} events in this round"
-            )
+            logger.info(f"round {i + 1} of opensearch purging complete, deleted {events_purged} events in this round")
         return ret
 
     def purge_submission(

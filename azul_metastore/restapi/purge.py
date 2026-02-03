@@ -36,7 +36,7 @@ def purge_submission(
     except ParserError:
         raise HTTPException(
             status_code=HTTP_400_BAD_REQUEST, detail=f"The timestamp provided '{timestamp}' has an invalid format."
-        )
+        ) from None
 
     purger = qpurge.Purger()
     try:
@@ -49,7 +49,7 @@ def purge_submission(
         raise HTTPException(
             status_code=HTTP_400_BAD_REQUEST,
             detail=str(e),
-        )
+        ) from None
     return qr.fr(ctx, ret or {}, resp)
 
 
@@ -81,5 +81,5 @@ def purge_link(
         raise HTTPException(
             status_code=HTTP_400_BAD_REQUEST,
             detail=str(e),
-        )
+        ) from None
     return qr.fr(ctx, ret or {}, resp)

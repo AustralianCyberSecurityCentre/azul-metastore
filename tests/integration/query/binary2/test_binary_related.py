@@ -18,7 +18,6 @@ def get_eid_read(ctx, eid):
 
 
 class TestRelationGroups(etb.DynamicTestCase):
-
     def test_basic(self):
         a = ("p1", "1")
         self.write_binary_events(

@@ -52,7 +52,7 @@ def partition_format(timestamp: str, index_time_unit: models_settings.PartitionU
         ret = ts.format("YYYY-MM")
     elif index_time_unit == models_settings.PartitionUnitEnum.week:
         # ts.week_of_year gives odd results, e.g. 2019-12-31 -> 1
-        ret = f'{ts.format("YYYY-MM")}-w{math.ceil(ts.day_of_year / 7):02}'
+        ret = f"{ts.format('YYYY-MM')}-w{math.ceil(ts.day_of_year / 7):02}"
     elif index_time_unit == models_settings.PartitionUnitEnum.day:
         ret = ts.format("YYYY-MM-DD")
     elif index_time_unit == models_settings.PartitionUnitEnum.all:

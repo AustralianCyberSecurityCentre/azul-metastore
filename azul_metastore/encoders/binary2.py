@@ -360,7 +360,7 @@ class Binary2(base_encoder.BaseIndexEncoder):
                 blockSizeStr, chunk, doubleChunk = ssdeep.split(":")
                 blockSize = int(blockSizeStr)
             except ValueError:
-                raise Exception(f"ssdeep could not be parsed {ssdeep}")
+                raise Exception(f"ssdeep could not be parsed {ssdeep}") from None
             encoded_event["ssdeep"] = ssdeep
             encoded_event["encoded_ssdeep"] = {
                 "blocksize": blockSize,

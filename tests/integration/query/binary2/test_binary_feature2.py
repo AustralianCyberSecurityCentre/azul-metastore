@@ -5,7 +5,6 @@ from tests.support import gen, integration_test
 
 
 class TestSearchEntity(integration_test.DynamicTestCase):
-
     def test_define_many_features(self):
         # create a plugin defining 2000 features
         self.write_plugin_events(

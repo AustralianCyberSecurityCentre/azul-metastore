@@ -15,7 +15,6 @@ class FakeResponse:
 
 
 class TestPurge(integration_test.DynamicTestCase):
-
     def setUp(self):
         super().setUp()
         self.purger = qpurge.Purger()

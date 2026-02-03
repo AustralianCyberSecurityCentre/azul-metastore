@@ -23,7 +23,7 @@ def ssdeep_compare(hash1: str, hash2: str) -> int:
         )
         return score
     except OSError:
-        raise Exception("could not find libfuzzy-dev; check that it is installed.")
+        raise Exception("could not find libfuzzy-dev; check that it is installed.") from None
 
 
 def read_similar_from_tlsh(ctx: Context, tlsh: str, maxCount: int) -> list[dict]:
@@ -115,7 +115,7 @@ def read_similar_from_ssdeep(ctx: Context, fuzzyHash: str, maxCount: int) -> lis
         blockSizeStr, chunk, doubleChunk = fuzzyHash.split(":")
         blockSize = int(blockSizeStr)
     except ValueError:
-        raise HTTPException(status_code=422, detail=f"ssdeep could not be parsed {fuzzyHash}")
+        raise HTTPException(status_code=422, detail=f"ssdeep could not be parsed {fuzzyHash}") from None
 
     body = {
         "_source": {"includes": ["sha256", "ssdeep"]},

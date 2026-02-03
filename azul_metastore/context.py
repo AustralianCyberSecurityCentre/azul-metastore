@@ -124,7 +124,7 @@ class Context:
                 ref="security was not valid",
                 external=f"security was not valid ({security})",
                 internal="upload_bad_security",
-            )
+            ) from None
 
 
 def get_general_context() -> Context:

@@ -3,7 +3,6 @@ from tests.support import gen, integration_test
 
 
 class TestBinaryRead(integration_test.DynamicTestCase):
-
     def test_get_author_stats(self):
         ts1 = "2000-01-01T01:00:00.000Z"
         self.write_binary_events(

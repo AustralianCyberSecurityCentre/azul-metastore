@@ -18,7 +18,7 @@ MAX_TO_SCAN = 10_000_000
 
 def md5(text: str):
     """Return string md5 representing incoming text."""
-    return hashlib.md5(text.encode()).hexdigest()  # noqa: S303 # nosec B303, B324
+    return hashlib.md5(text.encode()).hexdigest()  # noqa: S303, S324
 
 
 def get_ctx(creds: dict) -> context.Context:
@@ -44,7 +44,7 @@ def get_events(dest: str, filters: list, must_not: list, max_entries: int = MAX_
             resp["_source"]["kafka_key"] = resp["_id"]
             try:
                 event = rc.Binary2.decode(resp["_source"])
-            except Exception:
+            except Exception:  # noqa: S112
                 continue
             f.write(json.dumps(event))
             f.write("\n")

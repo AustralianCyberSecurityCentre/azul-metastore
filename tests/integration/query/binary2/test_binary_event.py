@@ -5,7 +5,6 @@ from tests.support import gen, integration_test
 
 
 class TestBinaryRead(integration_test.DynamicTestCase):
-
     def test_read_best_event_for_entity(self):
         self.write_binary_events(
             [

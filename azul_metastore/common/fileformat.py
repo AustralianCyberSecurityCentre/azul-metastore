@@ -82,7 +82,9 @@ async def unpack_content(
             yield raw_upload_file, fname
 
 
-async def async_extract_neutered(upload_file: UploadFile) -> tuple[AsyncIterable[bytes] | None, str | None]:
+async def async_extract_neutered(
+    upload_file: UploadFile,
+) -> tuple[AsyncIterable[bytes] | None, str | None]:
     """Handle extracting MalPZ/CaRT."""
     fname = None
     try:
@@ -142,18 +144,18 @@ def extract_archive(istream: io.BytesIO, password: str = None) -> Iterable[Tuple
                 yield UploadFile(io.BytesIO(zpf.read(n))), n
     except pyzipper.BadZipFile as e:
         if "File is not a zip file" in str(e):
-            raise ExtractException("not a zip file")
+            raise ExtractException("not a zip file") from None
         else:
             # unknown error
-            raise ExtractException(str(type(e)) + " " + str(e))
+            raise ExtractException(str(type(e)) + " " + str(e)) from None
     except RuntimeError as e:
         if "password required for extraction" in str(e):
-            raise ExtractException("zip requires password")
+            raise ExtractException("zip requires password") from None
         elif "Bad password for file" in str(e):
-            raise ExtractException("bad zip password")
+            raise ExtractException("bad zip password") from None
         else:
             # unknown error
-            raise ExtractException(str(type(e)) + " " + str(e))
+            raise ExtractException(str(type(e)) + " " + str(e)) from None
     if not extracted:
         raise ExtractException("no files were extracted from zip")
 

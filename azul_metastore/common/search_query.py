@@ -368,5 +368,5 @@ def validate_term_query(term: str, model_valid_keys: list[str]) -> list[str]:
     try:
         parse_ast = parse(term)
     except UnexpectedInput as e:
-        raise HTTPException(status_code=400, detail="Failed to parse term: " + str(e))
+        raise HTTPException(status_code=400, detail="Failed to parse term: " + str(e)) from None
     return _validate_term_query(parse_ast, model_valid_keys)

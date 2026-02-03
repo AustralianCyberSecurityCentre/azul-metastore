@@ -6,7 +6,6 @@ from tests.support import gen, integration_test
 
 
 class TestEntityFind(integration_test.DynamicTestCase):
-
     def test_capture_unmatched_source(self):
         # check can summarise info about the binary that doesn't match the search term
         self.write_binary_events(
