@@ -166,7 +166,7 @@ class DynamicTestCase(basic_test.BasicTest):
         )
         cls.dp_simulate_consumers_on_event = mock.patch(
             "azul_bedrock.dispatcher.DispatcherAPI.simulate_consumers_on_event",
-            side_effect=lambda *vs, **kv: (mapi.EventSimulate(consumers=[])),
+            side_effect=lambda *vs, **kv: mapi.EventSimulate(consumers=[]),
         )
 
     @classmethod
