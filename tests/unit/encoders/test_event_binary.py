@@ -4,10 +4,15 @@ import os
 
 from azul_bedrock import models_network as azm
 
-from azul_metastore.common.feature import FeatureEncodeException, enrich_feature
+from azul_metastore.common.feature import enrich_feature
 from azul_metastore.encoders import base_encoder
 from azul_metastore.encoders import binary2 as esc
 from tests.support import gen, unit_test
+from azul_bedrock import exceptions_bedrock
+from azul_bedrock import exceptions_metastore
+from azul_bedrock.dispatcher import DispatcherAPI
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
 
 
 class TestTimePartition(unit_test.BaseUnitTestCase):
@@ -169,11 +174,11 @@ class TestBinaryEventEncode(unit_test.BaseUnitTestCase):
 
     def test_enriching_uri_features(self):
         """Verify given Uris with a double port 9006:9006 enrichment fails but features are still encoded."""
-        with self.assertRaises(FeatureEncodeException):
+        with self.assertRaises(exceptions_metastore.FeatureEncodeException):
             f1 = gen.feature(fvt=("f1", "http://random:9006:9006/submit.php", azm.FeatureType.Uri.value))
             enrich_feature(f1)
 
-        with self.assertRaises(FeatureEncodeException):
+        with self.assertRaises(exceptions_metastore.FeatureEncodeException):
             f2 = gen.feature(fvt=("f2", "https://other.com:443:443/api/x", azm.FeatureType.Uri.value))
             enrich_feature(f2)
 

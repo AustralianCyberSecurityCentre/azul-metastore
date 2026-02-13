@@ -8,7 +8,8 @@ import time
 from typing import AsyncIterable, Callable, Generator
 
 import pyzipper
-from azul_bedrock.exceptions import ApiException, BaseError, DispatcherApiException
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException, BaseError, DispatcherApiException
 from azul_bedrock.models_restapi import binaries_data as bedr_binaries_data
 from cart import cart
 from fastapi import (
@@ -54,11 +55,16 @@ async def check_has_binary(
     # been made (to ensure the context captures everything)
     try:
         if not exists:
-            raise ApiException(status_code=HTTP_404_NOT_FOUND, ref="Item not found", internal="")
+            raise ApiException(
+                status_code=HTTP_404_NOT_FOUND,
+                ref="Item not found",
+                internal=ExceptionCodeEnum.MetastoreBinaryNotFound,
+                parameters={"sha256": sha256},
+            )
 
         # check dispatcher still has binary
         ctx.dispatcher.has_binary(source, label, sha256)
-    except HTTPException as e:
+    except (HTTPException, ApiException) as e:
         qr.set_security_headers(ctx, resp, ex=e)
         raise
 
@@ -87,13 +93,18 @@ async def download_binary_encoded(
 
     try:
         if not exists:
-            raise ApiException(status_code=HTTP_404_NOT_FOUND, ref="Item not found", internal="")
+            raise ApiException(
+                status_code=HTTP_404_NOT_FOUND,
+                ref="Item not found",
+                internal=ExceptionCodeEnum.MetastoreBinaryStreamNotFound,
+                parameters={"sha256": sha256},
+            )
         async_iter_content = await ctx.dispatcher.async_get_binary(source, label, sha256)
         # Disable digestors as we don't need them and they are super slow.
         packed_cart_stream = cart.async_pack_iterable(async_iter_content, auto_digests=())
         qr.set_security_headers(ctx, resp)
         return StreamingResponse(packed_cart_stream, media_type="application/octet-stream", status_code=HTTP_200_OK)
-    except HTTPException as e:
+    except (HTTPException, ApiException) as e:
         qr.set_security_headers(ctx, resp, ex=e)
         raise
 
@@ -119,9 +130,10 @@ async def download_binaries(
         to_download = []
         for sha256 in binaries:
             if not re.match(r"[a-fA-F0-9]{64}", sha256):
-                raise HTTPException(
+                raise ApiException(
                     status_code=422,
-                    detail=f"One of the provided sha256s '{sha256}' is invalid and the request cannot be processed.",
+                    internal=ExceptionCodeEnum.MetastoreInvalidSha256Provided,
+                    parameters={"sha256": sha256},
                 )
             exists, source, label = binary_read.find_stream_references(ctx, sha256)
             if exists:
@@ -132,7 +144,7 @@ async def download_binaries(
             raise ApiException(
                 status_code=HTTP_404_NOT_FOUND,
                 ref="No items found",
-                internal="no items found",
+                internal=ExceptionCodeEnum.MetastoreBulkUnableToDownloadAnyBinaries,
             )
 
         success = False
@@ -154,7 +166,7 @@ async def download_binaries(
             raise ApiException(
                 status_code=HTTP_404_NOT_FOUND,
                 ref="No items found",
-                internal="no items found",
+                internal=ExceptionCodeEnum.MetastoreNoBinariesDownloaded,
             )
 
         for _source, _label, sha256 in to_download:
@@ -163,7 +175,7 @@ async def download_binaries(
         resp = StreamingResponse(ostream, media_type="application/octet-stream", status_code=HTTP_200_OK)
         qr.set_security_headers(ctx, resp)
         return resp
-    except HTTPException as e:
+    except (HTTPException, ApiException) as e:
         qr.set_security_headers(ctx, None, ex=e)
         raise
 
@@ -194,7 +206,12 @@ async def download_binary_raw(
 
     try:
         if not source or not stream_data:
-            raise ApiException(status_code=HTTP_404_NOT_FOUND, ref="Stream not found", internal="")
+            raise ApiException(
+                status_code=HTTP_404_NOT_FOUND,
+                ref="Stream not found",
+                internal=ExceptionCodeEnum.MetastoreBinaryStreamNotFound,
+                parameters={"sha256": sha256},
+            )
 
         attachment_type = get_attachment_type(stream_data.file_format, sha256, stream)
         if not attachment_type:
@@ -202,8 +219,8 @@ async def download_binary_raw(
             raise ApiException(
                 status_code=HTTP_400_BAD_REQUEST,
                 ref="Stream file type not allowed for direct download",
-                internal=f"Got: {stream_data.file_format}",
-                external=f"Got: {stream_data.file_format}",
+                internal=ExceptionCodeEnum.MetastoreDownloadingBadStreamType,
+                parameters={"file_format": stream_data.file_format},
             )
 
         asyncIterable = await ctx.dispatcher.async_get_binary(source, stream_data.label, stream)
@@ -215,7 +232,7 @@ async def download_binary_raw(
             media_type=attachment_type,
             status_code=HTTP_200_OK,
         )
-    except HTTPException as e:
+    except (HTTPException, ApiException) as e:
         qr.set_security_headers(ctx, resp, ex=e)
         raise
 
@@ -287,7 +304,12 @@ def get_hex_view(
 
     try:
         if not exists:
-            raise ApiException(status_code=HTTP_404_NOT_FOUND, ref="Item not found", internal="")
+            raise ApiException(
+                status_code=HTTP_404_NOT_FOUND,
+                ref="Item not found",
+                internal=ExceptionCodeEnum.MetastoreBinaryStreamNotFound,
+                parameters={"sha256": sha256},
+            )
 
         # Get binary from dispatcher
         if max_bytes_to_read is None:
@@ -328,7 +350,7 @@ def get_hex_view(
                 hex=hex_group_formatter(range(chunk_size), chunk_size),
                 ascii="ASCII",
             )
-    except HTTPException as e:
+    except (HTTPException, ApiException) as e:
         qr.set_security_headers(ctx, resp, ex=e)
         raise
 
@@ -355,7 +377,12 @@ async def _handle_search_query(
     # do simple hash lookup to check if user can access binary
     exists, source, label = binary_read.find_stream_references(ctx, sha256)
     if not exists:
-        raise ApiException(status_code=HTTP_404_NOT_FOUND, ref="Item not found", internal="")
+        raise ApiException(
+            status_code=HTTP_404_NOT_FOUND,
+            ref="Item not found",
+            internal=ExceptionCodeEnum.MetastoreBinaryStreamNotFound,
+            parameters={"sha256": sha256},
+        )
 
     # Get binary from dispatcher
     if max_bytes_to_read is None:
@@ -432,7 +459,12 @@ async def get_strings(
         if regex is not None:
             exported_regex = re.compile(regex)
     except Exception:
-        raise ApiException(status_code=HTTP_400_BAD_REQUEST, ref="Invalid regex pattern", internal="") from None
+        raise ApiException(
+            status_code=HTTP_400_BAD_REQUEST,
+            ref="Invalid regex pattern",
+            internal=ExceptionCodeEnum.MetastoreInvalidStringsRegexProvided,
+            parameters={"regex": regex},
+        ) from None
 
     # If AI string filter is enabled; call it to add file type labels to strings
     s = settings.get()
@@ -462,7 +494,7 @@ async def get_strings(
         search = await _handle_search_query(
             sha256, offset, max_bytes_to_read, take_n_strings, ctx, search_handler, is_ai_filtering
         )
-    except HTTPException as e:
+    except (HTTPException, ApiException) as e:
         qr.set_security_headers(ctx, resp, ex=e)
         raise
 
@@ -494,7 +526,7 @@ async def get_strings(
                     if (time.time() - start_time) > TIME_OUT:
                         time_out = True
                         break
-                except HTTPException as e:
+                except (HTTPException, ApiException) as e:
                     qr.set_security_headers(ctx, resp, ex=e)
                     raise
             next_offset = 0
@@ -583,13 +615,18 @@ async def search_hex(
         try:
             filter_bytes = bytes(bytearray.fromhex(filter))
         except Exception:
-            raise ApiException(status_code=HTTP_400_BAD_REQUEST, ref="Invalid hex pattern", internal="") from None
+            raise ApiException(
+                status_code=HTTP_400_BAD_REQUEST,
+                ref="Invalid hex pattern",
+                internal=ExceptionCodeEnum.MetastoreInvalidHexPatternProvided,
+                parameters={"filter": filter},
+            ) from None
 
         return await data_hex.get_hex_hits(data_stream, current_offset, take_n_hits, filter_bytes)
 
     try:
         search = await _handle_search_query(sha256, offset, max_bytes_to_read, take_n_hits, ctx, search_handler)
-    except HTTPException as e:
+    except (HTTPException, ApiException) as e:
         qr.set_security_headers(ctx, resp, ex=e)
         raise
 

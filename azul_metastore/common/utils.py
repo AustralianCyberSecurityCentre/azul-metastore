@@ -34,24 +34,6 @@ def jsondict(d: BaseModel) -> dict:
     return jsonable_encoder(d, exclude_defaults=True, exclude_unset=True)
 
 
-class PreprocessException(Exception):
-    """The object is unable to be encoded for opensearch."""
-
-    pass
-
-
-class BadSourceException(PreprocessException):
-    """The supplied source was not specified in configuration."""
-
-    pass
-
-
-class NonUniqueDispatcherIdException(Exception):
-    """Exception raised if a dispatcherId is not unique."""
-
-    pass
-
-
 def md5(text: str):
     """Return string md5 representing incoming text."""
     return hashlib.md5(text.encode()).hexdigest()  # noqa: S303, S324

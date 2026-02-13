@@ -5,6 +5,8 @@ import logging
 import cachetools
 import pendulum
 from azul_bedrock import models_settings
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import BaseAzulException
 
 from azul_metastore import context, settings
 from azul_metastore.common import memcache
@@ -91,7 +93,10 @@ def _find_old_indices(
             # exceeds the the age-off period
             ret.append(index)
     except Exception as e:
-        raise Exception(f"failed to process ageoff on {alias=} with {expire_events_ms=} response:\n{resp}") from e
+        raise BaseAzulException(
+            internal=ExceptionCodeEnum.MetastoreFailedToAgeoffDocs,
+            parameters={"alias": alias, "expire_events_ms": expire_events_ms, "response": resp},
+        ) from e
     return ret
 
 

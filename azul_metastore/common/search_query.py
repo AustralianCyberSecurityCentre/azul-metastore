@@ -2,12 +2,12 @@
 
 from typing import Literal, Optional, Tuple
 
+from azul_bedrock import exceptions_bedrock, exceptions_metastore
+from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.models_restapi import binaries_auto_complete as bedr_bauto
-from fastapi import HTTPException
 from lark import UnexpectedCharacters, UnexpectedInput, UnexpectedToken
 from pydantic import BaseModel
 
-from azul_metastore.common import wrapper
 from azul_metastore.common.search_query_parser import (
     Expression,
     FieldComparison,
@@ -45,13 +45,22 @@ def _az_field_search_to_opensearch(
     # Handle pre-filter magic expressions
     if key.lower() == BINARY_TAG_KEY or key.lower() == FEATURE_TAG_KEY:
         if ctx is None:
-            raise ValueError("Dynamic evaluation needed for tag searches.")
+            raise exceptions_bedrock.AzulValueError(
+                ref="Dynamic evaluation needed for tag searches.",
+                internal=ExceptionCodeEnum.MetastoreSearchQueryMissingContext,
+            )
 
         if not isinstance(field, StringExpression) and not isinstance(field, NumberExpression):
-            raise ValueError("Tag search must be made on a string value.")
+            raise exceptions_bedrock.AzulValueError(
+                ref="Tag search must be made on a string value.",
+                internal=ExceptionCodeEnum.MetastoreSearchQueryTagSearchNotOnStringValue,
+            )
 
         if operator != ":" and operator != ":=":
-            raise ValueError("Tag search can only be a literal search.")
+            raise exceptions_bedrock.AzulValueError(
+                ref="Tag search can only be a literal search.",
+                internal=ExceptionCodeEnum.MetastoreSearchQueryTagSearchNotWithEquals,
+            )
 
         tag = str(field.value)
 
@@ -74,7 +83,10 @@ def _az_field_search_to_opensearch(
             prefilter_binaries = [x["_source"]["pivot"] for x in resp["hits"]["hits"]]
 
             if not prefilter_binaries:
-                raise wrapper.InvalidSearchException("tag not found")
+                raise exceptions_metastore.InvalidSearchException(
+                    ref="tag does not exist in opensearch",
+                    internal=ExceptionCodeEnum.MetastoreSearchQueryTagDoesntExist,
+                )
 
             return {"terms": {"sha256": prefilter_binaries}}
         else:
@@ -92,7 +104,9 @@ def _az_field_search_to_opensearch(
             ]
 
             if not prefilter_feature_values:
-                raise wrapper.InvalidSearchException("feature value tag not found")
+                raise exceptions_metastore.InvalidSearchException(
+                    ref="feature value tag not found", internal=ExceptionCodeEnum.MetastoreFeatureValueTagNotFound
+                )
 
             query_terms = []
             for name, value in prefilter_feature_values:
@@ -153,7 +167,10 @@ def _az_field_search_to_opensearch(
         elif field is None:
             return {"exists": {"field": key}}
 
-    raise ValueError("Hit unreachable during conversion of field")
+    raise exceptions_bedrock.AzulValueError(
+        ref="Hit unreachable during conversion of field",
+        internal=ExceptionCodeEnum.MetastoreSearchQueryUnreachableDuringConversion,
+    )
 
 
 def _az_query_to_opensearch_with_keys(
@@ -188,7 +205,10 @@ def _az_query_to_opensearch_with_keys(
             if isinstance(input.value, RangeExpression) or input.value is None:
                 # A user shouldn't be able to globally evaluate a range;
                 # this doesn't make sense on mainly string fields
-                raise ValueError("Search for an implict field should be a literal, not a range")
+                raise exceptions_bedrock.AzulValueError(
+                    ref="Search for an implicit field should be a literal, not a range",
+                    internal=ExceptionCodeEnum.MetastoreSearchQuerySearchForImplicitShouldBeLiteral,
+                )
 
             term = str(input.value.value)
             return {
@@ -319,8 +339,11 @@ def generate_autocomplete(input: str, offset: int) -> bedr_bauto.AutocompleteCon
                     prefix, prefix_type = _format_expression(node.value)
                     return bedr_bauto.AutocompleteFieldValue(key=key, prefix=prefix, prefix_type=prefix_type)
                 else:
-                    raise ValueError(
-                        "Parent of a node is not a Tag?", [type(parent_node) for parent_node in node.parents]
+                    parents = ",".join([str(type(parent_node)) for parent_node in node.parents])
+                    raise exceptions_bedrock.AzulValueError(
+                        ref=f"Parent of a node is not a Tag? {parents}",
+                        internal=ExceptionCodeEnum.MetastoreSearchQueryAutocompleteParentNotATag,
+                        parameters={"parents": parents},
                     )
             # Autocomplete a field's key
             elif node.branch == "Key" and isinstance(parent_node, Tag) and isinstance(node.value, StringExpression):
@@ -368,5 +391,10 @@ def validate_term_query(term: str, model_valid_keys: list[str]) -> list[str]:
     try:
         parse_ast = parse(term)
     except UnexpectedInput as e:
-        raise HTTPException(status_code=400, detail="Failed to parse term: " + str(e)) from None
+        raise exceptions_bedrock.ApiException(
+            status_code=400,
+            ref=f"Failed to parse term: {str(e)}",
+            internal=ExceptionCodeEnum.MetastoreSearchQueryInvalidTermKey,
+            parameters={"inner_exception": str(e)},
+        ) from None
     return _validate_term_query(parse_ast, model_valid_keys)

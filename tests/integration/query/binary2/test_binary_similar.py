@@ -34,7 +34,7 @@ class TestEntitySearch(etb.DynamicTestCase):
         )
 
         # check for exclusion of hash_same and hash_different
-        hashScores = binary_similar.read_similar_from_ssdeep(ctx=self.writer, fuzzyHash=hash_same, maxCount=100)
+        hashScores = binary_similar.read_similar_from_ssdeep(ctx=self.writer, fuzzy_hash=hash_same, maxCount=100)
         self.assertEqual(
             hashScores,
             [
@@ -45,7 +45,7 @@ class TestEntitySearch(etb.DynamicTestCase):
         )
 
         # check that maxCount is behaving correctly
-        hashScores = binary_similar.read_similar_from_ssdeep(ctx=self.writer, fuzzyHash=hash_same, maxCount=1)
+        hashScores = binary_similar.read_similar_from_ssdeep(ctx=self.writer, fuzzy_hash=hash_same, maxCount=1)
         self.assertEqual(hashScores, [{"sha256": "removed", "score": 79}])
 
     def test_binary_similar_tlsh(self):

@@ -7,13 +7,10 @@ import ipaddress
 import logging
 from urllib.parse import urlparse
 
+from azul_bedrock import exceptions_bedrock, exceptions_metastore
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+
 logger = logging.getLogger(__name__)
-
-
-class FeatureEncodeException(Exception):
-    """Something went wrong while encoding features."""
-
-    pass
 
 
 def enrich_feature(feat: dict):
@@ -23,7 +20,11 @@ def enrich_feature(feat: dict):
         # Error is returned as string to allow rest of this function to run.
         feat["enriched"] = _parse_feature_value(feat["value"], feat["type"])
     except Exception as e:
-        raise FeatureEncodeException(f"failed to parse and enrich feature: {feat} with error message: {e}") from e
+        raise exceptions_metastore.FeatureEncodeException(
+            ref=f"failed to parse and enrich feature: {feat} with error message: {e}",
+            internal=ExceptionCodeEnum.MetastoreFeatureEnrichmentFailed,
+            parameters={"feature": str(feat), "inner_exception": str(e)},
+        ) from e
 
 
 def _parse_feature_value(value: str, _type: str) -> dict:
@@ -39,7 +40,7 @@ def _parse_feature_value(value: str, _type: str) -> dict:
     }
 
     if _type not in cases.keys():
-        raise Exception(f"unhandled type: {_type} with value {value}")
+        raise exceptions_bedrock.BaseAzulException(f"unhandled type: {_type} with value {value}")
 
     return cases[_type](value)
 

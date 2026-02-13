@@ -4,7 +4,8 @@ import logging
 
 import httpx
 from azul_bedrock import models_restapi
-from azul_bedrock.exceptions import ApiException
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,8 @@ def call_string_filter(
         raise ApiException(
             status_code=response.status_code,
             ref=error_message,
-            internal="string_filter_error",
+            internal=ExceptionCodeEnum.MetastoreAiStringFilterFailure,
+            parameters={"text_content": str(response.content)},
         )
 
     if response is not None:

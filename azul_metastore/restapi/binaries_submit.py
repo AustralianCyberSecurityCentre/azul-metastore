@@ -5,7 +5,8 @@ import logging
 from typing import Annotated, Optional, Self
 
 from azul_bedrock import models_network as azm
-from azul_bedrock.exceptions import ApiException, BaseError
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException, BaseError
 from azul_bedrock.models_restapi import binaries_data as bedr_binaries_data
 from fastapi import (
     APIRouter,
@@ -44,8 +45,8 @@ def _to_utc_except(timestamp: str):
         raise ApiException(
             status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref="bad_timestamp",
-            external="a bad timestamp was provided",
-            internal="bad_timestamp",
+            internal=ExceptionCodeEnum.MetastoreCannotParseTimestampToUTC,
+            parameters={"inner_exception": str(e)},
         ) from e
 
 
@@ -67,8 +68,8 @@ def validate_json(field_name: str, field_value: str | None):
         raise ApiException(
             status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref="bad_json",
-            external=f"Bad json for the field {field_name} was provided, value was {field_value}",
-            internal="bad_json",
+            internal=ExceptionCodeEnum.MetastoreInvalidJson,
+            parameters={"field_name": field_name, "field_value": field_value},
         ) from e
 
 
@@ -242,8 +243,8 @@ async def submit_binary_to_source(
             raise ApiException(
                 status_code=HTTP_422_UNPROCESSABLE_CONTENT,
                 ref="stream labels must be supplied for all stream data",
-                external="stream labels must be supplied for all stream data",
-                internal="upload_bad_stream_data_labels",
+                internal=ExceptionCodeEnum.MetastoreAltStreamsLabelsDoesNotMatch,
+                parameters={"stream_label_count": len(stream_labels), "stream_data_count": len(stream_data)},
             )
         augstreams = []
         for stream, label in zip(stream_data, stream_labels, strict=False):
@@ -268,7 +269,7 @@ async def submit_binary_to_source(
         )
         _log_high_level_submission(request, ctx, result)
         return result
-    except HTTPException as e:
+    except (HTTPException, ApiException) as e:
         qr.set_security_headers(ctx, resp, security, ex=e)
         raise
 
@@ -315,8 +316,8 @@ async def submit_binary_to_source_dataless(
             raise ApiException(
                 status_code=HTTP_422_UNPROCESSABLE_CONTENT,
                 ref="stream labels must be supplied for all stream data",
-                external="stream labels must be supplied for all stream data",
-                internal="upload_bad_stream_data_labels",
+                internal=ExceptionCodeEnum.MetastoreAltStreamsLabelsDoesNotMatch,
+                parameters={"stream_label_count": len(stream_labels), "stream_data_count": len(stream_data)},
             )
         augstreams = []
         for stream, label in zip(stream_data, stream_labels, strict=False):
@@ -338,7 +339,7 @@ async def submit_binary_to_source_dataless(
         )
         _log_high_level_submission(request, ctx, result)
         return result
-    except HTTPException as e:
+    except (HTTPException, ApiException) as e:
         qr.set_security_headers(ctx, resp, security, ex=e)
         raise
 
@@ -395,7 +396,7 @@ async def submit_child_binary_to_source(
         )
         _log_high_level_submission(request, ctx, result)
         return result
-    except HTTPException as e:
+    except (HTTPException, ApiException) as e:
         qr.set_security_headers(ctx, resp, security, ex=e)
         raise
 
@@ -448,7 +449,7 @@ async def submit_child_binary_to_source_dataless(
         )
         _log_high_level_submission(request, ctx, result)
         return result
-    except HTTPException as e:
+    except (HTTPException, ApiException) as e:
         qr.set_security_headers(ctx, resp, security, ex=e)
         raise
 
@@ -469,5 +470,5 @@ async def expedite_processing(
         qr.set_security_headers(ctx, resp, security)
         binary_expedite.expedite_processing(ctx, qr.writer, sha256, bypass_cache)
         return True
-    except HTTPException as e:
+    except (HTTPException, ApiException) as e:
         qr.set_security_headers(ctx, resp, security, ex=e)

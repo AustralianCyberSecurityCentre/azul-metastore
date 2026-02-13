@@ -3,7 +3,7 @@ from typing import AsyncIterable
 
 from azul_bedrock.test_utils import file_manager
 from fastapi import UploadFile
-
+from azul_bedrock import exceptions_metastore
 from azul_metastore.common import fileformat
 from tests.support import unit_test
 
@@ -51,32 +51,32 @@ class FileformatTestCases(unit_test.BaseUnitTestCase):
 
         # zip, missing password
         with helpers.get_file("fake_infected.zip") as indata:
-            with self.assertRaisesRegex(fileformat.ExtractException, r"zip requires password"):
+            with self.assertRaisesRegex(exceptions_metastore.ExtractException, r"zip requires password"):
                 list(fileformat.extract_archive(indata))
 
         # zip, wrong password
         with helpers.get_file("fake_infected.zip") as indata:
-            with self.assertRaisesRegex(fileformat.ExtractException, r"bad zip password"):
+            with self.assertRaisesRegex(exceptions_metastore.ExtractException, r"bad zip password"):
                 list(fileformat.extract_archive(indata, "hello"))
 
         # zip, bomb to 5gb
         indata = io.BytesIO(fm.download_file_bytes("fb4ff972d21189beec11e05109c4354d0cd6d3b629263d6c950cf8cc3f78bd99"))
-        with self.assertRaisesRegex(fileformat.ExtractException, r"too many bytes in extracted submission"):
+        with self.assertRaisesRegex(exceptions_metastore.ExtractException, r"too many bytes in extracted submission"):
             list(fileformat.extract_archive(indata, "hello"))
 
         # non-archive/unsupported file type
         with helpers.get_file("fake.txt") as indata:
-            with self.assertRaisesRegex(fileformat.ExtractException, r"not a zip file"):
+            with self.assertRaisesRegex(exceptions_metastore.ExtractException, r"not a zip file"):
                 list(fileformat.extract_archive(indata))
 
         # too long file names
         with helpers.get_file("harden_long_files.zip") as indata:
-            with self.assertRaisesRegex(fileformat.ExtractException, r"file path too long"):
+            with self.assertRaisesRegex(exceptions_metastore.ExtractException, r"file path too long"):
                 list(fileformat.extract_archive(indata))
 
         # too many files
         with helpers.get_file("harden_too_many_files.zip") as indata:
-            with self.assertRaisesRegex(fileformat.ExtractException, r"too many files"):
+            with self.assertRaisesRegex(exceptions_metastore.ExtractException, r"too many files"):
                 list(fileformat.extract_archive(indata))
 
     async def test_handle_malpz(self):
@@ -151,20 +151,20 @@ class FileformatTestCases(unit_test.BaseUnitTestCase):
 
         # carted zip extraction
         with helpers.get_file("cartedzipfaketext.zip.cart") as indata:
-            with self.assertRaises(fileformat.ExtractException):
+            with self.assertRaises(exceptions_metastore.ExtractException):
                 await self._convert_to_list(fileformat.unpack_content(UploadFile(indata), extract=True))
 
         # malpz'd zip extraction
         with helpers.get_file("cartedzipfaketext.zip.malpz") as indata:
-            with self.assertRaises(fileformat.ExtractException):
+            with self.assertRaises(exceptions_metastore.ExtractException):
                 await self._convert_to_list(fileformat.unpack_content(UploadFile(indata), extract=True))
 
         # text file
         with helpers.get_file("fake.txt") as indata:
-            with self.assertRaises(fileformat.ExtractException):
+            with self.assertRaises(exceptions_metastore.ExtractException):
                 await self._convert_to_list(fileformat.unpack_content(UploadFile(indata), extract=True))
 
         # text file - can't extract
         with helpers.get_file("fake.txt") as indata:
-            with self.assertRaises(fileformat.ExtractException):
+            with self.assertRaises(exceptions_metastore.ExtractException):
                 await self._convert_to_list(fileformat.unpack_content(UploadFile(indata), extract=True))

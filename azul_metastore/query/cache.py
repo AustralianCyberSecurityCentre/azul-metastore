@@ -7,6 +7,9 @@ from __future__ import annotations
 import logging
 
 import pendulum
+from azul_bedrock import exceptions_metastore
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import BaseAzulException
 from opensearchpy import exceptions as osex
 
 from azul_metastore import context
@@ -36,7 +39,7 @@ def store_generic(ctx: context.Context, category: str, unique: str, version: str
     }
     try:
         priv = context.get_writer_context()
-    except (context.NoWriteException, osex.AuthenticationException) as e:
+    except (exceptions_metastore.NoWriteException, osex.AuthenticationException) as e:
         logger.error(f"store_generic error: {str(e)}")
         return
     priv.man.cache.w.wrap_and_index_docs(priv.sd, [cc.Cache.encode(doc)])
@@ -55,7 +58,7 @@ def load_generic(
     # use the priviliged reader, since otherwise the doc needs to have been indexed
     try:
         priv = context.get_writer_context()
-    except (context.NoWriteException, osex.AuthenticationException) as e:
+    except (exceptions_metastore.NoWriteException, osex.AuthenticationException) as e:
         logger.error(f"load_generic error: {str(e)}")
         return None
     resp = ctx.man.cache.w.get(priv.sd, _id)
@@ -90,7 +93,7 @@ def store_counts(ctx: context.Context, category: str, uniq: str, counts: dict[st
     # cache counts for future use
     try:
         priv = context.get_writer_context()
-    except (context.NoWriteException, osex.AuthenticationException) as e:
+    except (exceptions_metastore.NoWriteException, osex.AuthenticationException) as e:
         logger.error(f"store_counts error: {str(e)}")
         return
     encoded = [cc.Cache.encode(x) for x in docs]
@@ -109,7 +112,7 @@ def load_counts(ctx: context.Context, category: str, uniq: str, raw_ids: list[st
     """
     user_security = ctx.get_user_security_unique()
     if len(raw_ids) > 10000:
-        raise Exception("max counts in one call exceeded")
+        raise BaseAzulException(internal=ExceptionCodeEnum.MetastoreCacheTooManyIds)
 
     ids_map = {_calc_uniq(x, uniq): x for x in raw_ids}
     # USER - read cached counts

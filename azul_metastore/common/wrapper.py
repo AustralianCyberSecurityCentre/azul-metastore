@@ -8,7 +8,9 @@ import types
 from typing import Any, Iterable
 
 import opensearchpy
-from azul_bedrock.exceptions import HTTPException
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
+from azul_bedrock.exceptions_metastore import InitFailure
 from azul_bedrock.models_restapi.basic import QueryInfo
 from azul_security import exceptions as security_exception
 from opensearchpy import helpers
@@ -23,18 +25,6 @@ logger = logging.getLogger(__name__)
 MAX_DOCS_DELETED_PER_QUERY = 10000
 # For a delete_loop, if no more than this many docs are deleted, finish
 MIN_DOCS_DELETED_PER_QUERY = 100
-
-
-class InvalidSearchException(Exception):
-    """Arguments to search were invalid."""
-
-    pass
-
-
-class IndexException(Exception):
-    """Exception when attempting to index the documents."""
-
-    pass
 
 
 def partition_key_to_indices(partition: str, key: str) -> list[str]:
@@ -56,12 +46,6 @@ def set_index_properties(partition: str, key: str, data: dict) -> None:
     }
     sd = search_data.get_writer_search_data()
     sd.es().indices.put_template(name=f"azul.{partition}.{key}prop", body=body)
-
-
-class InitFailure(Exception):
-    """Opensearch indices could not be verified/initialised for metastore."""
-
-    pass
 
 
 class TimeAndLogCommand:
@@ -174,7 +158,10 @@ class Wrapper:
         try:
             existing_template = sd.es().indices.get_template(name=self.alias, ignore=[404]).get(self.alias, {})
         except opensearchpy.AuthenticationException as e:
-            raise InitFailure(f"{self.alias} {e.error}") from None
+            raise InitFailure(
+                internal=ExceptionCodeEnum.MetastoreOpensearchAuthFailure,
+                parameters={"alias": self.alias, "inner_error": e.error},
+            ) from None
 
         # Check if the version is absent or the configured number of shards and replicas has changed and
         # update index template if required.
@@ -191,14 +178,21 @@ class Wrapper:
             try:
                 sd.es().indices.create(index=self.index_open, ignore=400)
             except Exception as e:
-                raise InitFailure(f"Failure creating {self.index_open} index") from e
+                raise InitFailure(
+                    internal=ExceptionCodeEnum.MetastoreOpensearchFailedToCreateIndex,
+                    parameters={"index": self.index_open},
+                ) from e
             logger.info(f"{self.alias} template updated or created")
         elif existing_template["version"] != self.version:
             # do not replace automatically unless forced
             # this indicates that data needs to be reindexed
             raise InitFailure(
-                f"{self.alias} template ({existing_template['version']}) does not match metastore ({self.version}). "
-                "Consider using a new metastore partition and reindexing data."
+                internal=ExceptionCodeEnum.MetastoreOpensearchTemplateOldVersion,
+                parameters={
+                    "index": self.alias,
+                    "existing_template_version": existing_template["version"],
+                    "new_version": self.version,
+                },
             )
         else:
             logger.info(f"{self.alias} template ok")
@@ -209,7 +203,10 @@ class Wrapper:
             try:
                 sd.es().indices.create(index=self.index_open)
             except Exception as e:
-                raise InitFailure(f"Failure creating {self.index_open} index") from e
+                raise InitFailure(
+                    internal=ExceptionCodeEnum.MetastoreOpensearchFailedToCreateIndex,
+                    parameters={"index": self.index_open},
+                ) from e
             logger.info(f"{self.alias} alias {self.index_open} index created")
         else:
             logger.info(f"{self.alias} alias {self.index_open} index ok")
@@ -284,12 +281,12 @@ class Wrapper:
             knn_filter = query["knn"]
             if len(knn_filter) != 1:
                 # This gets more complicated with security filters; don't worry about this edge case
-                raise Exception("kNN filters only supported for one search term")
+                raise BaseAzulException(internal=ExceptionCodeEnum.MetastoreOpensearchKnnMisconfigured)
             query = knn_filter[list(knn_filter.keys())[0]].setdefault("filter", {})
 
         tmp = query.setdefault("bool", {})
         if set(query.keys()) != {"bool"}:
-            raise Exception("Can only have bool in top level query (or within kNN query filter)")
+            raise BaseAzulException(internal=ExceptionCodeEnum.MetastoreOnlyAllowTopLevelBoolOrKnn)
 
         tmp.setdefault("must_not", [])
         tmp.setdefault("filter", [])
@@ -304,8 +301,10 @@ class Wrapper:
             try:
                 safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
             except security_exception.SecurityException as e:
-                raise HTTPException(
-                    status_code=422, detail=f"Bad security provided in security_exclude {sd.security_exclude}" + str(e)
+                raise ApiException(
+                    status_code=422,
+                    internal=ExceptionCodeEnum.MetastoreBadSecurityConversionExclude,
+                    parameters={"security_exclude": sd.security_exclude, "inner_exception": str(e)},
                 ) from None
             if not sd.security_include:
                 tmp["must_not"] += [
@@ -348,9 +347,10 @@ class Wrapper:
                 try:
                     musts = utils.azsec().unsafe_to_safe(sd.security_include)
                 except security_exception.SecurityException as e:
-                    raise HTTPException(
+                    raise ApiException(
                         status_code=422,
-                        detail=f"Bad security provided in security_include {sd.security_include}" + str(e),
+                        internal=ExceptionCodeEnum.MetastoreBadSecurityConversionInclude,
+                        parameters={"security_include": sd.security_include, "inner_exception": str(e)},
                     ) from None
                 must_clauses = [{"term": {"encoded_security.inclusive": value}} for value in musts]
 
@@ -397,12 +397,12 @@ class Wrapper:
             knn_filter = query["knn"]
             if len(knn_filter) != 1:
                 # This gets more complicated with security filters; don't worry about this edge case
-                raise Exception("kNN filters only supported for one search term")
+                raise BaseAzulException(internal=ExceptionCodeEnum.MetastoreKnnTooManySearchTerms)
             query = knn_filter[list(knn_filter.keys())[0]].setdefault("filter", {})
 
         tmp = query.setdefault("bool", {})
         if set(query.keys()) != {"bool"}:
-            raise Exception("Can only have bool in top level query (or within kNN query filter)")
+            raise BaseAzulException(internal=ExceptionCodeEnum.MetastoreOnlyAllowTopLevelBoolOrKnn)
 
         tmp.setdefault("must_not", [])
         tmp.setdefault("must", [])
@@ -415,8 +415,10 @@ class Wrapper:
             try:
                 safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
             except security_exception.SecurityException as e:
-                raise HTTPException(
-                    status_code=422, detail=f"Bad security provided in security_exclude {sd.security_exclude}" + str(e)
+                raise ApiException(
+                    status_code=422,
+                    internal=ExceptionCodeEnum.MetastoreBadSecurityConversionExclude,
+                    parameters={"security_exclude": sd.security_exclude, "inner_exception": str(e)},
                 ) from None
 
             if not sd.security_include:
@@ -442,8 +444,10 @@ class Wrapper:
             try:
                 musts = utils.azsec().unsafe_to_safe(sd.security_include)
             except security_exception.SecurityException as e:
-                raise HTTPException(
-                    status_code=422, detail=f"Bad security provided in security_include {sd.security_include}" + str(e)
+                raise ApiException(
+                    status_code=422,
+                    internal=ExceptionCodeEnum.MetastoreBadSecurityConversionInclude,
+                    parameters={"security_include": sd.security_include, "inner_exception": str(e)},
                 ) from None
 
             for m in musts:
@@ -613,7 +617,9 @@ class Wrapper:
                 elif "update" in doc:
                     internal = doc["update"]
                 else:
-                    raise Exception(f"unknown doc type to handle error in {doc}")
+                    raise BaseAzulException(
+                        internal=ExceptionCodeEnum.MetastoreUnknownDocType, parameters={"doc_type": str(doc)}
+                    )
 
                 try:
                     etype = internal["error"]["type"]

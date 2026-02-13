@@ -5,9 +5,12 @@ FUTURE don't add classmethods on to pydantic classes
 
 import json
 
+from azul_bedrock import exceptions_metastore
 from azul_bedrock import models_network as azm
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import BaseAzulException
 
-from azul_metastore.common.utils import PreprocessException, azsec, jsondict
+from azul_metastore.common.utils import azsec, jsondict
 
 
 def normalise_security(d: dict) -> None:
@@ -27,13 +30,19 @@ class BinaryEvent(azm.BinaryEvent):
         # limit num streams
         len_streams = len(ev.entity.datastreams)
         if len_streams > stream_limit:
-            raise PreprocessException(f"too many streams: {len_streams} > {stream_limit}")
+            raise exceptions_metastore.PreprocessException(
+                internal=ExceptionCodeEnum.MetastorePreProcessTooManyStreams,
+                parameters={"len_streams": len_streams, "stream_limit": stream_limit},
+            )
 
         # limit num features
         features = ev.entity.features
         len_features = len(features)
         if len_features > feature_limit:
-            raise PreprocessException(f"too many features: {len_features} > {feature_limit}")
+            raise exceptions_metastore.PreprocessException(
+                internal=ExceptionCodeEnum.MetastorePreProcessTooManyFeatures,
+                parameters={"len_features": len_features, "feature_limit": feature_limit},
+            )
 
         # normalise entity id and hashes
         ev.entity.sha256 = ev.entity.sha256.lower() if ev.entity.sha256 else None
@@ -73,7 +82,10 @@ class PluginEvent(azm.PluginEvent):
                 json.loads(v)
             except json.decoder.JSONDecodeError as e:
                 # raise error on invalid config
-                raise Exception(f"plugin config value for '{k}' is not json string: {v}") from e
+                raise BaseAzulException(
+                    internal=ExceptionCodeEnum.MetastoreEncoderInvalidPluginConfig,
+                    parameters={"config_key": k, "config_value": v},
+                ) from e
 
         return dumped
 

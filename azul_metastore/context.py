@@ -4,8 +4,9 @@ from dataclasses import dataclass
 
 import cachetools
 from azul_bedrock import dispatcher as b_dispatcher
-from azul_bedrock import models_auth
-from azul_bedrock.exceptions import ApiException
+from azul_bedrock import exceptions_metastore, models_auth
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException
 from azul_bedrock.models_restapi.basic import UserAccess
 from azul_security import admin
 from azul_security import security as sec
@@ -14,12 +15,6 @@ from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT
 
 from azul_metastore import settings
 from azul_metastore.common import manager, memcache, opensearch, search_data, wrapper
-
-
-class NoWriteException(Exception):
-    """User does not have permission to write documents."""
-
-    pass
 
 
 @cachetools.cached(cache=memcache.get_ttl_cache("useraccess"), key=lambda x, _: x.unique())
@@ -74,9 +69,9 @@ class Context:
     azsec: sec.Security
     man: manager.Manager
 
-    user_info: models_auth.UserInfo = None
-    sd: search_data.SearchData = None
-    dispatcher: b_dispatcher.DispatcherAPI = None
+    user_info: models_auth.UserInfo | None = None
+    sd: search_data.SearchData | None = None
+    dispatcher: b_dispatcher.DispatcherAPI | None = None
 
     def refresh(self):
         """Refresh the searchable docs for all indices in partition."""
@@ -121,9 +116,9 @@ class Context:
         except SecurityException:
             raise ApiException(
                 status_code=HTTP_422_UNPROCESSABLE_CONTENT,
-                ref="security was not valid",
-                external=f"security was not valid ({security})",
-                internal="upload_bad_security",
+                ref=f"security was not valid ({security})",
+                internal=ExceptionCodeEnum.MetastoreContextBadSecurity,
+                parameters={"security": security},
             ) from None
 
 
@@ -159,5 +154,8 @@ def get_writer_context() -> Context:
     try:
         ret.man.initialise(ret.sd)
     except wrapper.InitFailure as e:
-        raise NoWriteException("Could not initialise metastore templates") from e
+        raise exceptions_metastore.NoWriteException(
+            ref="Could not initialise metastore templates",
+            internal=ExceptionCodeEnum.MetastoreContextInsufficientPermissionsForWrite,
+        ) from e
     return ret

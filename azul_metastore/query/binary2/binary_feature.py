@@ -7,7 +7,8 @@ import logging
 import re
 
 from azul_bedrock import models_restapi
-from fastapi import HTTPException
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException
 from pydantic import TypeAdapter
 
 from azul_metastore import context
@@ -312,8 +313,10 @@ def find_feature_values(
             try:
                 json_loaded_after = json.loads(after)
             except json.JSONDecodeError:
-                raise HTTPException(
-                    status_code=422, detail=f"Invalid after provided '{after}', after must be valid JSON!"
+                raise ApiException(
+                    status_code=422,
+                    internal=ExceptionCodeEnum.MetastoreInvalidAfterProvided,
+                    parameters={"after": after},
                 ) from None
             # resume pagination of existing search
             body["aggs"]["COMPOSITE"]["composite"]["after"] = json_loaded_after

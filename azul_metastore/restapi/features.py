@@ -1,10 +1,12 @@
 """Routes for feature data queries."""
 
 import pendulum
-from azul_bedrock.exceptions import ApiException
+from azul_bedrock import exceptions_metastore
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException
 from azul_bedrock.models_restapi import features as bedr_features
 from azul_security import exceptions
-from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response
+from fastapi import APIRouter, Body, Depends, Query, Response
 from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT
 
 from azul_metastore import context
@@ -142,9 +144,9 @@ def create_feature_value_tag(
     except exceptions.SecurityException:
         raise ApiException(
             status_code=HTTP_422_UNPROCESSABLE_CONTENT,
-            ref="security was not valid",
-            external=f"security was not valid ({security})",
-            internal="upload_bad_security",
+            ref=f"security was not valid ({security})",
+            internal=ExceptionCodeEnum.MetastoreContextBadSecurity,
+            parameters={"security": security},
         ) from None
 
     tag = dict(
@@ -158,9 +160,11 @@ def create_feature_value_tag(
         annotation.create_feature_value_tags(qr.writer, ctx.user_info.username, [tag])
         qr.set_security_headers(ctx, resp)
     except InvalidAnnotation as e:
-        e = HTTPException(status_code=400, detail=repr(e))
+        e = exceptions_metastore.convert_exception_to_api_exception(
+            base_exception=e, internal=ExceptionCodeEnum.MetastoreInvalidAnnotationForCreate, status_code=400
+        )
         qr.set_security_headers(ctx, resp, ex=e)
-        raise e
+        raise e from None
 
 
 @router.delete("/v0/features/tags/{tag}", **qr.kw)
@@ -172,7 +176,9 @@ def delete_feature_value_tag(
         annotation.delete_feature_value_tag(qr.writer, feature, value, tag)
         qr.set_security_headers(ctx, resp)
     except FileNotFoundError:
-        e = HTTPException(status_code=404)
+        e = ApiException(
+            status_code=404, internal=ExceptionCodeEnum.MetastoreInvalidDeleteTag, parameters={"tag": tag}
+        )
         qr.set_security_headers(ctx, resp, ex=e)
         raise e from None
 
@@ -229,7 +235,9 @@ def find_values_in_feature(
         after=after,
     )
     if not data:
-        e = HTTPException(status_code=404)
+        e = ApiException(
+            status_code=404, internal=ExceptionCodeEnum.MetastoreNoFeatureValuesFound, parameters={"feature": feature}
+        )
         qr.set_security_headers(ctx, resp, ex=e)
         raise e
     return qr.fr(ctx, data, resp)
@@ -255,8 +263,7 @@ def feature_pivot_search(
         raise ApiException(
             status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref="feature_values not valid",
-            external="feature values must be a valid list of tuples containing feature_name, feature_value",
-            internal="pivot_invalid_feature_values",
+            internal=ExceptionCodeEnum.MetastoreFeaturesInvalidPivotFeatures,
         )
     data = binary_feature_pivot.find_common_features_from_features(ctx, feature_values)
     return qr.fr(ctx, data, resp)

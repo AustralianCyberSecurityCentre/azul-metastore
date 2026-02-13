@@ -4,6 +4,9 @@ import logging
 from typing import Optional
 
 import cachetools
+from azul_bedrock import exceptions_metastore
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import BaseAzulException
 from azul_bedrock.models_auth import UserInfo
 from azul_bedrock.models_restapi import basic as bedr_basic
 from azul_security.exceptions import SecurityAccessException
@@ -48,12 +51,15 @@ def _get_subctx(user_info: UserInfo, security_exclude: list[str], security_inclu
             enable_log_es_queries=settings.get().log_opensearch_queries,
         ),
     )
-
     # verify that we have minimum required access
     try:
         ctx.get_user_access()
     except SecurityAccessException as e:
-        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail=str(e)) from None
+        raise exceptions_metastore.convert_exception_to_api_exception(
+            base_exception=e,
+            new_error_enum=ExceptionCodeEnum.MetastoreUserUnauthorized,
+            status_code=HTTP_401_UNAUTHORIZED,
+        ) from None
     return ctx
 
 
@@ -92,7 +98,7 @@ class QuickRefs:
             # This always passes even if this header doesn't exist
             del response.headers["x-azul-security-defaulted"]
         else:
-            raise Exception("Logic error - should be setting response and/or exception!")
+            raise BaseAzulException(internal=ExceptionCodeEnum.MetastoreSetSecurityHeaderUnexpected)
 
     @classmethod
     def format_response(cls, ctx: context.Context, data, response: Response):
@@ -135,7 +141,7 @@ class QuickRefs:
         try:
             user_info = request.state.user_info
         except AttributeError as e:
-            raise Exception("user_info is not available on request.state") from e
+            raise BaseAzulException(internal=ExceptionCodeEnum.MetastoreUserInfoNotAvailable) from e
 
         # If we are enabling es queries we should also bypass the cache so we need the value now.
         ctx = self.subctx(user_info, security_exclude, security_include, no_cache=include_queries)
