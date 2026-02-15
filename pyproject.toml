@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling", "hatch-vcs"]
+requires = ["hatchling", "hatch-vcs", "setuptools==81.0.0"]
 build-backend = "hatchling.build"
 
 [project]
@@ -88,8 +88,6 @@ dev = [
     "pytest>=9.0.2",
     "respx>=0.22.0",
     "ssdeep>=3.4",
-    # for ssdeep install, need to pin setuptools.
-    "setuptools==81.0.0",
     "tox>=4.34.1",
 ]
 
