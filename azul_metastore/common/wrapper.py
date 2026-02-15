@@ -8,11 +8,11 @@ import types
 from typing import Any, Iterable
 
 import opensearchpy
+from azul_bedrock import exceptions_security
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
 from azul_bedrock.exceptions_metastore import InitFailure
 from azul_bedrock.models_restapi.basic import QueryInfo
-from azul_security import exceptions as security_exception
 from opensearchpy import helpers
 
 from azul_metastore.common import search_data, utils
@@ -300,7 +300,7 @@ class Wrapper:
             # convert to safe format
             try:
                 safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
-            except security_exception.SecurityException as e:
+            except exceptions_security.SecurityException as e:
                 raise ApiException(
                     status_code=422,
                     internal=ExceptionCodeEnum.MetastoreBadSecurityConversionExclude,
@@ -346,7 +346,7 @@ class Wrapper:
                 # Convert to safe format and build AND-style term clauses
                 try:
                     musts = utils.azsec().unsafe_to_safe(sd.security_include)
-                except security_exception.SecurityException as e:
+                except exceptions_security.SecurityException as e:
                     raise ApiException(
                         status_code=422,
                         internal=ExceptionCodeEnum.MetastoreBadSecurityConversionInclude,
@@ -414,7 +414,7 @@ class Wrapper:
             # convert to safe format
             try:
                 safes = utils.azsec().unsafe_to_safe(sd.security_exclude)
-            except security_exception.SecurityException as e:
+            except exceptions_security.SecurityException as e:
                 raise ApiException(
                     status_code=422,
                     internal=ExceptionCodeEnum.MetastoreBadSecurityConversionExclude,
@@ -443,7 +443,7 @@ class Wrapper:
             # Convert to safe format and build AND-style term clauses
             try:
                 musts = utils.azsec().unsafe_to_safe(sd.security_include)
-            except security_exception.SecurityException as e:
+            except exceptions_security.SecurityException as e:
                 raise ApiException(
                     status_code=422,
                     internal=ExceptionCodeEnum.MetastoreBadSecurityConversionInclude,

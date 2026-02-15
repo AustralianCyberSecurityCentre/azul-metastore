@@ -9,8 +9,8 @@ from azul_bedrock import exceptions_metastore
 from azul_bedrock import models_network as azm
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
+from azul_bedrock.exceptions_security import SecurityAccessException, SecurityParseException
 from azul_bedrock.models_restapi import binaries_data as bedr_bdata
-from azul_security.exceptions import SecurityAccessException, SecurityParseException
 from starlette.datastructures import UploadFile
 from starlette.status import (
     HTTP_400_BAD_REQUEST,

@@ -1,11 +1,10 @@
 """Routes for feature data queries."""
 
 import pendulum
-from azul_bedrock import exceptions_metastore
+from azul_bedrock import exceptions_metastore, exceptions_security
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException
 from azul_bedrock.models_restapi import features as bedr_features
-from azul_security import exceptions
 from fastapi import APIRouter, Body, Depends, Query, Response
 from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT
 
@@ -141,7 +140,7 @@ def create_feature_value_tag(
     """Attach a tag to a specific feature value."""
     try:
         security = ctx.azsec.string_normalise(security)
-    except exceptions.SecurityException:
+    except exceptions_security.SecurityException:
         raise ApiException(
             status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref=f"security was not valid ({security})",
@@ -161,7 +160,7 @@ def create_feature_value_tag(
         qr.set_security_headers(ctx, resp)
     except InvalidAnnotation as e:
         e = exceptions_metastore.convert_exception_to_api_exception(
-            base_exception=e, internal=ExceptionCodeEnum.MetastoreInvalidAnnotationForCreate, status_code=400
+            base_exception=e, new_error_enum=ExceptionCodeEnum.MetastoreInvalidAnnotationForCreate, status_code=400
         )
         qr.set_security_headers(ctx, resp, ex=e)
         raise e from None

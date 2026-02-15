@@ -25,7 +25,7 @@ class TestSources(integration_test.BaseRestapi):
         response = self.client.get("/v0/sources/invalid1")
         self.assertEqual(404, response.status_code)
         resp = response.json()
-        self.assertEqual("Not Found", resp["detail"])
+        self.assertEqual("The provided source cannot be found in Azul.", resp["detail"]["external"])
 
         response = self.client.get("/v0/sources/s1")
         self.assertEqual(200, response.status_code)

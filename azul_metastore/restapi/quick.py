@@ -7,9 +7,9 @@ import cachetools
 from azul_bedrock import exceptions_metastore
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import BaseAzulException
+from azul_bedrock.exceptions_security import SecurityAccessException
 from azul_bedrock.models_auth import UserInfo
 from azul_bedrock.models_restapi import basic as bedr_basic
-from azul_security.exceptions import SecurityAccessException
 from fastapi import HTTPException, Query, Request, Response
 from pydantic import create_model
 from starlette.status import HTTP_401_UNAUTHORIZED

@@ -7,10 +7,10 @@ from azul_bedrock import dispatcher as b_dispatcher
 from azul_bedrock import exceptions_metastore, models_auth
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException
+from azul_bedrock.exceptions_security import SecurityException
 from azul_bedrock.models_restapi.basic import UserAccess
 from azul_security import admin
 from azul_security import security as sec
-from azul_security.exceptions import SecurityException
 from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT
 
 from azul_metastore import settings
