@@ -2,7 +2,8 @@
 
 from typing import Optional
 
-from azul_bedrock.exceptions import HTTPException
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException
 
 
 def strip_tlsh_version(tlsh_hash: str) -> str:
@@ -12,7 +13,11 @@ def strip_tlsh_version(tlsh_hash: str) -> str:
             return tlsh_hash[2:]
         else:
             # Unsupported TLSH version
-            raise HTTPException(status_code=422, detail=f"Invalid TLSH version in: '{tlsh_hash}'")
+            raise ApiException(
+                status_code=422,
+                internal=ExceptionCodeEnum.MetastoreInvalidTLSHFormat,
+                parameters={"tlsh_hash": tlsh_hash},
+            )
     else:
         return tlsh_hash
 
@@ -32,7 +37,9 @@ def _tlsh_to_array(tlsh_str: str) -> list[int]:
     tlsh_str = strip_tlsh_version(tlsh_str)
 
     if len(tlsh_str) != 70:
-        raise HTTPException(status_code=422, detail=f"Invalid TLSH length in: '{tlsh_str}'")
+        raise ApiException(
+            status_code=422, internal=ExceptionCodeEnum.MetastoreInvalidTLSHLength, parameters={"tlsh": tlsh_str}
+        )
 
     data = bytearray.fromhex(tlsh_str)
 

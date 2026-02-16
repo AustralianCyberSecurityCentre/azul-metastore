@@ -7,6 +7,8 @@ import traceback
 from enum import IntEnum
 
 import click
+from azul_bedrock import exceptions_bedrock
+from azul_bedrock.exception_enums import ExceptionCodeEnum
 from prometheus_client import start_http_server
 
 from azul_metastore import context, entry_purge, ingestor, settings
@@ -116,9 +118,9 @@ def apply_opensearch_config(print_only: bool, rolesmapping: bool, no_input: bool
     env_username = os.environ.get("METASTORE_OPENSEARCH_ADMIN_USERNAME")
     env_password = os.environ.get("METASTORE_OPENSEARCH_ADMIN_PASSWORD")
     if no_input and not (env_username and env_password):
-        raise ValueError(
-            "When using --no-input, both METASTORE_OPENSEARCH_ADMIN_USERNAME and "
-            "METASTORE_OPENSEARCH_ADMIN_PASSWORD must be set."
+        raise exceptions_bedrock.AzulValueError(
+            ref="When using --no-input, both METASTORE_OPENSEARCH_ADMIN_USERNAME and METASTORE_OPENSEARCH_ADMIN_PASSWORD must be set.",
+            internal=ExceptionCodeEnum.MetastoreEntryBadInputParameters,
         )
 
     elif no_input or click.confirm(
@@ -132,6 +134,7 @@ def apply_opensearch_config(print_only: bool, rolesmapping: bool, no_input: bool
         else:
             selected = None
 
+        int_val = ""
         while not selected:
             try:
                 int_val = click.prompt(

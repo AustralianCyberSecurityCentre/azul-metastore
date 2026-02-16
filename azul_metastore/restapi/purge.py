@@ -1,8 +1,11 @@
 """Routes for purge data queries."""
 
 import pendulum
+from azul_bedrock import exceptions_metastore
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException
 from azul_bedrock.models_restapi import purge as bedr_purge
-from fastapi import APIRouter, Depends, HTTPException, Path, Query, Response
+from fastapi import APIRouter, Depends, Path, Query, Response
 from pendulum.parsing.exceptions import ParserError
 from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 
@@ -27,15 +30,20 @@ def purge_submission(
 ):
     """Purge a set of submissions."""
     if not ctx.is_admin():
-        raise HTTPException(
+        raise ApiException(
             status_code=HTTP_403_FORBIDDEN,
-            detail=f"user '{ctx.user_info.username}' not superuser",
+            internal=ExceptionCodeEnum.MetastoreUserNotAllowedToPurge,
+            ref=f"user '{ctx.user_info.username}' not superuser",
+            parameters={"username": ctx.user_info.username},
         )
     try:
         pendulum.parse(timestamp)
     except ParserError:
-        raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST, detail=f"The timestamp provided '{timestamp}' has an invalid format."
+        raise ApiException(
+            status_code=HTTP_400_BAD_REQUEST,
+            ref=f"The timestamp provided '{timestamp}' has an invalid format.",
+            internal=ExceptionCodeEnum.MetastoreInvalidTimestampForPurge,
+            parameters={"timestamp": timestamp},
         ) from None
 
     purger = qpurge.Purger()
@@ -45,10 +53,11 @@ def purge_submission(
             timestamp=timestamp,
             purge=purge,
         )
-    except qpurge.InvalidPurgeException as e:
-        raise HTTPException(
+    except exceptions_metastore.InvalidPurgeException as e:
+        raise exceptions_metastore.convert_exception_to_api_exception(
+            base_exception=e,
+            new_error_enum=ExceptionCodeEnum.MetastoreInvalidPurgeExceptionApi,
             status_code=HTTP_400_BAD_REQUEST,
-            detail=str(e),
         ) from None
     return qr.fr(ctx, ret or {}, resp)
 
@@ -66,9 +75,11 @@ def purge_link(
 ):
     """Purge a manually added relationship between binaries."""
     if not ctx.is_admin():
-        raise HTTPException(
+        raise ApiException(
             status_code=HTTP_403_FORBIDDEN,
-            detail=f"user '{ctx.user_info.username}' not superuser",
+            internal=ExceptionCodeEnum.MetastoreUserNotAllowedToPurge,
+            ref=f"user '{ctx.user_info.username}' not superuser",
+            parameters={"username": ctx.user_info.username},
         )
 
     purger = qpurge.Purger()
@@ -77,9 +88,10 @@ def purge_link(
             track_link=track_link,
             purge=purge,
         )
-    except qpurge.InvalidPurgeException as e:
-        raise HTTPException(
+    except exceptions_metastore.InvalidPurgeException as e:
+        raise exceptions_metastore.convert_exception_to_api_exception(
+            base_exception=e,
+            new_error_enum=ExceptionCodeEnum.MetastoreInvalidPurgeExceptionApi,
             status_code=HTTP_400_BAD_REQUEST,
-            detail=str(e),
         ) from None
     return qr.fr(ctx, ret or {}, resp)

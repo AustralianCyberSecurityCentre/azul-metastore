@@ -4,7 +4,8 @@ import logging
 from typing import Iterable
 
 from azul_bedrock import models_network as azm
-from azul_bedrock.exceptions import ApiException
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException
 from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR
 
 from azul_metastore import context
@@ -147,7 +148,8 @@ def submit(
         raise ApiException(
             status_code=HTTP_500_INTERNAL_SERVER_ERROR,
             ref="Dispatcher rejected the submitted events",
-            internal=str(resp),
+            internal=ExceptionCodeEnum.MetastoreDispatcherRejectedEvents,
+            parameters={"response": resp},
         )
     full_event = resp.ok[0]
 
@@ -165,5 +167,6 @@ def submit(
             raise ApiException(
                 status_code=HTTP_500_INTERNAL_SERVER_ERROR,
                 ref="Unable to propagate insert events to metastore",
-                internal=str(e),
+                internal=ExceptionCodeEnum.MetastoreSubmissionsCantCreateInsertionEvents,
+                parameters={"inner_exception": str(e)},
             ) from e

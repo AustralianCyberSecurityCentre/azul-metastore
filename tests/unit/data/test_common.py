@@ -3,10 +3,14 @@ import io
 import json
 import re
 from unittest import mock
-
+from azul_bedrock import exceptions_bedrock
+from azul_bedrock import exceptions_metastore
+from azul_bedrock.dispatcher import DispatcherAPI
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
 from azul_bedrock import models_api
 from azul_bedrock import models_network as azm
-from azul_bedrock.exceptions import ApiException
+from azul_bedrock.exceptions_bedrock import ApiException
 from fastapi import UploadFile
 
 from azul_metastore import context
@@ -376,7 +380,11 @@ class CommonTestCases(unit_test.DataMockingUnitTest):
                 ctx=self.ctx,
                 priv_ctx=self.priv_ctx,
             )
-        self.assertEqual(apiException.exception.detail["internal"], "no_parent_and_source_submitted")
+        print(apiException.exception.detail["internal"])
+        self.assertEqual(
+            apiException.exception.detail["internal"],
+            ExceptionCodeEnum.MetastoreBadBinarySubmissionSourceOrParent.value,
+        )
 
         # Submit with source and parent
         with self.assertRaises(ApiException) as apiException:
@@ -397,7 +405,11 @@ class CommonTestCases(unit_test.DataMockingUnitTest):
                 ctx=self.ctx,
                 priv_ctx=self.priv_ctx,
             )
-        self.assertEqual(apiException.exception.detail["internal"], "parent_and_source_both_submitted")
+        print(apiException.exception.detail["internal"])
+        self.assertEqual(
+            apiException.exception.detail["internal"],
+            ExceptionCodeEnum.MetastoreBadBinarySubmissionParentAndSource.value,
+        )
 
         # Submit with no binary and no sha256
         with self.assertRaises(ApiException) as apiException:
@@ -418,7 +430,11 @@ class CommonTestCases(unit_test.DataMockingUnitTest):
                 ctx=self.ctx,
                 priv_ctx=self.priv_ctx,
             )
-        self.assertEqual(apiException.exception.detail["internal"], "upload_no_binary_sha256")
+        print(apiException.exception.detail["internal"])
+        self.assertEqual(
+            apiException.exception.detail["internal"],
+            ExceptionCodeEnum.MetastoreBadBinarySubmissionNoSha256Provided.value,
+        )
 
         # upload to parent With invalid parent_sha256
         with self.assertRaises(ApiException) as apiException:
@@ -439,7 +455,11 @@ class CommonTestCases(unit_test.DataMockingUnitTest):
                 ctx=self.ctx,
                 priv_ctx=self.priv_ctx,
             )
-        self.assertEqual(apiException.exception.detail["internal"], "upload_not_found_parent_sha256")
+        print(apiException.exception.detail["internal"])
+        self.assertEqual(
+            apiException.exception.detail["internal"],
+            ExceptionCodeEnum.MetastoreBadBinarySubmissionParentNotFound.value,
+        )
 
     @mock.patch(
         "azul_metastore.query.binary2.binary_read.find_stream_references", lambda *args: (False, None, None)

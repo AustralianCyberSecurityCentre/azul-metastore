@@ -4,25 +4,25 @@ from typing import Optional
 from urllib.parse import unquote
 
 import pendulum
+from azul_bedrock import exceptions_metastore
 from azul_bedrock import models_network as azm
-from azul_bedrock.exceptions import ApiException
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException
+from azul_bedrock.exceptions_security import SecurityAccessException, SecurityParseException
 from azul_bedrock.models_restapi import binaries as bedr_binaries
 from azul_bedrock.models_restapi.binaries_auto_complete import AutocompleteContext
-from azul_security.exceptions import SecurityAccessException, SecurityParseException
 from fastapi import (
     APIRouter,
     BackgroundTasks,
     Body,
     Depends,
-    HTTPException,
     Path,
     Query,
     Response,
 )
-from starlette.status import HTTP_404_NOT_FOUND, HTTP_422_UNPROCESSABLE_CONTENT
+from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT
 
 from azul_metastore import context
-from azul_metastore.common import wrapper
 from azul_metastore.common.search_query import validate_term_query
 from azul_metastore.encoders.annotation import InvalidAnnotation
 from azul_metastore.query import annotation, status
@@ -79,8 +79,10 @@ def find_binaries(
             count_binaries=count_entities,
             hashes=hashes,
         )
-    except wrapper.InvalidSearchException as e:
-        raise HTTPException(status_code=400, detail=e.args[0]) from e
+    except exceptions_metastore.InvalidSearchException as e:
+        raise exceptions_metastore.convert_exception_to_api_exception(
+            base_exception=e, new_error_enum=ExceptionCodeEnum.MetastoreFindBinaryInvalidSearch, status_code=400
+        ) from e
 
     # Check if term query was valid if no data was found from the request.
     if data.items_count == 0 and term:
@@ -89,10 +91,11 @@ def find_binaries(
         invalid_keys = validate_term_query(term, model_valid_keys)
         if len(invalid_keys) > 0:
             opt_s = "s" if len(invalid_keys) > 1 else ""
-            raise HTTPException(
+            invalid_keys_string = ", ".join(invalid_keys)
+            raise ApiException(
                 status_code=422,
-                detail=f"The following term query key{opt_s} could not be found: [{', '.join(invalid_keys)}]. "
-                + f"Either the key{opt_s} are related to results and temporarily missing or the query is invalid.",
+                internal=ExceptionCodeEnum.MetastorePotentiallyInvalidQueryOption,
+                parameters={"invalid_keys_string": invalid_keys_string, "opt_s": opt_s},
             )
     return qr.fr(ctx, data, resp)
 
@@ -121,8 +124,10 @@ def find_all_binaries(
             after=after,
             num_binaries=num_binaries,
         )
-    except wrapper.InvalidSearchException as e:
-        raise HTTPException(status_code=400, detail=e.args[0]) from e
+    except exceptions_metastore.InvalidSearchException as e:
+        raise exceptions_metastore.convert_exception_to_api_exception(
+            e, new_error_enum=ExceptionCodeEnum.MetastoreFindBinaryInvalidSearch, status_code=400
+        ) from e
 
     # If there is no data in the response and a term query was used check if the term query is valid.
     if (data.total is None or data.total == 0) and len(data.items) == 0 and term:
@@ -131,10 +136,11 @@ def find_all_binaries(
         invalid_keys = validate_term_query(term, model_valid_keys)
         if len(invalid_keys) > 0:
             opt_s = "s" if len(invalid_keys) > 1 else ""
-            raise HTTPException(
+            invalid_keys_string = ", ".join(invalid_keys)
+            raise ApiException(
                 status_code=422,
-                detail=f"The following term query key{opt_s} could not be found: [{', '.join(invalid_keys)}]. "
-                + f"Either the key{opt_s} are related to results and temporarily missing or the query is invalid.",
+                internal=ExceptionCodeEnum.MetastorePotentiallyInvalidQueryOption,
+                parameters={"invalid_keys_string": invalid_keys_string, "opt_s": opt_s},
             )
 
     return qr.fr(ctx, data, resp)
@@ -164,8 +170,10 @@ def find_all_parents(
             after=after,
         )
 
-    except wrapper.InvalidSearchException as e:
-        raise HTTPException(status_code=400, detail=e.args[0]) from e
+    except exceptions_metastore.InvalidSearchException as e:
+        raise exceptions_metastore.convert_exception_to_api_exception(
+            base_exception=e, new_error_enum=ExceptionCodeEnum.MetastoreFindBinaryInvalidSearch, status_code=400
+        ) from e
 
     return qr.fr(ctx, data, resp)
 
@@ -193,8 +201,10 @@ def find_all_children(
             is_parent=False,
             after=after,
         )
-    except wrapper.InvalidSearchException as e:
-        raise HTTPException(status_code=400, detail=e.args[0]) from e
+    except exceptions_metastore.InvalidSearchException as e:
+        raise exceptions_metastore.convert_exception_to_api_exception(
+            base_exception=e, new_error_enum=ExceptionCodeEnum.MetastoreFindBinaryInvalidSearch, status_code=400
+        ) from e
 
     return qr.fr(ctx, data, resp)
 
@@ -229,7 +239,9 @@ def check_metadata_exists(
     qr.set_security_headers(ctx, resp)
 
     if not data or not data["exists"]:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND)
+        raise ApiException(
+            status_code=404, internal=ExceptionCodeEnum.MetastoreBinaryNotFound, parameters={"sha256": sha256}
+        )
     return
 
 
@@ -253,13 +265,17 @@ def get_metadata(
     """Return all simple metadata for the entity."""
     try:
         data = binary_summary.read(ctx, sha256, details=detail, author=author, bucket_size=bucket_size)
-    except wrapper.InvalidSearchException as e:
+    except exceptions_metastore.InvalidSearchException as e:
         qr.set_security_headers(ctx, resp)
-        raise HTTPException(status_code=400, detail=e.args[0]) from e
+        raise exceptions_metastore.convert_exception_to_api_exception(
+            base_exception=e, new_error_enum=ExceptionCodeEnum.MetastoreFindBinaryInvalidSearch, status_code=400
+        ) from e
 
     if not data.documents.count:
         qr.set_security_headers(ctx, resp)
-        raise HTTPException(status_code=404)
+        raise ApiException(
+            status_code=404, internal=ExceptionCodeEnum.MetastoreBinaryNotFound, parameters={"sha256": sha256}
+        )
 
     return qr.fr(ctx, data, resp)
 
@@ -339,11 +355,18 @@ def get_nearby_binaries(
         # Search wider and for more cousins than default.
         data = binary_related.read_nearby(ctx, sha256, True, max_cousins=250, max_cousin_distance=4)
     else:
-        raise HTTPException(status_code=400, detail=f"Provided value for {include_cousins=} is invalid.")
+        raise ApiException(
+            status_code=400,
+            ref=f"Provided value for include_cousins={include_cousins} is invalid.",
+            internal=ExceptionCodeEnum.MetastoreIncludeCousinsInvalidEnum,
+            parameters={"include_cousins": include_cousins},
+        )
 
     if not data:
         qr.set_security_headers(ctx, resp)
-        raise HTTPException(status_code=404)
+        raise ApiException(
+            status_code=404, internal=ExceptionCodeEnum.MetastoreBinaryNotFound, parameters={"sha256": sha256}
+        )
 
     return qr.fr(ctx, data, resp)
 
@@ -372,15 +395,14 @@ def create_tag_on_binary(
         raise ApiException(
             status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref="Must provide valid security string.",
-            internal="invalid_security_string",
+            internal=ExceptionCodeEnum.MetastoreTagBinaryBadSecurityString,
         ) from None
     except SecurityAccessException as e:
         raise ApiException(
             status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref="security greater than user permissions",
-            external="security being applied by the user is greater than the current users security."
-            + f"because user: {str(e)}",
-            internal="security_too_secure",
+            internal=ExceptionCodeEnum.MetastoreTagBinaryInvalidSecurity,
+            parameters={"inner_exception": str(e)},
         ) from e
 
     qr.set_security_headers(ctx, resp, security)
@@ -395,7 +417,9 @@ def create_tag_on_binary(
     try:
         annotation.create_binary_tags(qr.writer, ctx.user_info.username, [tag])
     except InvalidAnnotation as e:
-        raise HTTPException(status_code=400, detail=repr(e)) from None
+        raise exceptions_metastore.convert_exception_to_api_exception(
+            base_exception=e, status_code=400, new_error_enum=ExceptionCodeEnum.MetastoreInvalidAnnotationForCreate
+        ) from None
 
 
 @router.delete("/v0/binaries/{sha256}/tags/{tag}", response_model=qr.gr(bedr_binaries.AnnotationUpdated), **qr.kw)
@@ -410,7 +434,11 @@ def delete_tag_on_binary(
     try:
         data = annotation.delete_binary_tag(qr.writer, sha256, tag)
     except FileNotFoundError:
-        raise HTTPException(status_code=404) from None
+        raise ApiException(
+            status_code=404,
+            internal=ExceptionCodeEnum.MetastoreCantDeleteTagFromBinary,
+            parameters={"sha256": sha256, "tag": tag},
+        ) from None
     finally:
         qr.set_security_headers(ctx, resp)
 
@@ -430,7 +458,9 @@ def get_binary_status(
     data = status.get_binary_status(ctx, sha256)
     if not data:
         qr.set_security_headers(ctx, resp)
-        raise HTTPException(status_code=404)
+        raise ApiException(
+            status_code=404, internal=ExceptionCodeEnum.MetastoreBinaryNotFound, parameters={"sha256": sha256}
+        )
     return qr.fr(ctx, bedr_binaries.Status(items=data), resp)
 
 
@@ -456,12 +486,16 @@ def get_binary_documents(
     """
     try:
         data = binary_event.get_binary_documents(ctx, sha256, event_type, size)
-    except wrapper.InvalidSearchException as e:
+    except exceptions_metastore.InvalidSearchException as e:
         qr.set_security_headers(ctx, resp)
-        raise HTTPException(status_code=400, detail=e.args[0]) from e
+        raise exceptions_metastore.convert_exception_to_api_exception(
+            base_exception=e, new_error_enum=ExceptionCodeEnum.MetastoreFindBinaryInvalidSearch, status_code=400
+        ) from e
 
     if not data.items:
         qr.set_security_headers(ctx, resp)
-        raise HTTPException(status_code=404)
+        raise ApiException(
+            status_code=404, internal=ExceptionCodeEnum.MetastoreBinaryNotFound, parameters={"sha256": sha256}
+        )
 
     return qr.fr(ctx, data, resp)

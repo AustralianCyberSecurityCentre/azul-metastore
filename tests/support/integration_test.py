@@ -8,7 +8,11 @@ import pendulum
 import urllib3
 from azul_bedrock import models_api as mapi
 from azul_bedrock import models_network as azm
-
+from azul_bedrock import exceptions_bedrock
+from azul_bedrock import exceptions_metastore
+from azul_bedrock.dispatcher import DispatcherAPI
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
 from azul_metastore import context, opensearch_config, settings
 from azul_metastore.common import memcache, search_data
 from azul_metastore.encoders import binary2 as rc2
@@ -226,7 +230,7 @@ class DynamicTestCase(basic_test.BasicTest):
         if refresh:
             cls.flush()
         if must_error != failed:
-            raise Exception(f"expected _write_events() failures {failed=} did not match {must_error=}")
+            raise BaseAzulException(f"expected _write_events() failures {failed=} did not match {must_error=}")
 
     @classmethod
     def write_plugin_events(cls, plugin_events=None, *, now=None, must_error: int = 0):

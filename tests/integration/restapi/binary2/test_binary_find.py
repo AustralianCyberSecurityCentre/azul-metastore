@@ -408,7 +408,7 @@ class TestBinaryFind(integration_test.BaseRestapi):
         response = self.client.get("/v0/binaries?term=binary.tag:invalid1&max_entities=500")
         self.assertEqual(400, response.status_code)
         resp = response.json()
-        self.assertEqual("tag not found", resp["detail"])
+        self.assertEqual("tag does not exist in opensearch", resp["detail"]["external"])
 
     def test_binary_find_tag_hundreds(self):
         """Test binary tags still works when there is 800 tags, this can fail if the Opensearch
@@ -476,7 +476,8 @@ class TestBinaryFind(integration_test.BaseRestapi):
         response = self.client.get("/v0/binaries?term=feature.tag:invalid1&max_entities=100")
         self.assertEqual(400, response.status_code)
         resp = response.json()
-        self.assertEqual("feature value tag not found", resp["detail"])
+        print(resp["detail"]["external"])
+        self.assertEqual("feature value tag not found", resp["detail"]["external"])
 
     def test_exclude_certain_security_labels(self):
         self.write_binary_events(

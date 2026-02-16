@@ -3,6 +3,11 @@ import re
 
 import httpx
 from azul_bedrock.models_restapi.basic import UserAccess, UserSecurity
+from azul_bedrock import exceptions_bedrock
+from azul_bedrock import exceptions_metastore
+from azul_bedrock.dispatcher import DispatcherAPI
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
 
 
 def get_file(target: str):
@@ -74,7 +79,7 @@ def mock_load_binary(request: httpx.Request, is_async_iterable_content: bool = F
             # response_headers['Transfer-Encoding']='chunked'
 
             if start > len(contents):
-                raise Exception("Error")
+                raise BaseAzulException("Error")
 
             contents = contents[start : end + 1]
             # return MockResponse(contents, HTTP_206_PARTIAL_CONTENT, headers=header)

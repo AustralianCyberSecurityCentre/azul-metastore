@@ -3,6 +3,8 @@
 import cachetools
 from azul_bedrock import models_network as azm
 from azul_bedrock import models_restapi
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import AzulValueError
 
 from azul_metastore.common import memcache
 from azul_metastore.common.search_query import BINARY_TAG_KEY, FEATURE_TAG_KEY
@@ -84,7 +86,9 @@ def _convert_opensearch_mapping_to_flat(object: dict[str, any]) -> dict[str, str
             # Assume a leaf node
             results[key] = value["type"]
         else:
-            raise ValueError("Bad mapping object:" + repr(value))
+            raise AzulValueError(
+                internal=ExceptionCodeEnum.MetastoreBadMappingToOpensearch, parameters={"value": repr(value)}
+            )
 
     return results
 

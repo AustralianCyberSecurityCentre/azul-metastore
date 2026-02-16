@@ -13,12 +13,15 @@ from collections import defaultdict
 
 import cachetools
 import xxhash
+from azul_bedrock import exceptions_bedrock, exceptions_metastore
 from azul_bedrock import models_network as azm
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import BaseAzulException
 
 from azul_metastore import settings
 from azul_metastore.common import feature, memcache
 from azul_metastore.common.tlsh import encode_tlsh_into_vector
-from azul_metastore.common.utils import BadSourceException, azsec, md5, to_utc
+from azul_metastore.common.utils import azsec, md5, to_utc
 from azul_metastore.encoders import base_encoder, template_feature, template_node
 
 from .base_encoder import uid
@@ -303,7 +306,10 @@ class Binary2(base_encoder.BaseIndexEncoder):
         mandatory = ["track_source_references", "track_authors"]
         for item in mandatory:
             if item not in event or not event[item]:
-                raise Exception(f"event is missing tracking information '{item}': {event}")
+                raise BaseAzulException(
+                    internal=ExceptionCodeEnum.MetastoreEncodeErrorMissingTrackingInfo,
+                    parameters={"item": item, "event": event},
+                )
 
         # Copy whole event to avoid issue when event is modified or nested components are used in the encoded output.
         event = copy.deepcopy(event)
@@ -332,7 +338,9 @@ class Binary2(base_encoder.BaseIndexEncoder):
         # ensure valid source
         source_id = event_source["name"]
         if not settings.check_source_exists(source_id):
-            raise BadSourceException(f"Source does not exist: {source_id}")
+            raise exceptions_metastore.BadSourceException(
+                internal=ExceptionCodeEnum.MetastoreEncodingMissingSource, parameters={"source_id": source_id}
+            )
 
         for k, v in event_source.get("settings", {}).items():
             event_source.setdefault("encoded_settings", []).append({"key": k, "value": v})
@@ -360,7 +368,10 @@ class Binary2(base_encoder.BaseIndexEncoder):
                 blockSizeStr, chunk, doubleChunk = ssdeep.split(":")
                 blockSize = int(blockSizeStr)
             except ValueError:
-                raise Exception(f"ssdeep could not be parsed {ssdeep}") from None
+                raise exceptions_bedrock.BaseAzulException(
+                    internal=ExceptionCodeEnum.MetastoreEncodingInvalidSSDeep,
+                    parameters={"ssdeep": ssdeep},
+                ) from None
             encoded_event["ssdeep"] = ssdeep
             encoded_event["encoded_ssdeep"] = {
                 "blocksize": blockSize,
@@ -393,7 +404,7 @@ class Binary2(base_encoder.BaseIndexEncoder):
                 # parse feature values into multiple fields
                 try:
                     feature.enrich_feature(feat)
-                except feature.FeatureEncodeException as e:
+                except exceptions_metastore.FeatureEncodeException as e:
                     __loggable_author = (
                         f"{event.get('author', {}).get('name')}-{event.get('author', {}).get('version')}"
                     )

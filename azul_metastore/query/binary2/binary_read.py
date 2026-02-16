@@ -3,6 +3,8 @@
 from typing import Optional
 
 from azul_bedrock import models_network as azm
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import BaseAzulException
 from azul_bedrock.models_restapi import binaries as bedr_binaries
 
 from azul_metastore.context import Context
@@ -26,7 +28,7 @@ def get_total_binary_count(ctx: Context) -> int:
 def find_stream_references(ctx: Context, sha256: str) -> tuple[bool, str, str]:
     """Return (True, exemplar source_id, exemplar label) if we have bytes backing the given sha256."""
     if not sha256:
-        raise Exception("sha256 not set")
+        raise BaseAzulException(internal=ExceptionCodeEnum.MetastoreSha256NotProvidedForFindingStreamRefs)
     sha256 = sha256.lower()
     # as augmented events have no associated submission we need to perform a parent-child query
     body = {

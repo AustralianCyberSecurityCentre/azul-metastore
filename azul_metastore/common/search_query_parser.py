@@ -5,6 +5,8 @@ import functools
 from pathlib import Path
 from typing import Any, Literal, Optional
 
+from azul_bedrock import exceptions_bedrock
+from azul_bedrock.exception_enums import ExceptionCodeEnum
 from lark import Lark, Token, Transformer
 from pydantic import BaseModel
 
@@ -57,7 +59,10 @@ def _token_to_location(token: Token | TokenLocation) -> TokenLocation:
     start = token.start_pos
     end = token.end_pos
     if not isinstance(start, int) or not isinstance(end, int):
-        raise ValueError("Token missing start/end")
+        raise exceptions_bedrock.AzulValueError(
+            ref="Token missing start/end",
+            internal=ExceptionCodeEnum.MetastoreSearchQueryMissingToken,
+        )
 
     return TokenLocation(start=start, end=end)
 
@@ -165,7 +170,11 @@ def _unescape_string(input: str, quote_character: Optional[str]) -> str:
         if capturing_escape:
             # Look up the character in the lookup table
             if character not in _ESCAPED_CHARACTERS:
-                raise ValueError("Invalid escape character: " + character)
+                raise exceptions_bedrock.AzulValueError(
+                    ref=f"Invalid escape character: {character}",
+                    internal=ExceptionCodeEnum.MetastoreSearchQueryInvalidUnescapeSequence,
+                    parameters={"character": character},
+                )
 
             output += _ESCAPED_CHARACTERS[character]
             capturing_escape = False
@@ -175,7 +184,10 @@ def _unescape_string(input: str, quote_character: Optional[str]) -> str:
             output += character
 
     if capturing_escape:
-        raise ValueError("Unterminated escape at end of string")
+        raise exceptions_bedrock.AzulValueError(
+            ref="Unterminated escape at end of string",
+            internal=ExceptionCodeEnum.MetastoreSearchQueryUnterminatedEscapeAtEnd,
+        )
 
     return output
 
@@ -186,7 +198,10 @@ class AzTransformer(Transformer):
     def _assert_input_tokens(self, tokens: list, length: int):
         """Assert that the number of input tokens matches expectations."""
         if len(tokens) != length:
-            raise ValueError("Input tokens don't match expected length")
+            raise exceptions_bedrock.AzulValueError(
+                ref="Input tokens don't match expected length",
+                internal=ExceptionCodeEnum.MetastoreSearchQueryNumberOfInputTokens,
+            )
 
     def number_token(self, tokens: list[Token]):
         """Handles values for tags which are numbers."""
@@ -285,7 +300,10 @@ class AzTransformer(Transformer):
         """Converts number expressions into a native type."""
         value_token = tokens[0]
         if not isinstance(value_token.value, int) and not isinstance(value_token.value, float):
-            raise ValueError("Internal error: RawToken of numeric field is not an integer")
+            raise exceptions_bedrock.AzulValueError(
+                ref="Internal error: RawToken of numeric field is not an integer",
+                internal=ExceptionCodeEnum.MetastoreSearchQueryNumberExpressionNotInteger,
+            )
 
         # This can contain 1 OR 2 tokens
         if len(tokens) == 1:
@@ -295,14 +313,20 @@ class AzTransformer(Transformer):
             # Filesize
             size_token = tokens[1]
             if not isinstance(size_token.value, str):
-                raise ValueError("Internal error: RawToken of string field is not an string")
+                raise exceptions_bedrock.AzulValueError(
+                    ref="Internal error: RawToken of string field is not an string",
+                    internal=ExceptionCodeEnum.MetastoreSearchQueryStringFieldNotString,
+                )
 
             return NumberExpression(
                 value=translate_size_unit(value_token.value, size_token.value),
                 location=_combine_locations(value_token.location, size_token.location),
             )
         else:
-            raise ValueError("Unexpected count of tokens when parsing number expression")
+            raise exceptions_bedrock.AzulValueError(
+                ref="Unexpected count of tokens when parsing number expression",
+                internal=ExceptionCodeEnum.MetastoreSearchQueryNumberExpressionUnexpectedTokenCount,
+            )
 
     number_or_filesize_expression = number_expression
 
@@ -317,7 +341,10 @@ class AzTransformer(Transformer):
             or not isinstance(tokens[2], NumberExpression)
             or not isinstance(tokens[3], _RangeInclusiveMarker)
         ):
-            raise ValueError("Invalid types passed to range expression")
+            raise exceptions_bedrock.AzulValueError(
+                ref="Invalid types passed to range expression",
+                internal=ExceptionCodeEnum.MetastoreSearchQueryInvalidType,
+            )
 
         return RangeExpression(
             startInclusive=tokens[0].value,
@@ -337,7 +364,10 @@ class AzTransformer(Transformer):
         """Handles a tag token with both a key and value."""
         # This token will take a key, an operator and an (optional) value
         if len(children) != 2 and len(children) != 3:
-            raise ValueError("Input tokens don't match expected length")
+            raise exceptions_bedrock.AzulValueError(
+                ref="Input tokens don't match expected length",
+                internal=ExceptionCodeEnum.MetastoreSearchQueryNumberOfInputTokens,
+            )
 
         key: StringExpression = children[0]
         operator: FieldComparison = children[1]

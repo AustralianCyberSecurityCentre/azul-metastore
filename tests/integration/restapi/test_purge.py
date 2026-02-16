@@ -60,13 +60,13 @@ class TestPlugins(integration_test.BaseRestapi):
         # Bad but not invalid timestamp
         response = self.client.delete(f"/v0/purge/submission/{track}?timestamp=2025&purge=true")
         self.assertEqual(400, response.status_code, response.json())
-        self.assertFormatted(response.json(), {"detail": "nothing to delete"})
+        self.assertFormatted(response.json()["detail"]["external"], "nothing to delete")
 
         # Completely invalid timestamp
         response = self.client.delete(f"/v0/purge/submission/{track}?timestamp=not-a-timestamp&purge=true")
         self.assertEqual(400, response.status_code, response.json())
         self.assertFormatted(
-            response.json(), {"detail": "The timestamp provided 'not-a-timestamp' has an invalid format."}
+            response.json()["detail"]["external"], "The timestamp provided 'not-a-timestamp' has an invalid format."
         )
 
     def test_purge_submission_low(self):
@@ -86,7 +86,7 @@ class TestPlugins(integration_test.BaseRestapi):
         response = self.client.delete(f"/v0/purge/submission/{track}?timestamp={ts}", headers={"x-test-user": user})
         self.assertEqual(403, response.status_code, response.json())
         resp = response.json()
-        self.assertFormatted(resp, {"detail": "user 'low' not superuser"})
+        self.assertFormatted(resp["detail"]["external"], "user 'low' not superuser")
         # simulate with no further filters
         response = self.client.delete(f"/v0/purge/submission/{track}", headers={"x-test-user": user})
         self.assertEqual(422, response.status_code, response.json())
@@ -102,7 +102,7 @@ class TestPlugins(integration_test.BaseRestapi):
         )
         self.assertEqual(403, response.status_code, response.json())
         resp = response.json()
-        self.assertFormatted(resp, {"detail": "user 'low' not superuser"})
+        self.assertFormatted(resp["detail"]["external"], "user 'low' not superuser")
 
         response = self.client.delete(
             f"/v0/purge/submission/{track}?purge=true&timestamp={ts}",
@@ -110,7 +110,7 @@ class TestPlugins(integration_test.BaseRestapi):
         )
         self.assertEqual(403, response.status_code, response.json())
         resp = response.json()
-        self.assertFormatted(resp, {"detail": "user 'low' not superuser"})
+        self.assertFormatted(resp["detail"]["external"], "user 'low' not superuser")
 
     def test_purge_link_system(self):
         evs = [
@@ -160,7 +160,7 @@ class TestPlugins(integration_test.BaseRestapi):
         response = self.client.delete(f"/v0/purge/link/{track}?purge=true")
         self.assertEqual(400, response.status_code, response.json())
         resp = response.json()
-        self.assertFormatted(resp, {"detail": "nothing to delete"})
+        self.assertFormatted(resp["detail"]["external"], "nothing to delete")
 
         track2 = evs[2].track_links[-1]
 
@@ -196,7 +196,7 @@ class TestPlugins(integration_test.BaseRestapi):
         )
         self.assertEqual(403, response.status_code, response.json())
         resp = response.json()
-        self.assertFormatted(resp, {"detail": "user 'low' not superuser"})
+        self.assertFormatted(resp["detail"]["external"], "user 'low' not superuser")
 
         response = self.client.delete(
             f"/v0/purge/link/{track}?purge=true",
@@ -204,7 +204,7 @@ class TestPlugins(integration_test.BaseRestapi):
         )
         self.assertEqual(403, response.status_code, response.json())
         resp = response.json()
-        self.assertFormatted(resp, {"detail": "user 'low' not superuser"})
+        self.assertFormatted(resp["detail"]["external"], "user 'low' not superuser")
 
         response = self.client.delete(
             f"/v0/purge/link/{track}?purge=true",
@@ -212,7 +212,7 @@ class TestPlugins(integration_test.BaseRestapi):
         )
         self.assertEqual(403, response.status_code, response.json())
         resp = response.json()
-        self.assertFormatted(resp, {"detail": "user 'low' not superuser"})
+        self.assertFormatted(resp["detail"]["external"], "user 'low' not superuser")
 
         track2 = evs[2].track_links[-1]
         response = self.client.delete(
@@ -221,4 +221,4 @@ class TestPlugins(integration_test.BaseRestapi):
         )
         self.assertEqual(403, response.status_code, response.json())
         resp = response.json()
-        self.assertFormatted(resp, {"detail": "user 'low' not superuser"})
+        self.assertFormatted(resp["detail"]["external"], "user 'low' not superuser")

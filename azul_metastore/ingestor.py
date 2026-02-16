@@ -8,7 +8,7 @@ import traceback
 from typing import Any
 
 from azul_bedrock import dispatcher as b_dispatcher
-from azul_bedrock import exceptions as azbe
+from azul_bedrock import exception_enums, exceptions_bedrock, exceptions_metastore
 from azul_bedrock import models_api as azapi
 from azul_bedrock import models_network as azm
 
@@ -16,12 +16,6 @@ from azul_metastore import context, settings
 from azul_metastore.query import binary_create, plugin, status
 
 logger = logging.getLogger(__name__)
-
-
-class DataException(Exception):
-    """Error getting data from dispatcher."""
-
-    pass
 
 
 class BaseIngestor:
@@ -38,7 +32,7 @@ class BaseIngestor:
         self.s = settings.get()
         self.url = self.s.dispatcher_events_url
         if not self.model:
-            raise Exception(f"event type not set for {self.__class__.__name__}")
+            raise exceptions_bedrock.BaseAzulException(f"event type not set for {self.__class__.__name__}")
 
         self.ctx = ctx
 
@@ -60,13 +54,20 @@ class BaseIngestor:
         """Read documents from dispatcher."""
         try:
             _, events = self._get_data()
-        except azbe.DispatcherApiException as e:
+        except exceptions_bedrock.DispatcherApiException as e:
             if e.status_code != 200:
                 content_slice = None
                 if e.response is not None:
                     content_slice = e.response.content[:1000]
-                raise DataException(f"bad status {e.status_code}\n{content_slice}") from e
-            raise DataException("connection error") from e
+                raise exceptions_metastore.DataException(
+                    internal=exception_enums.MetastoreIngestorBadStatusDocument,
+                    ref=f"bad status {e.status_code}\n{content_slice}",
+                    parameters={"status_code": str(e.status_code), "content_text": str(content_slice)},
+                ) from e
+            raise exceptions_metastore.DataException(
+                ref="connection error",
+                internal=exception_enums.MetastoreIngestorGetDataNetworkError,
+            ) from e
         return events
 
     def is_done(self) -> bool:
@@ -93,7 +94,7 @@ class BaseIngestor:
                 start_get_data = time.time()
                 d = self.get_data()
                 time_spent_getting_data += time.time() - start_get_data
-            except DataException:
+            except exceptions_metastore.DataException:
                 traceback.print_exc()
                 logger.error("dispatcher fetch failure")
                 time.sleep(10)

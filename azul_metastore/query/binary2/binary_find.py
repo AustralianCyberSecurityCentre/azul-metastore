@@ -4,9 +4,10 @@ import itertools
 import logging
 from typing import Optional
 
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException
 from azul_bedrock.models_restapi import binaries as bedr_binaries
 from azul_bedrock.models_restapi.binaries_auto_complete import AutocompleteContext
-from fastapi import HTTPException
 from lark import UnexpectedInput
 
 from azul_metastore.common import search_query, wrapper
@@ -232,8 +233,12 @@ def find_binaries(
     :param count_binaries: will count the total number of matching binaries if true
     :return: dictionary with number of results and limited list of results
     """
-    if max_binaries > 1000:
-        raise wrapper.InvalidSearchException("max entities too large")
+    MAX_ALLOWED_BINARIES = 1000
+    if max_binaries > MAX_ALLOWED_BINARIES:
+        raise wrapper.exceptions_metastore.InvalidSearchException(
+            internal=ExceptionCodeEnum.MetastoreBinaryFindTooManyBinariesRequested,
+            parameters={"requested_binaries": max_binaries, "max_allowed_binaries": MAX_ALLOWED_BINARIES},
+        )
     if not hashes:
         hashes = []
     # create custom sort parameters from input
@@ -287,7 +292,11 @@ def find_binaries(
         try:
             parse_ast = parse(term)
         except UnexpectedInput as e:
-            raise HTTPException(status_code=400, detail="Failed to parse term: " + str(e)) from None
+            raise ApiException(
+                status_code=400,
+                internal=ExceptionCodeEnum.MetastoreBinaryFindFaildToParseSearchTerm,
+                parameters={"term": term, "inner_exception": str(e)},
+            ) from None
 
         if parse_ast is not None:
             result, extra_info = az_query_to_opensearch(ctx, parse_ast)

@@ -4,7 +4,8 @@ from ctypes import CDLL, create_string_buffer
 from typing import Iterable
 
 import pendulum
-from azul_bedrock.exceptions import HTTPException
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
 
 from azul_metastore.common.tlsh import encode_tlsh_into_vector, strip_tlsh_version
 from azul_metastore.context import Context
@@ -23,7 +24,7 @@ def ssdeep_compare(hash1: str, hash2: str) -> int:
         )
         return score
     except OSError:
-        raise Exception("could not find libfuzzy-dev; check that it is installed.") from None
+        raise BaseAzulException(internal=ExceptionCodeEnum.MetastoreLibFuzzyFailedToInitalise) from None
 
 
 def read_similar_from_tlsh(ctx: Context, tlsh: str, maxCount: int) -> list[dict]:
@@ -93,7 +94,7 @@ def read_similar_from_tlsh(ctx: Context, tlsh: str, maxCount: int) -> list[dict]
     return similar_hashes
 
 
-def read_similar_from_ssdeep(ctx: Context, fuzzyHash: str, maxCount: int) -> list[dict]:
+def read_similar_from_ssdeep(ctx: Context, fuzzy_hash: str, maxCount: int) -> list[dict]:
     """Compares binaries in Opensearch by ssdeep fuzzyhash.
 
     ssdeep hashes are split into 3 colon-delimited parts: the block size, the hash for blocksize
@@ -112,10 +113,14 @@ def read_similar_from_ssdeep(ctx: Context, fuzzyHash: str, maxCount: int) -> lis
     A list of sha256 hashes and corresponding similarity score is returned, ordered by score descending.
     """
     try:
-        blockSizeStr, chunk, doubleChunk = fuzzyHash.split(":")
+        blockSizeStr, chunk, doubleChunk = fuzzy_hash.split(":")
         blockSize = int(blockSizeStr)
     except ValueError:
-        raise HTTPException(status_code=422, detail=f"ssdeep could not be parsed {fuzzyHash}") from None
+        raise ApiException(
+            status_code=422,
+            internal=ExceptionCodeEnum.MetastoreReadSimilarSSDeepBadFuzzyHash,
+            parameters={"fuzzy_hash": fuzzy_hash},
+        ) from None
 
     body = {
         "_source": {"includes": ["sha256", "ssdeep"]},
@@ -131,7 +136,7 @@ def read_similar_from_ssdeep(ctx: Context, fuzzyHash: str, maxCount: int) -> lis
                         ]
                     }
                 },
-                "must_not": [{"match": {"ssdeep": fuzzyHash}}],
+                "must_not": [{"match": {"ssdeep": fuzzy_hash}}],
                 "filter": [{"terms": {"encoded_ssdeep.blocksize": [blockSize, blockSize * 2, blockSize / 2]}}],
             }
         },
@@ -146,7 +151,7 @@ def read_similar_from_ssdeep(ctx: Context, fuzzyHash: str, maxCount: int) -> lis
 
     for hit in resp["hits"]["hits"]:
         # calculate score
-        score = ssdeep_compare(fuzzyHash, hit["_source"]["ssdeep"])
+        score = ssdeep_compare(fuzzy_hash, hit["_source"]["ssdeep"])
         similarHashes.append({"sha256": hit["_source"]["sha256"], "score": score})
 
     # sort hashes by score

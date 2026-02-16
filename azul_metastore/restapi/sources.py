@@ -3,8 +3,10 @@
 from datetime import datetime
 
 from azul_bedrock import models_settings
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException
 from azul_bedrock.models_restapi import sources as bedr_sources
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from fastapi import APIRouter, Depends, Query, Response
 from starlette.status import HTTP_404_NOT_FOUND
 
 from azul_metastore import context, settings
@@ -23,7 +25,7 @@ def get_all_sources(
     data = binary_source.read_sources()
     if not data:
         qr.set_security_headers(ctx, resp)
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND)
+        raise ApiException(status_code=HTTP_404_NOT_FOUND, internal=ExceptionCodeEnum.MetastoreNoSourcesInAzul)
     return qr.fr(ctx, data, resp)
 
 
@@ -36,7 +38,7 @@ def check_source_exists(
     """Read basic source information."""
     try:
         if not settings.check_source_exists(source):
-            raise HTTPException(status_code=HTTP_404_NOT_FOUND)
+            raise ApiException(status_code=HTTP_404_NOT_FOUND, internal=ExceptionCodeEnum.MetastoreSourceNotFound)
     finally:
         qr.set_security_headers(ctx, resp)
 
@@ -50,7 +52,7 @@ def read_source(
     """Read basic source information."""
     if not settings.check_source_exists(name):
         qr.set_security_headers(ctx, resp)
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND)
+        raise ApiException(status_code=HTTP_404_NOT_FOUND, internal=ExceptionCodeEnum.MetastoreSourceNotFound)
     data = binary_source.read_source(ctx, name)
     return qr.fr(ctx, data, resp)
 
@@ -66,7 +68,7 @@ def source_refs_read(
     rows = binary_source.read_source_references(ctx, source, term=term)
     if not rows:
         qr.set_security_headers(ctx, resp)
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND)
+        raise ApiException(status_code=HTTP_404_NOT_FOUND, internal=ExceptionCodeEnum.MetastoreSourceNoReferences)
     return qr.fr(ctx, {"items": rows}, resp)
 
 
@@ -86,5 +88,7 @@ def source_submissions_read(
     )
     if not rows:
         qr.set_security_headers(ctx, resp)
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND)
+        raise ApiException(
+            status_code=HTTP_404_NOT_FOUND, internal=ExceptionCodeEnum.MetastoreSourceSubmissionNoInformationFound
+        )
     return qr.fr(ctx, {"items": rows}, resp)

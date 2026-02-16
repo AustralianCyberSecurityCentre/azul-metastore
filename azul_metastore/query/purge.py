@@ -14,7 +14,10 @@ import pathlib
 import shutil
 
 import pendulum
+from azul_bedrock import exceptions_metastore
 from azul_bedrock import models_network as azm
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import BaseAzulException
 from azul_bedrock.models_restapi import purge as bedr_purge
 from opensearchpy import helpers
 
@@ -25,12 +28,6 @@ from azul_metastore.query.binary2 import binary_consistency
 logger = logging.getLogger(__name__)
 
 
-class InvalidPurgeException(Exception):
-    """The provided arguments to the purge are invalid."""
-
-    pass
-
-
 class Purger:
     """Create an instance of the data purger."""
 
@@ -38,7 +35,7 @@ class Purger:
         s = settings.get()
 
         if not s.purge_sha256_folder:
-            raise Exception("to purge data, 'purge_sha256_folder' config option must be set")
+            raise BaseAzulException(internal=ExceptionCodeEnum.MetastoreCannotCreatePurgeFolder)
         # Create purge dir if it does not exist.
         pathlib.Path(s.purge_sha256_folder).mkdir(parents=False, exist_ok=True)
         self._purge_folder = s.purge_sha256_folder
@@ -153,7 +150,9 @@ class Purger:
                 id_deletes.append({"delete": {"_index": doc["_index"], "_id": doc["_id"], "routing": doc["_routing"]}})
             ret = ctx.sd.es().bulk(body=id_deletes)
             if ret["errors"]:
-                raise Exception(ret)
+                raise BaseAzulException(
+                    internal=ExceptionCodeEnum.MetastoreMetaDataDeletionFailure, parameters={"ret": ret}
+                )
 
             total_purged_count += len(id_deletes)
 
@@ -231,7 +230,7 @@ class Purger:
         ctx.refresh()
         raw_count = self._count(ctx, raw_search)
         if not raw_count:
-            raise InvalidPurgeException("nothing to delete")
+            raise exceptions_metastore.InvalidPurgeException(internal=ExceptionCodeEnum.MetastoreNothingToPurge)
 
         ret = bedr_purge.PurgeResults(events_purged=0, binaries_purged=0)
 

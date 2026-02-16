@@ -1,5 +1,6 @@
 from azul_metastore.query.binary2 import binary_event
 from tests.support import unit_test
+from azul_bedrock import exceptions_bedrock
 
 
 class TestBinaryRead(unit_test.BaseUnitTestCase):
@@ -76,5 +77,5 @@ class TestBinaryRead(unit_test.BaseUnitTestCase):
         )
 
         # Test error handling for invalid types
-        with self.assertRaises(ValueError):
+        with self.assertRaises(exceptions_bedrock.AzulValueError):
             binary_event._convert_opensearch_mapping_to_flat({"something_cool": {"value": "123"}})

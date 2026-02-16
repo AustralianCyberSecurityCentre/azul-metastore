@@ -5,7 +5,8 @@ import logging
 from typing import Optional
 
 from azul_bedrock import models_restapi
-from fastapi import HTTPException
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
 from lark import UnexpectedInput
 
 from azul_metastore.common.search_query import az_query_to_opensearch
@@ -65,8 +66,8 @@ def find_all_binaries(
         try:
             json_loaded_after = json.loads(after)
         except json.JSONDecodeError:
-            raise HTTPException(
-                status_code=422, detail=f"Invalid after provided '{after}', after must be valid JSON!"
+            raise ApiException(
+                status_code=422, internal=ExceptionCodeEnum.MetastoreInvalidAfterProvided, parameters={"after": after}
             ) from None
         # resume pagination of existing search
         body["aggs"]["COMPOSITE"]["composite"]["after"] = json_loaded_after
@@ -79,7 +80,11 @@ def find_all_binaries(
         try:
             parse_ast = parse(term)
         except UnexpectedInput as e:
-            raise HTTPException(status_code=400, detail="Failed to parse term: " + str(e)) from None
+            raise ApiException(
+                status_code=400,
+                internal=ExceptionCodeEnum.MetastoreFailedToParseTermQuery,
+                parameters={"inner_exception": str(e)},
+            ) from None
 
         if parse_ast is not None:
             result, _extra_info = az_query_to_opensearch(ctx, parse_ast)
@@ -137,7 +142,7 @@ def find_all_family_binaries(
     #  be included in results depending on timing.
     body = None
     if not sha256:
-        raise Exception("Sha256 to search for parent or child binaries for was not set and should have been!")
+        raise BaseAzulException(internal=ExceptionCodeEnum.MetastoreSha256NotProvidedForFindFamily)
     sha256 = sha256.lower()
     # max number of binaries returned per page
     PAGE_SIZE = 50
@@ -177,8 +182,8 @@ def find_all_family_binaries(
         try:
             json_loaded_after = json.loads(after)
         except json.JSONDecodeError:
-            raise HTTPException(
-                status_code=422, detail=f"Invalid after provided '{after}', after must be valid JSON!"
+            raise ApiException(
+                status_code=422, internal=ExceptionCodeEnum.MetastoreInvalidAfterProvided, parameters={"after": after}
             ) from None
         # resume pagination of existing search
         body["aggs"]["FAMILY"]["composite"]["after"] = json_loaded_after

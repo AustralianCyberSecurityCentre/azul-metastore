@@ -5,10 +5,12 @@ import logging
 import os
 from typing import AsyncIterable
 
+from azul_bedrock import exceptions_metastore
 from azul_bedrock import models_network as azm
-from azul_bedrock.exceptions import ApiException
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
+from azul_bedrock.exceptions_security import SecurityAccessException, SecurityParseException
 from azul_bedrock.models_restapi import binaries_data as bedr_bdata
-from azul_security.exceptions import SecurityAccessException, SecurityParseException
 from starlette.datastructures import UploadFile
 from starlette.status import (
     HTTP_400_BAD_REQUEST,
@@ -57,13 +59,16 @@ async def _submit_binary_data_with_sources(
     """Submit binary data to multiple sources and return the file info."""
     # If there are multiple sources, copy from one source to another after initial submission
     if len(sources) == 0:
-        raise Exception("Attempting to upload a binary to no sources!")
+        raise BaseAzulException(internal=ExceptionCodeEnum.MetastoreNoSourcesForBinarySubmission)
 
     initial_source = sources[0]
     meta = await ctx.dispatcher.async_submit_binary(initial_source, label, data, SUBMIT_BINARY_TIMEOUT_SECONDS)
 
-    for additional_source in sources[1:]:
-        ctx.dispatcher.copy_binary(initial_source, additional_source, label, meta.sha256)
+    if meta.sha256:
+        for additional_source in sources[1:]:
+            ctx.dispatcher.copy_binary(initial_source, additional_source, label, meta.sha256)
+    else:
+        logger.warning("Failed to copy datastream due to sha256 not being set!")
 
     return meta
 
@@ -72,16 +77,15 @@ async def _process_augmented_streams(
     ctx: context.Context, sources_to_submit: list[str], augstreams: list[tuple[str, UploadFile]]
 ) -> list[azm.Datastream]:
     """Process all the aug streams as a single async task."""
-    aug_tasks: dict[asyncio.Task[azm.Datastream]] = {}
+    aug_tasks: dict[str, asyncio.Task[azm.Datastream]] = {}
     # process all the aug streams.
     async with asyncio.TaskGroup() as tg:
         for label, aug_binary in augstreams or []:
             if label == "content":
                 raise ApiException(
                     status_code=HTTP_422_UNPROCESSABLE_CONTENT,
-                    ref="aug stream cannot be 'content'",
-                    external="aug stream cannot be 'content'",
-                    internal="upload_no_aug_content",
+                    ref="augmented stream cannot be 'content'",
+                    internal=ExceptionCodeEnum.MetastoreBadAugmentedStreamLabel,
                 )
 
             augTask = tg.create_task(_submit_binary_data_with_sources(ctx, sources_to_submit, label, aug_binary))
@@ -116,16 +120,16 @@ def _submit_binary_event(
     if not settings.check_source_exists(source):
         raise ApiException(
             status_code=HTTP_400_BAD_REQUEST,
-            ref=f"Source is not defined: {source}",
-            internal="bad_source_id",
+            internal=ExceptionCodeEnum.MetastoreInvalidSourceForBinarySubmission,
+            parameters={"source": source},
         )
     try:
         settings.check_source_references(source, references)
     except settings.BadSourceRefsException as e:
         raise ApiException(
             status_code=HTTP_400_BAD_REQUEST,
-            ref=str(e),
-            internal="bad_source_refs",
+            internal=ExceptionCodeEnum.MetastoreBadSourceReferenceDefinition,
+            parameters={"inner_exception": str(e)},
         ) from None
 
     author.security = security
@@ -185,14 +189,16 @@ def _submit_binary_event(
             raise ApiException(
                 status_code=HTTP_500_INTERNAL_SERVER_ERROR,
                 ref="Unable to submit binary event to metastore immediately",
-                internal=str(e),
+                internal=ExceptionCodeEnum.MetastoreUnableToSubmitBinaryEventImmediately,
+                parameters={"inner_exception": str(e)},
             ) from e
 
     if len(resp.ok) == 0:
         raise ApiException(
             status_code=HTTP_500_INTERNAL_SERVER_ERROR,
             ref="Dispatcher rejected the submitted events",
-            internal=str(resp),
+            internal=ExceptionCodeEnum.MetastoreBinarySubmitDispatcherRejectedEvent,
+            parameters={"response": str(resp)},
         )
     model = basic_events.BinaryEvent(**resp.ok[0])
     return model
@@ -231,46 +237,43 @@ async def high_level_submit_binary(
     except SecurityParseException:
         raise ApiException(
             status_code=HTTP_422_UNPROCESSABLE_CONTENT,
+            internal=ExceptionCodeEnum.MetastoreBadBinarySubmissionBadSecurityString,
             ref="Must provide valid security string.",
-            internal="invalid_security_string",
         ) from None
     except SecurityAccessException as e:
         raise ApiException(
             status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref="security greater than user permissions",
-            external="security being applied by the user is greater than the current users security."
-            + f"because user: {str(e)}",
-            internal="security_too_secure",
+            internal=ExceptionCodeEnum.MetastoreBadBinarySubmissionUserSecurity,
+            parameters={"inner_exception": str(e)},
         ) from e
 
     if not parent_sha256 and not source:
         raise ApiException(
             status_code=HTTP_400_BAD_REQUEST,
             ref="Must provide source or parent information.",
-            internal="no_parent_and_source_submitted",
+            internal=ExceptionCodeEnum.MetastoreBadBinarySubmissionSourceOrParent,
         )
 
     if parent_sha256 and source:
         raise ApiException(
             status_code=400,
             ref="cannot insert binary to source and parent at same time",
-            internal="parent_and_source_both_submitted",
+            internal=ExceptionCodeEnum.MetastoreBadBinarySubmissionParentAndSource,
         )
 
     if not binary and not sha256:
         raise ApiException(
             status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref="Must supply binary or sha256",
-            external="Must supply binary or sha256",
-            internal="upload_no_binary_sha256",
+            internal=ExceptionCodeEnum.MetastoreBadBinarySubmissionNoSha256Provided,
         )
 
     if parent_sha256 and not binary_read.find_stream_references(ctx, parent_sha256)[0]:
         raise ApiException(
             status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref="Parent Id (sha256) must already exist",
-            external="Parent Id (sha256) must already exist",
-            internal="upload_not_found_parent_sha256",
+            internal=ExceptionCodeEnum.MetastoreBadBinarySubmissionParentNotFound,
         )
 
     is_source_submission = bool(source)
@@ -303,12 +306,12 @@ async def high_level_submit_binary(
                     binary_details, local_filename, augstreams=augstream_meta
                 )
                 entities.append(entity)
-        except fileformat.ExtractException as e:
+        except exceptions_metastore.ExtractException as e:
             raise ApiException(
                 status_code=HTTP_422_UNPROCESSABLE_CONTENT,
                 ref="bad_bundled_submission",
-                external=str(e),
-                internal=str(e),
+                internal=ExceptionCodeEnum.MetastoreUnableToExtractProvidedArchive,
+                parameters={"inner_exception": str(e)},
             ) from None
     else:
         # dataless submission
@@ -320,9 +323,8 @@ async def high_level_submit_binary(
             raise ApiException(
                 status_code=HTTP_404_NOT_FOUND,
                 ref="Unable to find existing metadata",
-                external=f"Cannot find existing metadata for entity {sha256}. "
-                "You will need to supply Azul with the original binary.",
-                internal="upload_no_existing_metadata",
+                internal=ExceptionCodeEnum.MetastoreDatalessSubmissionBinaryDoesNotExist,
+                parameters={"sha256": sha256},
             ) from None
         # first entry in data block must have been generated by dispatcher for 'content'
         binary_details = azm.BinaryEvent(**doc).entity.datastreams[0]
@@ -332,8 +334,7 @@ async def high_level_submit_binary(
         raise ApiException(
             status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref="Unable to extract files",
-            external="Cannot find any files to extract. This may be an unsupported filetype or bad password.",
-            internal="upload_nothing_extracted",
+            internal=ExceptionCodeEnum.MetastoreUnableToExtractAnyFiles,
         )
 
     # Submit events to dispatcher and track the returned submission data.

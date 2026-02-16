@@ -87,7 +87,8 @@ dev = [
     "pyjwt>=2.11.0",
     "pytest>=9.0.2",
     "respx>=0.22.0",
-    "ssdeep>=3.4",
+    # pinned to avoid issues installing 3.4, which fails on debian.
+    "ssdeep==3.3",
     "tox>=4.34.1",
 ]
 

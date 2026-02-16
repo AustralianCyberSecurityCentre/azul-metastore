@@ -4,6 +4,8 @@ Mostly for allowing unit tests to easily clear all cached results.
 """
 
 import cachetools
+from azul_bedrock import exceptions_metastore
+from azul_bedrock.exception_enums import ExceptionCodeEnum
 
 caches = {}
 
@@ -14,7 +16,11 @@ def get_ttl_cache(name: str, **overrides) -> cachetools.TTLCache:
     kwargs.update(overrides or {})
     _id = f"ttl-{name}"
     if _id in caches:
-        raise Exception(f"cache already exists {_id}")
+        raise exceptions_metastore.CacheAlreadyExistsException(
+            ref=f"cache already exists {_id}",
+            internal=ExceptionCodeEnum.MetastoreMemcacheTTLCacheAlreadyCreated,
+            parameters={"cache_id": _id},
+        )
     caches[_id] = cachetools.TTLCache(**kwargs)
     return caches[_id]
 
@@ -25,7 +31,11 @@ def get_lru_cache(name: str, **overrides) -> cachetools.LRUCache:
     kwargs.update(overrides or {})
     _id = f"lru-{name}"
     if _id in caches:
-        raise Exception(f"cache already exists {_id}")
+        raise exceptions_metastore.CacheAlreadyExistsException(
+            ref=f"cache already exists {_id}",
+            internal=ExceptionCodeEnum.MetastoreMemcacheLRUCacheAlreadyCreated,
+            parameters={"cache_id": _id},
+        )
     caches[_id] = cachetools.LRUCache(**kwargs)
     return caches[_id]
 

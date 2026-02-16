@@ -210,6 +210,6 @@ class TestOpensearchAccess(integration_test.BaseRestapi):
         resp = response.json()
         print(resp)
         self.assertEqual(
-            resp,
-            {"detail": "user does not meet minimum_required_access, missing security labels ['LOW']"},
+            resp["detail"]["external"],
+            "user does not meet minimum_required_access, missing security labels ['LOW']",
         )

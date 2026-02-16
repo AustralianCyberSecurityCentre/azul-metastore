@@ -4,17 +4,14 @@ from __future__ import annotations
 
 import re
 
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_metastore import InvalidAnnotation
+
 from azul_metastore.common.utils import md5, to_utc
 
 from . import base_encoder
 
 safe_tag = re.compile(r"[a-z0-9\-]*$")
-
-
-class InvalidAnnotation(Exception):
-    """The supplied annotation is not valid."""
-
-    pass
 
 
 class Annotation(base_encoder.BaseIndexEncoder):
@@ -47,13 +44,22 @@ class Annotation(base_encoder.BaseIndexEncoder):
         if "sha256" in event:
             event["sha256"] = event["sha256"].lower()
         if event["type"] not in ["fv_tag", "entity_tag"]:
-            raise InvalidAnnotation(f"unknown annotation {event['type']}")
+            raise InvalidAnnotation(
+                internal=ExceptionCodeEnum.MetastoreUnknownAnnotation, parameters={"event_type": event["type"]}
+            )
         if not safe_tag.match(event.get("tag", "")):
-            raise InvalidAnnotation(f"bad characters in tag: {event['tag']}")
+            raise InvalidAnnotation(
+                internal=ExceptionCodeEnum.MetastoreAnnotationBadCharacterInTag, parameters={"event_tag": event["tag"]}
+            )
         if len(event.get("tag", "")) > 25:
-            raise InvalidAnnotation(f"tag too long: {event['tag']}")
+            raise InvalidAnnotation(
+                internal=ExceptionCodeEnum.MetastoreAnnotationTagTooLong, parameters={"event_tag": event["tag"]}
+            )
         if len(event.get("comment", "")) > 1000:
-            raise InvalidAnnotation(f"comment too long: {event['comment']}")
+            raise InvalidAnnotation(
+                internal=ExceptionCodeEnum.MetastoreAnnotationCommentTooLong,
+                parameters={"event_comment": event["comment"]},
+            )
 
         event["timestamp"] = to_utc(event["timestamp"])
         cls._encode_security(event)

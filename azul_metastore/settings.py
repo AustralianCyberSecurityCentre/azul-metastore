@@ -7,7 +7,8 @@ import sys
 from functools import cached_property
 
 import cachetools
-from azul_bedrock import models_settings
+from azul_bedrock import exceptions_metastore, models_settings
+from azul_bedrock.exception_enums import ExceptionCodeEnum
 from fastapi import Request
 from pydantic import BaseModel, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -18,12 +19,6 @@ from azul_metastore.common import memcache
 logger = logging.getLogger(__name__)
 loki_logger = None
 printed = False
-
-
-class ConfigException(Exception):
-    """Problem with the configuration of Azul Metastore."""
-
-    pass
 
 
 class IndexSettings(BaseModel):
@@ -103,7 +98,10 @@ class Metastore(BaseSettings):
             printed = True
 
         if not self.partition:
-            raise ConfigException("metastore_partition must be set. Recommended to set to dev01, qa01, prod01, etc.")
+            raise exceptions_metastore.ConfigException(
+                ref="metastore_partition must be set. Recommended to set to dev01, qa01, prod01, etc.",
+                internal=ExceptionCodeEnum.MetastoreSettingsPartitionNotSet,
+            )
 
     # location of opensearch cluster that can be queried
     # can also be a load balancer
@@ -234,12 +232,6 @@ def check_source_exists(source: str):
     return source in s.sources
 
 
-class BadSourceRefsException(Exception):
-    """Source references are invalid."""
-
-    pass
-
-
 def check_source_references(source: str, references: dict):
     """Check that supplied source references are valid."""
     s = get()
@@ -249,6 +241,12 @@ def check_source_references(source: str, references: dict):
     fields_missing = source_requires.difference(keys)
     fields_extra = keys.difference(source_allows)
     if fields_missing:
-        raise BadSourceRefsException(f"{source}: missing {fields_missing}")
+        raise exceptions_metastore.BadSourceRefsException(
+            ref=f"source={source}: missing fields= {fields_missing}",
+            internal=ExceptionCodeEnum.MetastoreSettingsFieldsAreMissing,
+        )
     if fields_extra:
-        raise BadSourceRefsException(f"{source}: extra {fields_extra}")
+        raise exceptions_metastore.BadSourceRefsException(
+            ref=f"source={source}: has extra fields {fields_extra}",
+            internal=ExceptionCodeEnum.MetastoreSettingsExtraFieldsAreMissing,
+        )

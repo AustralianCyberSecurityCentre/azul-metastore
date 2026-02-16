@@ -8,6 +8,8 @@ from typing import ClassVar
 
 import pendulum
 from azul_bedrock import models_settings
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import BaseAzulException
 from azul_security import security as azul_security
 
 from azul_metastore import settings
@@ -44,7 +46,9 @@ def partition_format(timestamp: str, index_time_unit: models_settings.PartitionU
     """Calculate special timestamp string."""
     ts = pendulum.parse(timestamp)
     if isinstance(ts, (pendulum.Duration, pendulum.Time)):
-        raise Exception(f"invalid timestamp {timestamp}; is not an absolute timestamp")
+        raise BaseAzulException(
+            internal=ExceptionCodeEnum.MetastoreEncoderInvalidTimestamp, parameters={"timestamp": timestamp}
+        )
 
     if index_time_unit == models_settings.PartitionUnitEnum.year:
         ret = ts.format("YYYY")
@@ -59,7 +63,10 @@ def partition_format(timestamp: str, index_time_unit: models_settings.PartitionU
         ret = "all"
     else:
         avail_options = ", ".join(models_settings.PartitionUnitEnum._member_names_)
-        raise Exception(f"unknown value {index_time_unit=}, should be one of {avail_options}")
+        raise BaseAzulException(
+            internal=ExceptionCodeEnum.MetastoreInvalidPartitionFormatUnits,
+            parameters={"index_time_unit": index_time_unit, "available_options": avail_options},
+        )
     return ret
 
 

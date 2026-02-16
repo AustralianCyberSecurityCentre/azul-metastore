@@ -2,15 +2,27 @@ from unittest import mock
 
 from azul_metastore.common import memcache, search_data
 from tests.support import unit_test
+from azul_bedrock import exceptions_metastore
+from azul_bedrock.exception_enums import ExceptionCodeEnum
 
 
 class TestUtil(unit_test.BaseUnitTestCase):
     def test_credentials_to_access(self):
-        self.assertRaises(search_data.BadCredentialsException, search_data.credentials_to_access, {"random": "stuff"})
-        self.assertRaises(search_data.BadCredentialsException, search_data.credentials_to_access, {"format": "stuff"})
-        self.assertRaises(search_data.BadCredentialsException, search_data.credentials_to_access, {"format": "basic"})
-        self.assertRaises(search_data.BadCredentialsException, search_data.credentials_to_access, {"format": "jwt"})
-        self.assertRaises(search_data.BadCredentialsException, search_data.credentials_to_access, {"format": "oauth"})
+        self.assertRaises(
+            exceptions_metastore.BadCredentialsException, search_data.credentials_to_access, {"random": "stuff"}
+        )
+        self.assertRaises(
+            exceptions_metastore.BadCredentialsException, search_data.credentials_to_access, {"format": "stuff"}
+        )
+        self.assertRaises(
+            exceptions_metastore.BadCredentialsException, search_data.credentials_to_access, {"format": "basic"}
+        )
+        self.assertRaises(
+            exceptions_metastore.BadCredentialsException, search_data.credentials_to_access, {"format": "jwt"}
+        )
+        self.assertRaises(
+            exceptions_metastore.BadCredentialsException, search_data.credentials_to_access, {"format": "oauth"}
+        )
 
         c = search_data.credentials_to_access({"format": "basic", "username": "user", "password": "pass"})
         self.assertEqual(("user", "pass"), c["http_auth"])
@@ -24,9 +36,13 @@ class TestUtil(unit_test.BaseUnitTestCase):
     @mock.patch("opensearchpy.OpenSearch")
     @mock.patch("azul_metastore.common.search_data.credentials_to_access")
     def test_credentials_to_es(self, _cta, _es):
-        _cta.side_effect = search_data.BadCredentialsException()
+        _cta.side_effect = exceptions_metastore.BadCredentialsException(
+            internal=ExceptionCodeEnum.MetastoreOpensearchCantGetUserAccount
+        )
         memcache.clear()
-        self.assertRaises(search_data.BadCredentialsException, search_data.credentials_to_es, {"unique": "blah"})
+        self.assertRaises(
+            exceptions_metastore.BadCredentialsException, search_data.credentials_to_es, {"unique": "blah"}
+        )
 
         _cta.side_effect = None
         _cta.return_value = {"http_auth": ("user", "pass")}

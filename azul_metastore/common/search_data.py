@@ -4,16 +4,12 @@ from dataclasses import dataclass, field
 
 import cachetools
 import opensearchpy
+from azul_bedrock import exceptions_metastore
+from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.models_restapi.basic import QueryInfo
 
 from azul_metastore import settings
 from azul_metastore.common import memcache
-
-
-class BadCredentialsException(Exception):
-    """Supplied credentials were invalid."""
-
-    pass
 
 
 def credentials_to_access(c: dict) -> dict:
@@ -28,9 +24,17 @@ def credentials_to_access(c: dict) -> dict:
         elif format == "oauth":
             access["headers"] = {"Authorization": f"Bearer {c['token']}"}
         else:
-            raise BadCredentialsException(f"unrecognised credential format: {c['format']}")
+            raise exceptions_metastore.BadCredentialsException(
+                ref=f"unrecognised credential format: {c['format']}",
+                internal=ExceptionCodeEnum.MetastoreSearchDataBadCredentials,
+                parameters={"credential_format": str(c["format"])},
+            )
     except KeyError as e:
-        raise BadCredentialsException(f"missing/bad parameter: {str(e)}") from e
+        raise exceptions_metastore.BadCredentialsException(
+            ref=f"missing/bad parameter: {str(e)}",
+            internal=ExceptionCodeEnum.MetastoreSearchDataMissingOrBadParameters,
+            parameters={"inner_exception": str(e)},
+        ) from e
 
     return access
 
@@ -79,7 +83,7 @@ class SearchData:
         """Return unique representation of users access."""
         return f"{self.credentials['unique']}|{'.'.join(sorted(self.security_exclude))}"
 
-    def clear_state(self) -> str:
+    def clear_state(self):
         """Clear any state on the SearchData, including logged opensearch queries."""
         self.captured_es_queries = []
 

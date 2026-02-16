@@ -7,8 +7,10 @@ from typing import AsyncIterable, Iterable, Optional, Tuple
 
 import malpz
 import pyzipper
+from azul_bedrock import exceptions_metastore
 from azul_bedrock.dispatcher import DispatcherAPI
-from azul_bedrock.exceptions import ApiException
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException
 from cart import cart
 from fastapi import UploadFile
 from pydantic import ByteSize
@@ -26,14 +28,8 @@ MAX_BUNDLED_FILES = 1000
 MAX_BUNDLED_FILENAME_LENGTH = 255
 
 
-class ExtractException(Exception):
-    """Supplied file could not be extracted."""
-
-    pass
-
-
 async def unpack_content(
-    binary: UploadFile, extract: bool = False, password: str = None
+    binary: UploadFile, extract: bool = False, password: str | None = None
 ) -> AsyncIterable[Tuple[AsyncIterable[bytes] | UploadFile, Optional[str]]]:
     """Unpack available binary samples from supplied input stream.
 
@@ -64,8 +60,8 @@ async def unpack_content(
             raise ApiException(
                 status_code=HTTP_422_UNPROCESSABLE_CONTENT,
                 ref=f"Can't extract file larger than {ByteSize(MAX_BUNDLED_PRE_EXTRACT_SIZE).human_readable()}",
-                external=f"Can't extract file larger than {ByteSize(MAX_BUNDLED_PRE_EXTRACT_SIZE).human_readable()}",
-                internal="extract_file_too_large",
+                internal=ExceptionCodeEnum.MetastoreFileFormatTooLargeForUnzip,
+                parameters={"max_bundled_pre_extract_size": ByteSize(MAX_BUNDLED_PRE_EXTRACT_SIZE).human_readable()},
             )
         # if submitter trusts the file enough to be bundled submission, it shouldn't be cart'd so we don't uncart here
         data_to_extract = io.BytesIO(buffered_data)
@@ -116,15 +112,21 @@ def extract_archive(istream: io.BytesIO, password: str = None) -> Iterable[Tuple
             zpf.setpassword(password)
             namelist = list(zpf.namelist())
             if len(namelist) > MAX_BUNDLED_FILES:
-                raise ExtractException(f"too many files ({len(namelist)}/{MAX_BUNDLED_FILES})")
+                raise exceptions_metastore.ExtractException(
+                    ref=f"too many files to extract archive ({len(namelist)}/{MAX_BUNDLED_FILES})",
+                    internal=ExceptionCodeEnum.MetastoreFileFormatTooManyFilesToExtract,
+                    parameters={"number_of_files": len(namelist), "max_number_of_files": MAX_BUNDLED_FILES},
+                )
             # check total extracted size
             total_bytes = 0
             for n in namelist:
                 info: zipfile.ZipInfo = zpf.getinfo(n)
                 total_bytes += info.file_size
             if total_bytes > MAX_BUNDLED_POST_EXTRACT_SIZE:
-                raise ExtractException(
-                    f"too many bytes in extracted submission ({total_bytes}/{MAX_BUNDLED_POST_EXTRACT_SIZE})"
+                raise exceptions_metastore.ExtractException(
+                    ref=f"too many bytes in extracted submission ({total_bytes}/{MAX_BUNDLED_POST_EXTRACT_SIZE})",
+                    internal=ExceptionCodeEnum.MetastoreFileFormatFileTooLargeToExtract,
+                    parameters={"total_bytes": total_bytes, "max_extraction_size": MAX_BUNDLED_POST_EXTRACT_SIZE},
                 )
             # get bytes for each file in zip
             for n in namelist:
@@ -132,32 +134,63 @@ def extract_archive(istream: io.BytesIO, password: str = None) -> Iterable[Tuple
                 if info.is_dir():
                     continue
                 if len(n) > MAX_BUNDLED_FILENAME_LENGTH:
-                    raise ExtractException(
-                        f"file path too long ({len(n)}/{MAX_BUNDLED_FILENAME_LENGTH}): "
-                        f"{n[:MAX_BUNDLED_FILENAME_LENGTH]}..."
+                    path_len = len(n)
+                    first_part_of_path = n[:MAX_BUNDLED_FILENAME_LENGTH]
+
+                    raise exceptions_metastore.ExtractException(
+                        ref=f"file path too long ({path_len}/{MAX_BUNDLED_FILENAME_LENGTH}): {first_part_of_path}...",
+                        internal=ExceptionCodeEnum.MetastoreFileFormatFilePathTooLong,
+                        parameters={
+                            "path_len": path_len,
+                            "max_bundled_filename_length": MAX_BUNDLED_FILENAME_LENGTH,
+                            "first_part_of_path": first_part_of_path,
+                        },
                     )
                 if "/../" in n:
-                    raise ExtractException(f"file name has bad character sequence: {n}")
+                    raise exceptions_metastore.ExtractException(
+                        ref=f"file name has bad character sequence (/../): {n}",
+                        internal=ExceptionCodeEnum.MetastoreFileFormatBadPathElevation,
+                        parameters={"file_path": n},
+                    )
                 if len(zpf.read(n)) == 0:
                     continue
                 extracted = True
                 yield UploadFile(io.BytesIO(zpf.read(n))), n
     except pyzipper.BadZipFile as e:
         if "File is not a zip file" in str(e):
-            raise ExtractException("not a zip file") from None
+            raise exceptions_metastore.ExtractException(
+                ref="not a zip file", internal=ExceptionCodeEnum.MetastoreFileFormatNotAZipFile
+            ) from None
         else:
             # unknown error
-            raise ExtractException(str(type(e)) + " " + str(e)) from None
+            raise exceptions_metastore.ExtractException(
+                ref=str(type(e)) + " " + str(e),
+                internal=ExceptionCodeEnum.MetastoreFileFormatUnknownException,
+                parameters={"error_type": str(type(e)), "error_text": str(e)},
+            ) from None
     except RuntimeError as e:
         if "password required for extraction" in str(e):
-            raise ExtractException("zip requires password") from None
+            raise exceptions_metastore.ExtractException(
+                ref="zip requires password",
+                internal=ExceptionCodeEnum.MetastoreFileFormatZipFileRequiresPassword,
+            ) from None
         elif "Bad password for file" in str(e):
-            raise ExtractException("bad zip password") from None
+            raise exceptions_metastore.ExtractException(
+                ref="bad zip password",
+                internal=ExceptionCodeEnum.MetastoreFileFormatZipFileBadPasswordProvided,
+            ) from None
         else:
             # unknown error
-            raise ExtractException(str(type(e)) + " " + str(e)) from None
+            raise exceptions_metastore.ExtractException(
+                ref=str(type(e)) + " " + str(e),
+                internal=ExceptionCodeEnum.MetastoreFileFormatUnknownException,
+                parameters={"error_type": str(type(e)), "error_text": str(e)},
+            ) from None
     if not extracted:
-        raise ExtractException("no files were extracted from zip")
+        raise exceptions_metastore.ExtractException(
+            ref="no files were extracted from zip",
+            internal=ExceptionCodeEnum.MetastoreFileFormatNoFilesExtractedFromZip,
+        )
 
 
 async def async_handle_malpz(async_stream: UploadFile) -> Tuple[bytes, dict]:
@@ -178,15 +211,14 @@ async def async_handle_malpz(async_stream: UploadFile) -> Tuple[bytes, dict]:
             raise ApiException(
                 status_code=HTTP_422_UNPROCESSABLE_CONTENT,
                 ref=f"Can't unmalpz file larger than {ByteSize(MAX_BUNDLED_PRE_EXTRACT_SIZE).human_readable()}",
-                external=f"Can't unmalpz file larger than {ByteSize(MAX_BUNDLED_PRE_EXTRACT_SIZE).human_readable()}",
-                internal="unmalpz_file_too_large",
+                internal=ExceptionCodeEnum.MetastoreFileFormatFileTooLargeForUnmalpz,
+                parameters={"file_size": str(ByteSize(MAX_BUNDLED_PRE_EXTRACT_SIZE).human_readable())},
             )
         unwrapped = malpz.unwrap(buffered_data)
         meta = unwrapped.get("meta", {})
         return unwrapped["data"], meta
-    except Exception:
+    finally:
         await async_stream.seek(0)
-        raise
 
 
 def get_attachment_type(file_format: Optional[str], entity_hash: str, request_hash: str) -> Optional[str]:

@@ -1,7 +1,9 @@
 """Routes for entity data queries."""
 
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException
 from azul_bedrock.models_restapi import plugins as bedr_plugins
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, Response
 
 from azul_metastore import context
 from azul_metastore.query import plugin
@@ -20,7 +22,7 @@ def get_all_plugins(
     data = plugin.get_all_plugins(ctx)
     if not data:
         qr.set_security_headers(ctx, resp)
-        raise HTTPException(status_code=404)
+        raise ApiException(status_code=404, internal=ExceptionCodeEnum.MetastoreNoPluginsInAzul)
     return qr.fr(ctx, [d.model_dump(mode="json") for d in data], resp)
 
 
@@ -37,7 +39,7 @@ def get_all_plugin_statuses(
     data = plugin.get_all_plugin_latest_activity(ctx)
     if not data:
         qr.set_security_headers(ctx, resp)
-        raise HTTPException(status_code=404)
+        raise ApiException(status_code=404, internal=ExceptionCodeEnum.MetastoreNoPluginStatusesInAzul)
     return qr.fr(ctx, [d.model_dump(mode="json") for d in data], resp)
 
 
@@ -56,5 +58,5 @@ def get_plugin(resp: Response, name: str, version: str, ctx: context.Context = D
     # no trace of plugin
     if not data["plugin"]:
         qr.set_security_headers(ctx, resp)
-        raise HTTPException(status_code=404)
+        raise ApiException(status_code=404, internal=ExceptionCodeEnum.MetastorePluginNotInAzul)
     return qr.fr(ctx, data, resp)

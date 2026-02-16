@@ -9,6 +9,11 @@ from starlette.testclient import TestClient
 from azul_metastore import context, settings
 from azul_metastore.common import search_data
 from tests.support import auth
+from azul_bedrock import exceptions_bedrock
+from azul_bedrock import exceptions_metastore
+from azul_bedrock.dispatcher import DispatcherAPI
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
 
 
 def set_token(request: Request) -> UserInfo:
@@ -21,7 +26,7 @@ def set_token(request: Request) -> UserInfo:
     elif user in auth.Auth.users:
         creds = auth.Auth.users[user]
     else:
-        raise Exception(f"unknown user {user}")
+        raise BaseAzulException(f"unknown user {user}")
     data = {
         "exp": -1,
         "token_type": "Bearer",

@@ -3,6 +3,7 @@ import os
 
 from azul_metastore import settings
 from tests.support import unit_test
+from azul_bedrock import exceptions_metastore
 
 
 class TestSourceRead(unit_test.BaseUnitTestCase):
@@ -69,17 +70,17 @@ class TestSourceRead(unit_test.BaseUnitTestCase):
         settings.check_source_references("source3", {"r1": 1, "r2": 2, "r3": 3, "r4": 4})
         settings.check_source_references("source3", {"r1": 1, "r2": 2, "r3": 3, "r4": 4, "r5": 5, "r6": 6})
         self.assertRaises(
-            settings.BadSourceRefsException,
+            exceptions_metastore.BadSourceRefsException,
             settings.check_source_references,
             *("source3", {"r1": 1, "r2": 2, "r3": 3}),
         )
         self.assertRaises(
-            settings.BadSourceRefsException,
+            exceptions_metastore.BadSourceRefsException,
             settings.check_source_references,
             *("source3", {}),
         )
         self.assertRaises(
-            settings.BadSourceRefsException,
+            exceptions_metastore.BadSourceRefsException,
             settings.check_source_references,
             *("source3", {"r1": 1, "r2": 2, "r3": 3, "r4": 4, "gtrhtr": 9}),
         )
