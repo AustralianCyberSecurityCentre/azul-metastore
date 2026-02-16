@@ -18,7 +18,6 @@ from azul_metastore.common import memcache
 
 logger = logging.getLogger(__name__)
 loki_logger = None
-printed = False
 
 
 class IndexSettings(BaseModel):
@@ -86,34 +85,15 @@ class Metastore(BaseSettings):
             fh.setFormatter(special_log_format)
             loki_logger.addHandler(fh)
 
-        # prevent duplicate printing for each read of settings
-        if not printed:
-            if not self.opensearch_url:
-                logger.warning("no opensearch url set for metastore!")
-            if not self.certificate_verification:
-                logger.warning("certificate verification disabled!")
-
-            if self.opensearch_url.startswith("http:"):
-                logger.warning(f"host not under ssl! {self.opensearch_url}")
-            printed = True
-
         if not self.partition:
             raise exceptions_metastore.ConfigException(
                 ref="metastore_partition must be set. Recommended to set to dev01, qa01, prod01, etc.",
                 internal=ExceptionCodeEnum.MetastoreSettingsPartitionNotSet,
             )
 
-    # location of opensearch cluster that can be queried
-    # can also be a load balancer
-    opensearch_url: str = ""
-
     # credentials for account to manage Azul indices in opensearch
     opensearch_username: str = "azul_writer"
-    opensearch_password: str = ""  # noqa: S105 # nosec S105
-
-    # admin credentials to create roles and rolemappings (must be used in conjunction with no-input flag)
-    opensearch_admin_username: str = "azul_admin"
-    opensearch_admin_password: str = ""  # noqa: S105 # nosec S105
+    opensearch_password: str = ""  # nosec S105
 
     # azul.<partition> prefix for all indices in opensearch
     # to simplify migration recommended to set to dev01, qa01, prod01
@@ -121,8 +101,6 @@ class Metastore(BaseSettings):
     # if this value is incremented, all events will be reindexed from dispatcher
     # this is useful if moving between opensearch clusters or if mapping has changed
     ingestor_version_suffix: int = 0
-    # intended for local testing only
-    certificate_verification: bool = True
 
     # separated to diagnose memory issues in dispatcher
     # dispatcher for event interaction

@@ -4,56 +4,18 @@ from dataclasses import dataclass, field
 
 import cachetools
 import opensearchpy
-from azul_bedrock import exceptions_metastore
-from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.datastore import credentials_to_access as bed_credentials_to_access
+from azul_bedrock.datastore import credentials_to_es as bed_credentials_to_es
 from azul_bedrock.models_restapi.basic import QueryInfo
 
 from azul_metastore import settings
 from azul_metastore.common import memcache
 
 
-def credentials_to_access(c: dict) -> dict:
-    """Return credentials in format used to get access."""
-    access = {}
-    format = c.get("format")
-    try:
-        if format == "basic":
-            access["http_auth"] = (c["username"], c["password"])
-        elif format == "jwt":
-            access["headers"] = {"Authorization": c["token"]}
-        elif format == "oauth":
-            access["headers"] = {"Authorization": f"Bearer {c['token']}"}
-        else:
-            raise exceptions_metastore.BadCredentialsException(
-                ref=f"unrecognised credential format: {c['format']}",
-                internal=ExceptionCodeEnum.MetastoreSearchDataBadCredentials,
-                parameters={"credential_format": str(c["format"])},
-            )
-    except KeyError as e:
-        raise exceptions_metastore.BadCredentialsException(
-            ref=f"missing/bad parameter: {str(e)}",
-            internal=ExceptionCodeEnum.MetastoreSearchDataMissingOrBadParameters,
-            parameters={"inner_exception": str(e)},
-        ) from e
-
-    return access
-
-
 @cachetools.cached(cache=memcache.get_ttl_cache("creds_es"), key=lambda x: x["unique"])
 def credentials_to_es(c: dict) -> opensearchpy.OpenSearch:
-    """Turn credentials into an opensearch object and cache. Invalidate after some time."""
-    access = credentials_to_access(c)
-    s = settings.get()
-    # unfortunately opensearchpy does not use requests library, but urlli3 directly
-    # we have to manually reference certificates not found in Certifi for consistency
-    # as we query opensearch via both requests and opensearchpy
-    if not s.certificate_verification:
-        access["verify_certs"] = False
-        access["ssl_show_warn"] = False
-    access["timeout"] = 120
-
-    # enable transport compression
-    return opensearchpy.OpenSearch(hosts=s.opensearch_url, http_compress=True, **access)
+    """Cache acquisition of opensearch credentials."""
+    return bed_credentials_to_es(c)
 
 
 @dataclass
@@ -72,7 +34,7 @@ class SearchData:
 
     def access(self) -> dict:
         """Return access data."""
-        return credentials_to_access(self.credentials)
+        return bed_credentials_to_access(self.credentials)
 
     def es(self) -> opensearchpy.OpenSearch:
         """Opensearch object. Usually has some auth info loaded to allow authenticated queries."""
