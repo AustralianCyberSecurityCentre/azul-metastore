@@ -50,6 +50,9 @@ class Metastore(BaseSettings):
         }[self.log_level]
         logger.setLevel(log_level)
 
+        # Restrain OpenSearch-py to the same level
+        logging.getLogger('opensearch').setLevel(log_level)
+
         if not logger.hasHandlers():
             h = logging.StreamHandler(sys.stdout)
             h.setLevel(log_level)
