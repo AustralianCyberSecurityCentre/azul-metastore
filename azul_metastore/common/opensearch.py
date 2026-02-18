@@ -3,15 +3,13 @@
 import copy
 
 import httpx
-from azul_bedrock import exceptions_bedrock
+from azul_bedrock import exceptions_bedrock, settings
 from azul_bedrock.exception_enums import ExceptionCodeEnum
-
-from azul_metastore import settings
 
 
 def get_user_account(user_auth: dict) -> dict:
     """Get user account information from opensearch."""
-    s = settings.get()
+    s = settings.get_opensearch()
     # opensearch path to get account information
     api_path = "_plugins/_security/api/account"
 

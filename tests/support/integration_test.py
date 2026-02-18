@@ -10,6 +10,7 @@ from azul_bedrock import models_api as mapi
 from azul_bedrock import models_network as azm
 from azul_bedrock import exceptions_bedrock
 from azul_bedrock import exceptions_metastore
+from azul_bedrock import settings as bed_settings
 from azul_bedrock.dispatcher import DispatcherAPI
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
@@ -128,8 +129,9 @@ class DynamicTestCase(basic_test.BasicTest):
         global created_opensearch_roles
         cls.clear_cache()
         cls.alter_environment()
+        bed_s = bed_settings.get_opensearch()
         s = settings.get()
-        print(f"using opensearch at {s.opensearch_url}")
+        print(f"using opensearch at {bed_s.opensearch_url}")
 
         # Update opensearch config if we have elevated permissions.
         # This must be done before using the writer user, as it creates the correct roles.
