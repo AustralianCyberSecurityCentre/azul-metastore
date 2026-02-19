@@ -8,6 +8,7 @@ from enum import IntEnum
 
 import click
 from azul_bedrock import exceptions_bedrock
+from azul_bedrock.datastore import CredentialFormat, Credentials
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from prometheus_client import start_http_server
 
@@ -152,13 +153,15 @@ def apply_opensearch_config(print_only: bool, rolesmapping: bool, no_input: bool
         if selected == AuthOptions.user_and_password:
             username = env_username or click.prompt(text="Please provide the username for Opensearch: ")
             password = env_password or click.prompt(text="Please provide the password for Opensearch: ")
-            credentials = {"unique": username, "format": "basic", "username": username, "password": password}
+            credentials = Credentials(
+                unique=username, format=CredentialFormat.basic, username=username, password=password
+            )
         elif selected == AuthOptions.jwt:
             token = click.prompt(text="Please provide the JWT for Opensearch: ")
-            credentials = {"unique": "local-user-jwt", "format": "jwt", "token": token}
+            Credentials(unique="local-user-jwt", format=CredentialFormat.jwt, token=token)
         elif selected == AuthOptions.oauth_token:
             token = click.prompt(text="Please provide the OAuth token for Opensearch: ")
-            credentials = {"unique": "local-user-oauth", "format": "jwt", "token": token}
+            credentials = Credentials(unique="local-user-oauth", format=CredentialFormat.jwt, token=token)
         else:
             click.echo("Error. Must provide credentials.")
             return 7

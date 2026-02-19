@@ -19,6 +19,7 @@ from azul_metastore.common import memcache, search_data
 from azul_metastore.encoders import binary2 as rc2
 from azul_metastore.query import annotation, binary_create, plugin, status
 from tests.support import auth, basic_test, gen, system
+from azul_bedrock.datastore import Credentials, CredentialFormat
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -139,12 +140,9 @@ class DynamicTestCase(basic_test.BasicTest):
         password = os.environ["TEST_OPENSEARCH_ELEVATED_PASSWORD"]
         if not created_opensearch_roles and username and password:
             created_opensearch_roles = True
-            credentials = {
-                "unique": username,
-                "format": "basic",
-                "username": username,
-                "password": password,
-            }
+            credentials = Credentials(
+                unique=username, format=CredentialFormat.basic, username=username, password=password
+            )
             admin_session = search_data.SearchData(credentials, security_exclude=[], security_include=[])
             opensearch_config.write_config_to_opensearch(admin_session, rolesmapping=True)
 

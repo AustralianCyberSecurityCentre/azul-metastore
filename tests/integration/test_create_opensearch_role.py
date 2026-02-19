@@ -6,6 +6,7 @@ from azul_metastore import entry
 from azul_metastore.common import search_data
 from azul_metastore.opensearch_config import write_config_to_opensearch
 from tests.support import integration_test
+from azul_bedrock.datastore import Credentials, CredentialFormat
 
 
 class TestSearch(integration_test.DynamicTestCase):
@@ -14,12 +15,12 @@ class TestSearch(integration_test.DynamicTestCase):
         super().setUpClass()
         cls.username = os.environ["TEST_OPENSEARCH_ELEVATED_USER"]
         cls.password = os.environ["TEST_OPENSEARCH_ELEVATED_PASSWORD"]
-        cls.credentials = {
-            "unique": cls.username,
-            "format": "basic",
-            "username": cls.username,
-            "password": cls.password,
-        }
+        cls.credentials = Credentials(
+            unique=cls.username,
+            format=CredentialFormat.basic,
+            username=cls.username,
+            password=cls.password,
+        )
         cls.admin_session = search_data.SearchData(cls.credentials, security_exclude=[], security_include=[])
         cls.test_role_name = "s-low"
 

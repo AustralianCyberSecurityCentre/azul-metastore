@@ -40,7 +40,7 @@ def set_token(request: Request) -> UserInfo:
         email="",
         roles=["validated"] + extra_roles,
         decoded=data,
-        credentials=Credentials(**creds),
+        credentials=creds,
         unique_id=user,
     )
     return request.state.user_info
@@ -123,9 +123,9 @@ class System:
         """Get writer context."""
         return self.get_ctx(settings.get_writer_creds())
 
-    def get_ctx(self, creds: dict) -> context.Context:
+    def get_ctx(self, creds: Credentials) -> context.Context:
         """Create context using creds."""
-        user_info = UserInfo(username=creds["unique"], unique_id=creds["unique"])
+        user_info = UserInfo(username=creds.unique, unique_id=creds.unique)
         sd = search_data.SearchData(credentials=creds, security_exclude=[], security_include=[])
         return self.base.copy_with(user_info=user_info, sd=sd)
 

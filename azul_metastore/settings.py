@@ -8,6 +8,7 @@ from functools import cached_property
 
 import cachetools
 from azul_bedrock import exceptions_metastore, models_settings
+from azul_bedrock.datastore import CredentialFormat, Credentials
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from fastapi import Request
 from pydantic import BaseModel, computed_field
@@ -193,15 +194,15 @@ def get():
 
 
 @cachetools.cached(cache=memcache.get_lru_cache("get_writer_creds"))
-def get_writer_creds():
+def get_writer_creds() -> Credentials:
     """Return credentials for the writer."""
     s = get()
-    return {
-        "unique": "writer",
-        "format": "basic",
-        "username": s.opensearch_username,
-        "password": s.opensearch_password,
-    }
+    return Credentials(
+        format=CredentialFormat.basic,
+        unique="writer",
+        username=s.opensearch_username,
+        password=s.opensearch_password,
+    )
 
 
 def check_source_exists(source: str):

@@ -4,6 +4,7 @@ from azul_metastore.common import memcache, search_data
 from tests.support import unit_test
 from azul_bedrock import exceptions_metastore
 from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.datastore import Credentials, CredentialFormat
 
 
 class TestUtil(unit_test.BaseUnitTestCase):
@@ -15,7 +16,9 @@ class TestUtil(unit_test.BaseUnitTestCase):
         )
         memcache.clear()
         self.assertRaises(
-            exceptions_metastore.BadCredentialsException, search_data.credentials_to_es, {"unique": "blah"}
+            exceptions_metastore.BadCredentialsException,
+            search_data.credentials_to_es,
+            Credentials(unique="cactus", format=CredentialFormat.jwt),
         )
 
         _cta.side_effect = None
@@ -27,15 +30,35 @@ class TestSearchData(unit_test.BaseUnitTestCase):
     @mock.patch("azul_metastore.common.search_data.credentials_to_es")
     def test_es(self, _cte):
         _cte.return_value = 515
-        self.assertEqual(515, search_data.SearchData({}, [], []).es())
+        self.assertEqual(
+            515, search_data.SearchData(Credentials(unique="cactus", format=CredentialFormat.none), [], []).es()
+        )
 
     @mock.patch("azul_metastore.common.search_data.bed_credentials_to_access")
     def test_access(self, _cta):
         _cta.return_value = 515
-        self.assertEqual(515, search_data.SearchData({}, [], []).access())
+        self.assertEqual(
+            515, search_data.SearchData(Credentials(unique="cactus", format=CredentialFormat.none), [], []).access()
+        )
 
     def test_unique(self):
-        self.assertEqual("cactus|", search_data.SearchData({"unique": "cactus"}, [], []).unique())
-        self.assertEqual("cactus|a", search_data.SearchData({"unique": "cactus"}, ["a"], []).unique())
-        self.assertEqual("cactus|a.c", search_data.SearchData({"unique": "cactus"}, ["a", "c"], []).unique())
-        self.assertEqual("cactus|a.c", search_data.SearchData({"unique": "cactus"}, ["c", "a"], []).unique())
+        self.assertEqual(
+            "cactus|",
+            search_data.SearchData(Credentials(unique="cactus", format=CredentialFormat.none), [], []).unique(),
+        )
+        self.assertEqual(
+            "cactus|a",
+            search_data.SearchData(Credentials(unique="cactus", format=CredentialFormat.none), ["a"], []).unique(),
+        )
+        self.assertEqual(
+            "cactus|a.c",
+            search_data.SearchData(
+                Credentials(unique="cactus", format=CredentialFormat.none), ["a", "c"], []
+            ).unique(),
+        )
+        self.assertEqual(
+            "cactus|a.c",
+            search_data.SearchData(
+                Credentials(unique="cactus", format=CredentialFormat.none), ["c", "a"], []
+            ).unique(),
+        )
