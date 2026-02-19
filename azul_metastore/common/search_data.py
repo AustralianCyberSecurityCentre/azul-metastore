@@ -13,7 +13,7 @@ from azul_metastore import settings
 from azul_metastore.common import memcache
 
 
-@cachetools.cached(cache=memcache.get_ttl_cache("creds_es"), key=lambda x: x["unique"])
+@cachetools.cached(cache=memcache.get_ttl_cache("creds_es"), key=lambda x: x.unique)
 def credentials_to_es(c: Credentials) -> opensearchpy.OpenSearch:
     """Cache acquisition of opensearch credentials."""
     return bed_credentials_to_es(c)
