@@ -605,7 +605,7 @@ class TestFeatures(integration_test.BaseRestapi):
         self.assertEqual(4, len(resp_model.values))
         self.assertEqual(resp_model.values[0].value, "1")
         self.assertEqual(resp_model.total, 4)
-        self.assertTrue(resp_model.is_total_approx)  # TODO? - REALLY!
+        self.assertTrue(resp_model.is_total_approx)
 
         # Second query that will get no value because precisely 4 matched.
         response = self.client.post(f"/v0/features/feature/f1?term=1&num_values=4", json={"after": resp_model.after})
