@@ -2,6 +2,7 @@ from unittest import mock
 
 from azul_metastore.common import search_data, wrapper
 from tests.support import unit_test
+from azul_bedrock.datastore import Credentials, CredentialFormat
 
 
 class TestUtil(unit_test.BaseUnitTestCase):
@@ -21,7 +22,11 @@ class TestWrapper(unit_test.BaseUnitTestCase):
         w = wrapper.Wrapper("", "encoded", {}, [], {}, 1)
 
         # check exclusive filter works
-        sd = search_data.SearchData(credentials={}, security_exclude=["HIGH"], security_include=[])
+        sd = search_data.SearchData(
+            credentials=Credentials(unique="a", format=CredentialFormat.none),
+            security_exclude=["HIGH"],
+            security_include=[],
+        )
         query = {}
         query = w._limit_search(sd, query)
         self.assertEqual(
@@ -65,7 +70,11 @@ class TestWrapper(unit_test.BaseUnitTestCase):
         w = wrapper.Wrapper("", "encoded", {}, [], {}, 1)
 
         # check exclusive filter works
-        sd = search_data.SearchData(credentials={}, security_exclude=["HIGH"], security_include=["REL:APPLE"])
+        sd = search_data.SearchData(
+            credentials=Credentials(unique="a", format=CredentialFormat.none),
+            security_exclude=["HIGH"],
+            security_include=["REL:APPLE"],
+        )
         query = {}
         query = w._limit_search(sd, query)
         self.assertEqual(
@@ -107,7 +116,11 @@ class TestWrapper(unit_test.BaseUnitTestCase):
         w = wrapper.Wrapper("", "encoded", {}, [], {}, 1)
 
         # check exclusive filter works
-        sd = search_data.SearchData(credentials={}, security_exclude=["HIGH"], security_include=[])
+        sd = search_data.SearchData(
+            credentials=Credentials(unique="a", format=CredentialFormat.none),
+            security_exclude=["HIGH"],
+            security_include=[],
+        )
         query = {
             "query": {
                 "bool": {
@@ -183,7 +196,9 @@ class TestWrapper(unit_test.BaseUnitTestCase):
 
         # check exclusive filter works
         sd = search_data.SearchData(
-            credentials={}, security_exclude=["REL:CAR", "HIGH"], security_include=["REL:APPLE"]
+            credentials=Credentials(unique="a", format=CredentialFormat.none),
+            security_exclude=["REL:CAR", "HIGH"],
+            security_include=["REL:APPLE"],
         )
         query = {
             "query": {

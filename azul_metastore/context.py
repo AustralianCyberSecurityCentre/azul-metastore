@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import cachetools
 from azul_bedrock import dispatcher as b_dispatcher
 from azul_bedrock import exceptions_metastore, models_auth
+from azul_bedrock.datastore import get_user_account
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException
 from azul_bedrock.exceptions_security import SecurityException
@@ -14,7 +15,7 @@ from azul_security import security as sec
 from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT
 
 from azul_metastore import settings
-from azul_metastore.common import manager, memcache, opensearch, search_data, wrapper
+from azul_metastore.common import manager, memcache, search_data, wrapper
 
 
 @cachetools.cached(cache=memcache.get_ttl_cache("useraccess"), key=lambda x, _: x.unique())
@@ -32,7 +33,7 @@ def _get_user_access(sd: search_data.SearchData, azsec: sec.Security) -> UserAcc
         security_labels = sorted(azsec.get_labels_allowed())
     else:
         ret.security_enabled = True
-        ret.account_info = opensearch.get_user_account(sd.access())
+        ret.account_info = get_user_account(sd.access())
 
         # read internal roles as security labels translated by opensearch
         # i.e. 'ACCESS2' on JWT is translated to 's-rel-apple' role by opensearch

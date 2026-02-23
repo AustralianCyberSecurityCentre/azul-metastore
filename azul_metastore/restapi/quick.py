@@ -45,7 +45,7 @@ def _get_subctx(user_info: UserInfo, security_exclude: list[str], security_inclu
     ctx = _get_base().copy_with(
         user_info=user_info,
         sd=search_data.SearchData(
-            credentials=user_info.credentials.model_dump(),
+            credentials=user_info.credentials,
             security_exclude=security_exclude,
             security_include=security_include,
             enable_log_es_queries=settings.get().log_opensearch_queries,

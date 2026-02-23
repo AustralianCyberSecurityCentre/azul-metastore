@@ -3,6 +3,7 @@
 import datetime
 
 import jwt
+from azul_bedrock.datastore import Credentials, CredentialFormat
 
 from azul_metastore.encoders import base_encoder
 
@@ -33,31 +34,31 @@ def get_roles(token: str):
 
 
 class Auth:
-    users = {}
-    users["low"] = user_low = {
-        "unique": "low",
-        "format": "jwt",
-        "token": gen_token(markings=["LOW"], user="low"),
-    }
-    users["med"] = user_med = {
-        "unique": "med",
-        "format": "jwt",
-        "token": gen_token(markings=["LOW", "MEDIUM", "REL:APPLE"], user="med"),
-    }
-    users["high"] = user_high = {
-        "unique": "high",
-        "format": "jwt",
-        "token": gen_token(markings=["LOW", "MEDIUM", "MOD1", "REL:APPLE"], user="high"),
-    }
-    users["high_org2"] = user_high_org2 = {
-        "unique": "high_org2",
-        "format": "jwt",
-        "token": gen_token(markings=["LOW", "MEDIUM", "HIGH", "MOD1", "REL:BEE"], user="high_org2"),
-    }
-    users["high_all"] = user_high_all = {
-        "unique": "high_all",
-        "format": "jwt",
-        "token": gen_token(
+    users: dict[str, Credentials] = {}
+    users["low"] = user_low = Credentials(
+        unique="low",
+        format=CredentialFormat.jwt,
+        token=gen_token(markings=["LOW"], user="low"),
+    )
+    users["med"] = user_med = Credentials(
+        unique="med",
+        format=CredentialFormat.jwt,
+        token=gen_token(markings=["LOW", "MEDIUM", "REL:APPLE"], user="med"),
+    )
+    users["high"] = user_high = Credentials(
+        unique="high",
+        format=CredentialFormat.jwt,
+        token=gen_token(markings=["LOW", "MEDIUM", "MOD1", "REL:APPLE"], user="high"),
+    )
+    users["high_org2"] = user_high_org2 = Credentials(
+        unique="high_org2",
+        format=CredentialFormat.jwt,
+        token=gen_token(markings=["LOW", "MEDIUM", "HIGH", "MOD1", "REL:BEE"], user="high_org2"),
+    )
+    users["high_all"] = user_high_all = Credentials(
+        unique="high_all",
+        format=CredentialFormat.jwt,
+        token=gen_token(
             markings=[
                 "LOW",
                 "LOW: LY",
@@ -75,9 +76,9 @@ class Auth:
             ],
             user="high_all",
         ),
-    }
-    users["anonymoose"] = user_anonymoose = {
-        "unique": "anonymoose",
-        "format": "jwt",
-        "token": gen_token(markings=["OFFICIAL"], user="anonymoose"),
-    }
+    )
+    users["anonymoose"] = user_anonymoose = Credentials(
+        unique="anonymoose",
+        format=CredentialFormat.jwt,
+        token=gen_token(markings=["OFFICIAL"], user="anonymoose"),
+    )

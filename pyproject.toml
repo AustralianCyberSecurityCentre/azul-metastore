@@ -24,7 +24,7 @@ classifiers=[
     "Topic :: Software Development :: Libraries",
 ]
 dependencies = [
-    "azul-bedrock>=9.0.32",
+    "azul-bedrock>=10.0.26",
     "azul-security>=0.8.0.0",
     "black>=26.1.0",
     "cachetools>=7.0.0",

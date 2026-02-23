@@ -10,6 +10,7 @@ from azul_bedrock import models_api as mapi
 from azul_bedrock import models_network as azm
 from azul_bedrock import exceptions_bedrock
 from azul_bedrock import exceptions_metastore
+from azul_bedrock import settings as bed_settings
 from azul_bedrock.dispatcher import DispatcherAPI
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
@@ -18,6 +19,7 @@ from azul_metastore.common import memcache, search_data
 from azul_metastore.encoders import binary2 as rc2
 from azul_metastore.query import annotation, binary_create, plugin, status
 from tests.support import auth, basic_test, gen, system
+from azul_bedrock.datastore import Credentials, CredentialFormat
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -128,8 +130,9 @@ class DynamicTestCase(basic_test.BasicTest):
         global created_opensearch_roles
         cls.clear_cache()
         cls.alter_environment()
+        bed_s = bed_settings.get_opensearch()
         s = settings.get()
-        print(f"using opensearch at {s.opensearch_url}")
+        print(f"using opensearch at {bed_s.opensearch_url}")
 
         # Update opensearch config if we have elevated permissions.
         # This must be done before using the writer user, as it creates the correct roles.
@@ -137,12 +140,9 @@ class DynamicTestCase(basic_test.BasicTest):
         password = os.environ["TEST_OPENSEARCH_ELEVATED_PASSWORD"]
         if not created_opensearch_roles and username and password:
             created_opensearch_roles = True
-            credentials = {
-                "unique": username,
-                "format": "basic",
-                "username": username,
-                "password": password,
-            }
+            credentials = Credentials(
+                unique=username, format=CredentialFormat.basic, username=username, password=password
+            )
             admin_session = search_data.SearchData(credentials, security_exclude=[], security_include=[])
             opensearch_config.write_config_to_opensearch(admin_session, rolesmapping=True)
 
