@@ -59,14 +59,9 @@ purge = "azul_metastore.restapi.purge:router"
 sources = "azul_metastore.restapi.sources:router"
 statistics = "azul_metastore.restapi.statistics:router"
 
-
 [project.urls]
 Documentation = "https://australiancybersecuritycentre.github.io/azul/"
 Repository = "https://github.com/AustralianCyberSecurityCentre/azul-metastore"
-
-[[tool.uv.index]]
-url = "https://pypi.org/simple"
-default = true
 
 [tool.hatch.version]
 source = "vcs"
