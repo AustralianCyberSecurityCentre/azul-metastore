@@ -2,6 +2,8 @@
 
 from typing import Generator, Iterable
 
+from azul_bedrock import models_network as azm
+
 from azul_metastore import context
 from azul_metastore.common import utils
 
@@ -70,7 +72,22 @@ def ensure_valid_binaries(ctx: context.Context) -> int:
         "query": {
             "bool": {
                 "filter": [{"term": {"binary_info": "binary"}}],
-                "must_not": [{"has_child": {"type": "metadata", "query": {"exists": {"field": "source.name"}}}}],
+                "must_not": [
+                    {
+                        "has_child": {
+                            "type": "metadata",
+                            "query": {
+                                "terms": {
+                                    "action": [
+                                        azm.BinaryAction.Extracted.value,
+                                        azm.BinaryAction.Mapped.value,
+                                        azm.BinaryAction.Sourced.value,
+                                    ]
+                                }
+                            },
+                        }
+                    },
+                ],
             }
         }
     }
