@@ -15,8 +15,11 @@ class TestBinaryFind(integration_test.BaseRestapi):
         self.assertEqual(after, '{"SHA256": "e188"}')
         self.assertEqual(parsed["data"]["total"], 210)
 
+        print("after", after)
+        print(parsed)
         response = self.client.post("/v0/binaries/all?num_binaries=100", content=json.dumps({"after": after}))
         print(response.content)
+
         self.assertEqual(200, response.status_code)
         parsed = response.json()
         self.assertEqual(100, len(parsed["data"]["items"]))
@@ -65,6 +68,8 @@ class TestBinaryFind(integration_test.BaseRestapi):
         parsed = response.json()
         self.assertEqual(80, len(parsed["data"]["items"]))
         after = parsed["data"]["after"]
+        print("after", after)
+        print(parsed)
         self.assertEqual(parsed["data"]["total"], 80)
 
         response = self.client.post(
