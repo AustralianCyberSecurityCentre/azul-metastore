@@ -1,4 +1,5 @@
 import json
+import time
 
 from tests.support import gen, integration_test
 
@@ -6,7 +7,6 @@ from tests.support import gen, integration_test
 class TestBinaryFind(integration_test.BaseRestapi):
     def test_binary_find_simple(self):
         self.write_binary_events([gen.binary_event(eid=f"e{x}", authornv=("a1", "1")) for x in range(210)])
-
         response = self.client.post("/v0/binaries/all?num_binaries=100")
         self.assertEqual(200, response.status_code)
         parsed = response.json()
@@ -15,7 +15,11 @@ class TestBinaryFind(integration_test.BaseRestapi):
         self.assertEqual(after, '{"SHA256": "e188"}')
         self.assertEqual(parsed["data"]["total"], 210)
 
-        response = self.client.post("/v0/binaries/all?num_binaries=100", content=json.dumps({"after": after}))
+        print("after", after)
+        print(parsed)
+        response = self.client.post("/v0/binaries/all?num_binaries=100", json={"after": after})
+        print(response.content)
+
         self.assertEqual(200, response.status_code)
         parsed = response.json()
         self.assertEqual(100, len(parsed["data"]["items"]))
@@ -23,7 +27,7 @@ class TestBinaryFind(integration_test.BaseRestapi):
         self.assertEqual(after, '{"SHA256": "e9"}')
         self.assertNotIn("total", parsed["data"])
 
-        response = self.client.post("/v0/binaries/all?num_binaries=100", content=json.dumps({"after": after}))
+        response = self.client.post("/v0/binaries/all?num_binaries=100", json={"after": after})
         self.assertEqual(200, response.status_code)
         parsed = response.json()
         self.assertEqual(10, len(parsed["data"]["items"]))
@@ -31,7 +35,7 @@ class TestBinaryFind(integration_test.BaseRestapi):
         self.assertEqual(after, '{"SHA256": "e99"}')
         self.assertNotIn("total", parsed["data"])
 
-        response = self.client.post("/v0/binaries/all?num_binaries=100", content=json.dumps({"after": after}))
+        response = self.client.post("/v0/binaries/all?num_binaries=100", json={"after": after})
         self.assertEqual(200, response.status_code)
         parsed = response.json()
         self.assertEqual(0, len(parsed["data"]["items"]))
@@ -64,13 +68,16 @@ class TestBinaryFind(integration_test.BaseRestapi):
         parsed = response.json()
         self.assertEqual(80, len(parsed["data"]["items"]))
         after = parsed["data"]["after"]
+        print("after", after)
+        print(parsed)
         self.assertEqual(parsed["data"]["total"], 80)
 
         response = self.client.post(
             "/v0/binaries/all?num_binaries=100",
             params={"term": '"application/zip"'},
-            content=json.dumps({"after": after}),
+            json={"after": after},
         )
+        print(response.content)
         self.assertEqual(200, response.status_code)
         parsed = response.json()
         self.assertEqual(0, len(parsed["data"]["items"]))
