@@ -503,7 +503,7 @@ class Binary2(base_encoder.BaseIndexEncoder):
             # metadata also needs to track submission
             encoded_event.update(cls._encode_submission(event, unique_submission))
 
-        if event["action"] in [azm.BinaryAction.Extracted, azm.BinaryAction.Mapped:
+        if event["action"] in [azm.BinaryAction.Extracted, azm.BinaryAction.Mapped]:
             # mapped events can be source-level so may have a path of 1
             if len(event_source_path) >= 2:
                 # unique link
