@@ -187,7 +187,6 @@ def _do_cleanup_annotations() -> int:
             found_sha256s = set()
 
             for current_annotation in resp["hits"]["hits"]:
-                print(current_annotation)
                 annotation_sha256: str = current_annotation["_source"]["sha256"]
                 found_sha256s.add(annotation_sha256)
 
