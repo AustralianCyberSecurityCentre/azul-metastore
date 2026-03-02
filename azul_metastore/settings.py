@@ -43,11 +43,13 @@ class Metastore(BaseSettings):
 
         log_level = {
             "FATAL": logging.FATAL,
+            "CRITICAL": logging.FATAL,
             "ERROR": logging.ERROR,
+            "WARN": logging.WARNING,
             "WARNING": logging.WARNING,
             "INFO": logging.INFO,
             "DEBUG": logging.DEBUG,
-        }[self.log_level]
+        }[self.log_level.upper()]
         logger.setLevel(log_level)
 
         if not logger.hasHandlers():
