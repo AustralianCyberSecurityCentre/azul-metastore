@@ -420,6 +420,56 @@ class TestSearchQueryParser(unit_test.BaseUnitTestCase):
             ),
         )
 
+    def test_logical_docand_operator(self):
+        """Tests that DOCAND logical operators on multiple tags behave correctly."""
+        self.assertEqual(
+            search_query_parser.parse("cats DOCAND 'dogs'"),
+            search_query_parser.LogicalOperator(
+                operator="DOCAND",
+                children=[
+                    search_query_parser.Tag(
+                        location=search_query_parser.TokenLocation(start=0, end=4),
+                        value=search_query_parser.StringExpression(
+                            location=search_query_parser.TokenLocation(start=0, end=4), quotes=None, value="cats"
+                        ),
+                    ),
+                    search_query_parser.Tag(
+                        location=search_query_parser.TokenLocation(start=12, end=18),
+                        value=search_query_parser.StringExpression(
+                            location=search_query_parser.TokenLocation(start=12, end=18), quotes="single", value="dogs"
+                        ),
+                    ),
+                ],
+            ),
+        )
+
+        self.assertEqual(
+            search_query_parser.parse("cats DOCAND dogs DOCAND mice"),
+            search_query_parser.LogicalOperator(
+                operator="DOCAND",
+                children=[
+                    search_query_parser.Tag(
+                        location=search_query_parser.TokenLocation(start=0, end=4),
+                        value=search_query_parser.StringExpression(
+                            location=search_query_parser.TokenLocation(start=0, end=4), quotes=None, value="cats"
+                        ),
+                    ),
+                    search_query_parser.Tag(
+                        location=search_query_parser.TokenLocation(start=12, end=16),
+                        value=search_query_parser.StringExpression(
+                            location=search_query_parser.TokenLocation(start=12, end=16), quotes=None, value="dogs"
+                        ),
+                    ),
+                    search_query_parser.Tag(
+                        location=search_query_parser.TokenLocation(start=24, end=28),
+                        value=search_query_parser.StringExpression(
+                            location=search_query_parser.TokenLocation(start=24, end=28), quotes=None, value="mice"
+                        ),
+                    ),
+                ],
+            ),
+        )
+
     def test_logical_not_operator(self):
         """Tests that the NOT operator is correctly applied to a tag."""
         self.assertEqual(

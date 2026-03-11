@@ -178,7 +178,7 @@ def _az_query_to_opensearch_with_keys(
 ) -> tuple[dict, str | None]:
     """Converts an Azul search query into native OpenSearch syntax."""
     if isinstance(input, LogicalOperator):
-        # AND/OR/NOT operator
+        # AND/DOCAND/OR/NOT operator
         keys = []
         transformed_children = []
         for cur_child in input.children:
@@ -191,6 +191,8 @@ def _az_query_to_opensearch_with_keys(
 
         if input.operator == "AND":
             return {"bool": {"filter": transformed_children}}, None
+        elif input.operator == "DOCAND":
+            return {"bool": {"must": transformed_children}}, None
         elif input.operator == "NOT":
             must_exist_filter_list = []
             for key in keys:
