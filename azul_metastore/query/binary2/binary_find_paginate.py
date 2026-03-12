@@ -13,6 +13,7 @@ from azul_metastore.common.search_query import az_query_to_opensearch
 from azul_metastore.common.search_query_parser import parse
 from azul_metastore.context import Context
 from azul_metastore.encoders import binary2
+from azul_metastore.query.binary2.binary_find import _wrap_search_has_child
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +49,7 @@ def find_all_binaries(
     body = {
         "query": {
             "bool": {
-                "filter": [],
+                "filter": [{"has_child": {"type": "metadata", "query": {"exists": {"field": "source.name"}}}}],
                 "should": [],
             }
         },
@@ -57,7 +58,7 @@ def find_all_binaries(
             "COMPOSITE": {
                 "composite": {
                     "size": num_binaries,
-                    "sources": [{"SHA256": {"terms": {"field": "sha256"}}}],
+                    "sources": [{"SHA256": {"terms": {"field": "_id"}}}],
                 }
             }
         },
@@ -88,7 +89,8 @@ def find_all_binaries(
 
         if parse_ast is not None:
             result, _extra_info = az_query_to_opensearch(ctx, parse_ast)
-            body["query"]["bool"]["filter"] = [result]
+            result = _wrap_search_has_child([result], include_highlights=False)
+            body["query"]["bool"]["filter"] = result
 
     # perform search
     resp = ctx.man.binary2.w.search(ctx.sd, body=body)
