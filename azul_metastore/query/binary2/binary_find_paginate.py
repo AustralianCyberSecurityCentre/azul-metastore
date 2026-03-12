@@ -74,7 +74,7 @@ def find_all_binaries(
         body["aggs"]["COMPOSITE"]["composite"]["after"] = json_loaded_after
     else:
         # first request so count expected number of records
-        body["aggs"]["TOTAL"] = {"cardinality": {"field": "sha256", "precision_threshold": 1000}}
+        body["aggs"]["TOTAL"] = {"cardinality": {"field": "_id", "precision_threshold": 1000}}
 
     if term is not None:
         # Transform an Azul free-text search expression to an OpenSearch query
