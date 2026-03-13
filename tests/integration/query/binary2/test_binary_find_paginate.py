@@ -11,21 +11,21 @@ class TestEntityFind(integration_test.DynamicTestCase):
 
         all_binaries = []
         after = None
-        expected = None
+        actual = None
         while True:
             resp = binary_find_paginate.find_all_binaries(self.writer, after=after, num_binaries=100)
             if not resp.items:
                 break
             if resp.total:
-                expected = resp.total
+                actual = resp.total
             after = resp.after
             all_binaries.extend(resp.items)
         self.assertEqual(200, len(all_binaries))
-        self.assertEqual(expected, 200)  # count should be accurate for <1000
+        self.assertEqual(actual, 200)  # count should be accurate for <1000
 
         all_binaries = []
         after = None
-        expected = None
+        actual = None
         while True:
             resp = binary_find_paginate.find_all_binaries(
                 self.writer, after=after, num_binaries=100, term='features_map.f1:"v1"'
@@ -33,8 +33,8 @@ class TestEntityFind(integration_test.DynamicTestCase):
             if not resp.items:
                 break
             if resp.total:
-                expected = resp.total
+                actual = resp.total
             after = resp.after
             all_binaries.extend(resp.items)
         self.assertEqual(100, len(all_binaries))
-        self.assertEqual(expected, 100)  # count should be accurate for <1000
+        self.assertEqual(actual, 100)  # count should be accurate for <1000

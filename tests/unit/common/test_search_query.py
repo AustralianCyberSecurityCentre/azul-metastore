@@ -194,6 +194,20 @@ class TestSearchQuery(unit_test.BaseUnitTestCase):
 
         self.assertEqual(
             search_query.az_query_to_opensearch(
+                None, search_query.LogicalOperator(operator="DOCAND", children=[test_tag, test_tag2])
+            )[0],
+            {
+                "bool": {
+                    "must": [
+                        search_query.az_query_to_opensearch(None, test_tag)[0],
+                        search_query.az_query_to_opensearch(None, test_tag2)[0],
+                    ]
+                }
+            },
+        )
+
+        self.assertEqual(
+            search_query.az_query_to_opensearch(
                 None, search_query.LogicalOperator(operator="OR", children=[test_tag, test_tag2])
             )[0],
             {

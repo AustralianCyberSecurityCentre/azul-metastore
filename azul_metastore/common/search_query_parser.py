@@ -139,7 +139,7 @@ class Tag(LocatedToken):
 class LogicalOperator(BaseModel):
     """A logical operator is a boolean operation between two fields."""
 
-    operator: Literal["OR"] | Literal["AND"] | Literal["NOT"]
+    operator: Literal["OR"] | Literal["AND"] | Literal["DOCAND"] | Literal["NOT"]
     children: list["Expression"]
 
 
@@ -396,7 +396,9 @@ class AzTransformer(Transformer):
         self._assert_input_tokens(expr_operands, 1)
         return expr_operands[0]
 
-    def _handle_logical_expr(self, children: list[Expression], operator: Literal["OR"] | Literal["AND"]) -> Expression:
+    def _handle_logical_expr(
+        self, children: list[Expression], operator: Literal["OR"] | Literal["AND"] | Literal["DOCAND"]
+    ) -> Expression:
         """Helper for logical expressions to flatten operators where possible."""
         # This can have any number of elements
         if len(children) == 1:
@@ -419,6 +421,10 @@ class AzTransformer(Transformer):
     def and_logical_expr(self, children: list[Expression]):
         """Handles AND logical expression tokens."""
         return self._handle_logical_expr(children, "AND")
+
+    def doc_and_logical_expr(self, children: list[Expression]):
+        """Handles DOCAND logical expression tokens."""
+        return self._handle_logical_expr(children, "DOCAND")
 
     def not_logical_expr(self, children: list[Expression]):
         """Handles NOT logical expressions tokens."""

@@ -272,8 +272,8 @@ class TestBinaryFind(integration_test.BaseRestapi):
     def test_binary_find_free_text(self):
         self.write_binary_events(
             [
-                gen.binary_event(eid="e1"),
-                gen.binary_event(eid="e2"),
+                gen.binary_event(eid="e1", fvl=[("f1", "v1"), ("f2", "v2")]),
+                gen.binary_event(eid="e2", fvl=[("f1", "v1")]),
                 gen.binary_event(eid="e3"),
             ]
         )
@@ -289,6 +289,15 @@ class TestBinaryFind(integration_test.BaseRestapi):
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(2, len(resp["data"]["items"]))
+
+        # Search for binary event with both f1: v1 and fv2: v2 (should be 'e1')
+        response = self.client.get(
+            "/v0/binaries", params={"term": 'features_map.f1:"v1" DOCAND features_map.f2:"v2"', "max_entities": 500}
+        )
+        self.assertEqual(200, response.status_code)
+        resp = response.json()
+        self.assertEqual(1, len(resp["data"]["items"]))
+        self.assertEqual("e1", resp["data"]["items"][0]["key"])
 
     def test_binary_find_sort(self):
         # Sort order is (oldest to newest date)
