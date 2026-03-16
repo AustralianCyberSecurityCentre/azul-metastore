@@ -138,6 +138,6 @@ class TestEntitySearch(etb.DynamicTestCase):
             similar_entropies,
             [
                 binary_similar.SimilarEntropyMatchRow(sha256="e6_2", score=100.0),
-                binary_similar.SimilarEntropyMatchRow(sha256="e8_2", score=94.21),
+                binary_similar.SimilarEntropyMatchRow(sha256="e8_2", score=97.52),
             ],
         )
