@@ -1,6 +1,5 @@
 """Queries for finding similar binaries."""
 
-import json
 from ctypes import CDLL, create_string_buffer
 from typing import Iterable
 
