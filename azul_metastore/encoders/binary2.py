@@ -412,7 +412,7 @@ class Binary2(base_encoder.BaseIndexEncoder):
                 encoded_event["tlsh_vector"] = result
 
         # encoded entropy if it's available in info
-        entropy = encoded_event.get("info") or encoded_event.get("info", {}).get("entropy")
+        entropy = encoded_event.get("info", {}).get("entropy")
         if entropy:
             entropy_blocks = entropy.get("blocks", [])
             entropy_converted = convert_entropy_to_opensearch_entropy(entropy_blocks)

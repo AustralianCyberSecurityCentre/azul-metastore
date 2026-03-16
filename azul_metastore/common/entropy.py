@@ -51,6 +51,6 @@ def convert_entropy_to_opensearch_entropy(entropy_values: list[float]) -> list[n
     So there is also a large loss of precision during the interpolation anyway.
     """
     entropy_numpy_array = _interpolate_entropy(entropy_values)
-    if not entropy_numpy_array:
+    if entropy_numpy_array is None or len(entropy_numpy_array) == 0:
         return None
     return _convert_float_0_8_to_byte(entropy_numpy_array)

@@ -1,5 +1,6 @@
 """Queries for finding similar binaries."""
 
+import json
 from ctypes import CDLL, create_string_buffer
 from typing import Iterable
 
@@ -388,7 +389,7 @@ def read_similar_from_entropy(
         # modulus removes these whole numbers so we get a useable percentage score
         # multipy by 100 to get a nice percentage
         # round to 2 decimal places because score can subtly vary
-        score = round((hit["_score"] % 1) * 100, 2)
+        score = round((hit["_score"] % 1.00001) * 100, 2)
 
         similar_hashes.append(SimilarEntropyMatchRow(sha256=hit["_source"]["sha256"], score=score))
 
