@@ -6,7 +6,9 @@ from typing import Iterable
 import pendulum
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
+from azul_bedrock.models_restapi import binaries as bedr_binaries
 
+from azul_metastore.common.entropy import convert_entropy_to_opensearch_entropy
 from azul_metastore.common.tlsh import encode_tlsh_into_vector, strip_tlsh_version
 from azul_metastore.context import Context
 from azul_metastore.query import cache
@@ -322,3 +324,76 @@ def read_similar_from_features(
     ret["status"] = "complete"
     _cache()
     yield ret
+
+
+# TODO - move this model to bedrock
+class SimilarEntropyMatchRow(bedr_binaries.BaseModelRepr):
+    """Entropy match result row."""
+
+    sha256: str
+    score: int | float
+
+
+class SimilarEntropyMatch(bedr_binaries.BaseModelRepr):
+    """Ssdeep similarity calculation result."""
+
+    matches: list[SimilarEntropyMatchRow]
+
+
+def read_similar_from_entropy(
+    ctx: Context, original_sha256: str, entropy: list[float], max_matches: int, entropy_vector_type: str
+) -> list[SimilarEntropyMatchRow]:
+    """Compares binaries in OpenSearch by Entropy.
+
+    This uses the kNN binary vector searching algorithm to find similar Entropy vectors by bit difference.
+    """
+    search_entropy = convert_entropy_to_opensearch_entropy(entropy)
+    # Entropy can't be searched because it's too small so return empty list.
+    if not search_entropy:
+        return []
+
+    body = {
+        "_source": {"includes": ["sha256"]},
+        "query": {
+            "knn": {
+                entropy_vector_type: {
+                    "vector": search_entropy,
+                    "min_score": 0.9,
+                    # Requires OpenSearch 2.4+
+                    # https://opensearch.org/docs/latest/vector-search/filter-search-knn/efficient-knn-filtering/
+                    "filter": {
+                        "bool": {
+                            "must_not": [
+                                # Don't match on yourself.
+                                {"match": {"sha256": original_sha256}},
+                            ],
+                        }
+                    },
+                }
+            }
+        },
+        "size": max_matches,
+        # we only care about unique entity ids
+        "collapse": {"field": "sha256"},
+    }
+
+    resp = ctx.man.binary2.w.search(ctx.sd, body=body)
+
+    similar_hashes: list[SimilarEntropyMatchRow] = []
+
+    for hit in resp["hits"]["hits"]:
+        # OpenSearch natively provides the search score for kNN
+
+        # knn call in wrapper inserts security as filter, but this affects the score by adding whole numbers
+        # modulus removes these whole numbers so we get a useable percentage score
+        # multipy by 100 to get a nice percentage
+        # round to 2 decimal places because score can subtly vary
+        score = round((hit["_score"] % 1) * 100, 2)
+
+        similar_hashes.append(SimilarEntropyMatchRow(sha256=hit["_source"]["sha256"], score=score))
+
+    # sort hashes by score
+    similar_hashes.sort(key=lambda x: x.score, reverse=True)
+
+    # Limit to max_matches if the number of hashes exceeded that value.
+    return similar_hashes[:max_matches]

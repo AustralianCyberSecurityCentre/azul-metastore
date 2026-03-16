@@ -1,5 +1,7 @@
 """Routes for entity data queries."""
 
+import logging
+import time
 from typing import Optional
 from urllib.parse import unquote
 
@@ -36,6 +38,15 @@ from azul_metastore.query.binary2 import (
     binary_summary,
 )
 from azul_metastore.restapi.quick import qr
+
+# TODO remove whole logger
+logger = logging.getLogger(__name__)
+logging.basicConfig(
+    format="%(asctime)s %(name)s:%(levelname)s: %(message)s",
+    datefmt="%Y-%m-%dT%H:%M:%S%z",
+    level=logging.WARNING,
+)
+
 
 router = APIRouter()
 
@@ -314,6 +325,33 @@ def get_similar_ssdeep_binaries(
     """Return id and similarity score of entities with a similar ssdeep fuzzyhash."""
     data = {"matches": binary_similar.read_similar_from_ssdeep(ctx, ssdeep, max_matches)}
     return qr.fr(ctx, data, resp)
+
+
+@router.get(
+    "/v0/binaries/{sha256}/similar/entropy",
+    response_model=qr.gr(binary_similar.SimilarEntropyMatch),
+    **qr.kw,
+)
+def get_similar_entropy_binaries(
+    resp: Response,
+    sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"),
+    entropy: list[float] = Query(description="ssdeep fuzzyhash to do comparison on"),
+    # TODO this will be removed once a preferred spacing method is selected.
+    entropy_method: str = Query(
+        "entropy_vector_cosineimil",
+        description='Entropy space type to use "entropy_vector_l2", "entropy_vector_cosineimil", "entropy_vector_innerproduct"',
+    ),
+    max_matches: int = Query(20, description="Maximum number of matches to return"),
+    ctx: context.Context = Depends(qr.ctx),
+):
+    """Search for binaries with similar entropy to the entropy provided."""
+    start = time.time()
+    result = binary_similar.read_similar_from_entropy(
+        ctx, original_sha256=sha256, entropy=entropy, max_matches=max_matches, entropy_vector_type=entropy_method
+    )
+    # TODO remove logging statement
+    logger.warning(f"Total time to get similar entropy {time.time() - start:.2f}")
+    return qr.fr(ctx, binary_similar.SimilarEntropyMatch(matches=result), resp)
 
 
 @router.get("/v0/binaries/{sha256}/similar", response_model=qr.gr(bedr_binaries.SimilarMatch), **qr.kw)
