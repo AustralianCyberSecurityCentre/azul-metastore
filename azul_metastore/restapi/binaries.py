@@ -327,7 +327,7 @@ def get_similar_ssdeep_binaries(
     return qr.fr(ctx, data, resp)
 
 
-@router.get(
+@router.post(
     "/v0/binaries/{sha256}/similar/entropy",
     response_model=qr.gr(binary_similar.SimilarEntropyMatch),
     **qr.kw,
@@ -335,13 +335,13 @@ def get_similar_ssdeep_binaries(
 def get_similar_entropy_binaries(
     resp: Response,
     sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"),
-    entropy: list[float] = Query(description="list of entropy values"),
     # TODO this will be removed once a preferred spacing method is selected.
     entropy_method: str = Query(
         "entropy_vector_cosineimil",
         description='Entropy space type to use "entropy_vector_l2", "entropy_vector_cosineimil", "entropy_vector_innerproduct"',
     ),
     max_matches: int = Query(20, description="Maximum number of matches to return"),
+    entropy: list[float] = Body(description="list of entropy values"),
     ctx: context.Context = Depends(qr.ctx),
 ):
     """Search for binaries with similar entropy to the entropy provided."""
