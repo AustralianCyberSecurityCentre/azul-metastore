@@ -180,7 +180,7 @@ class Metastore(BaseSettings):
             fmt_vars = dict(
                 time=datetime.datetime.now(tz=datetime.timezone.utc),
                 connection=request.headers.get("connection", "-"),
-                session_id=request.headers.get("x-session-id", "-"),
+                session_id=request.headers.get("X-Session-ID", "-"),
                 username=username,
                 method=request.method,
                 path=request.url.path,
