@@ -20,6 +20,7 @@ from azul_bedrock.exceptions_bedrock import BaseAzulException
 
 from azul_metastore import settings
 from azul_metastore.common import feature, memcache
+from azul_metastore.common.entropy import ENTROPY_VECTOR_DIMENSION, convert_entropy_to_opensearch_entropy
 from azul_metastore.common.tlsh import encode_tlsh_into_vector
 from azul_metastore.common.utils import azsec, md5, to_utc
 from azul_metastore.encoders import base_encoder, template_feature, template_node
@@ -81,6 +82,30 @@ map_common = {
         "data_type": "byte",
         # https://opensearch.org/docs/latest/field-types/supported-field-types/knn-spaces/
         "space_type": "cosinesimil",
+        "method": {"name": "hnsw", "engine": "lucene"},
+    },
+    "entropy_vector_l2": {
+        "type": "knn_vector",
+        "dimension": ENTROPY_VECTOR_DIMENSION,
+        "data_type": "byte",
+        # https://opensearch.org/docs/latest/field-types/supported-field-types/knn-spaces/
+        "space_type": "l2",
+        "method": {"name": "hnsw", "engine": "lucene"},
+    },
+    "entropy_vector_cosineimil": {
+        "type": "knn_vector",
+        "dimension": ENTROPY_VECTOR_DIMENSION,
+        "data_type": "byte",
+        # https://opensearch.org/docs/latest/field-types/supported-field-types/knn-spaces/
+        "space_type": "cosinesimil",
+        "method": {"name": "hnsw", "engine": "lucene"},
+    },
+    "entropy_vector_innerproduct": {
+        "type": "knn_vector",
+        "dimension": ENTROPY_VECTOR_DIMENSION,
+        "data_type": "byte",
+        # https://opensearch.org/docs/latest/field-types/supported-field-types/knn-spaces/
+        "space_type": "innerproduct",
         "method": {"name": "hnsw", "engine": "lucene"},
     },
     # file identification
@@ -385,6 +410,15 @@ class Binary2(base_encoder.BaseIndexEncoder):
             result = encode_tlsh_into_vector(tlsh)
             if result:
                 encoded_event["tlsh_vector"] = result
+
+        # encoded entropy if it's available in info
+        entropy = encoded_event.get("info") or encoded_event.get("info", {}).get("entropy")
+        if entropy:
+            entropy_blocks = entropy.get("blocks", [])
+            entropy_converted = convert_entropy_to_opensearch_entropy(entropy_blocks)
+            encoded_event["entropy_vector_l2"] = entropy_converted
+            encoded_event["entropy_vector_cosineimil"] = entropy_converted
+            encoded_event["entropy_vector_innerproduct"] = entropy_converted
 
         for node in event_source_path:
             laggs = node["encoded"]
