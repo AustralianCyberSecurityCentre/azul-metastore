@@ -92,7 +92,8 @@ class TestEntitySearch(etb.DynamicTestCase):
                     info={
                         "entropy": {
                             "idk": True,
-                            "blocks": [x * 0.2 for x in series_2[:7]] + [x * 0.8 for x in series_2[7:]],
+                            # As the sequence is very long this has minimal impact on the difference (sequence is 100 digits long)
+                            "blocks": [x * 0.2 for x in series_2[:7]] + [x * 0.9 for x in series_2[7:]],
                         }
                     },
                 ),

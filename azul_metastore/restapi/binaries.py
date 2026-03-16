@@ -335,7 +335,7 @@ def get_similar_ssdeep_binaries(
 def get_similar_entropy_binaries(
     resp: Response,
     sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"),
-    entropy: list[float] = Query(description="ssdeep fuzzyhash to do comparison on"),
+    entropy: list[float] = Query(description="list of entropy values"),
     # TODO this will be removed once a preferred spacing method is selected.
     entropy_method: str = Query(
         "entropy_vector_cosineimil",
