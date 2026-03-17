@@ -2,20 +2,20 @@
 
 import numpy as np
 
-# Note - 32 is arbitrary, keeping this number smaller improves query efficiency
+# Note - 40 is somewhat arbitrary, keeping this number smaller improves query efficiency
 # The largest value that makes sense is 800 (because there are at most 800 values in entropy with the way the entropy plugin works)
-# but 16, 40, 64... would also be valid (40 in theory would make the math for interpolation better for larger files)
-ENTROPY_VECTOR_DIMENSION = 32
+# 40 was selected because 800 divides into it equally but it wasn't so large it would cause problems
+ENTROPY_VECTOR_DIMENSION = 40
 MAX_ENTROPY_VALUE = 8.0
 MIN_ENTROPY_VALUE = 0.0
 
 
 def _interpolate_entropy(entropy_values: list[float]) -> np.ndarray | None:
-    """Use interpolation to ensure there are exactly 32 values for entropy."""
-    # Can't perform meaningful interpolation is there isn't at least 4 values.
-    if len(entropy_values) < 4:
+    """Use interpolation to ensure there are exactly 40 values for entropy."""
+    # Don't attempt interpolation unless there are at least enough entropy to fill up the vector (40 - note is roughly a 10kB file)
+    if len(entropy_values) < ENTROPY_VECTOR_DIMENSION:
         return None
-    # Interpolate from any number of entropy values 4->800 to bieng the length of ENTROPY_VECTOR_DIMENSION
+    # Interpolate from any number of entropy values, this can scale the number of entropy values up or down to fit.
     original_x_axis = np.linspace(0, 1.0, len(entropy_values))
     new_x_axis = np.linspace(0.0, 1.0, ENTROPY_VECTOR_DIMENSION)
     new_values = np.interp(new_x_axis, original_x_axis, entropy_values)

@@ -84,28 +84,12 @@ map_common = {
         "space_type": "cosinesimil",
         "method": {"name": "hnsw", "engine": "lucene"},
     },
-    "entropy_vector_l2": {
-        "type": "knn_vector",
-        "dimension": ENTROPY_VECTOR_DIMENSION,
-        "data_type": "byte",
-        # https://opensearch.org/docs/latest/field-types/supported-field-types/knn-spaces/
-        "space_type": "l2",
-        "method": {"name": "hnsw", "engine": "lucene"},
-    },
-    "entropy_vector_cosineimil": {
+    "entropy_vector": {
         "type": "knn_vector",
         "dimension": ENTROPY_VECTOR_DIMENSION,
         "data_type": "byte",
         # https://opensearch.org/docs/latest/field-types/supported-field-types/knn-spaces/
         "space_type": "cosinesimil",
-        "method": {"name": "hnsw", "engine": "lucene"},
-    },
-    "entropy_vector_innerproduct": {
-        "type": "knn_vector",
-        "dimension": ENTROPY_VECTOR_DIMENSION,
-        "data_type": "byte",
-        # https://opensearch.org/docs/latest/field-types/supported-field-types/knn-spaces/
-        "space_type": "innerproduct",
         "method": {"name": "hnsw", "engine": "lucene"},
     },
     # file identification
@@ -416,9 +400,7 @@ class Binary2(base_encoder.BaseIndexEncoder):
         if entropy:
             entropy_blocks = entropy.get("blocks", [])
             entropy_converted = convert_entropy_to_opensearch_entropy(entropy_blocks)
-            encoded_event["entropy_vector_l2"] = entropy_converted
-            encoded_event["entropy_vector_cosineimil"] = entropy_converted
-            encoded_event["entropy_vector_innerproduct"] = entropy_converted
+            encoded_event["entropy_vector"] = entropy_converted
 
         for node in event_source_path:
             laggs = node["encoded"]
@@ -672,6 +654,7 @@ class Binary2(base_encoder.BaseIndexEncoder):
             "encoded_ssdeep",
             "tlsh",
             "tlsh_vector",
+            "entropy_vector",
             "mime",
             "magic",
             "file_format",
@@ -714,6 +697,7 @@ class Binary2(base_encoder.BaseIndexEncoder):
         event.get("source", {}).pop("encoded_settings", None)
         event.get("entity", {}).pop("encoded_ssdeep", None)
         event.get("entity", {}).pop("tlsh_vector", None)
+        event.get("entity", {}).pop("entropy_vector", None)
         for feat in event.get("source", {}).get("path", []):
             feat.pop("encoded", None)
         for feat in event.get("entity", {}).get("features", []):

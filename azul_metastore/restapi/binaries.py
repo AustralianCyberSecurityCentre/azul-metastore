@@ -1,7 +1,5 @@
 """Routes for entity data queries."""
 
-import logging
-import time
 from typing import Optional
 from urllib.parse import unquote
 
@@ -38,15 +36,6 @@ from azul_metastore.query.binary2 import (
     binary_summary,
 )
 from azul_metastore.restapi.quick import qr
-
-# TODO remove whole logger
-logger = logging.getLogger(__name__)
-logging.basicConfig(
-    format="%(asctime)s %(name)s:%(levelname)s: %(message)s",
-    datefmt="%Y-%m-%dT%H:%M:%S%z",
-    level=logging.WARNING,
-)
-
 
 router = APIRouter()
 
@@ -335,22 +324,14 @@ def get_similar_ssdeep_binaries(
 def get_similar_entropy_binaries(
     resp: Response,
     sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"),
-    # TODO this will be removed once a preferred spacing method is selected.
-    entropy_method: str = Query(
-        "entropy_vector_cosineimil",
-        description='Entropy space type to use "entropy_vector_l2", "entropy_vector_cosineimil", "entropy_vector_innerproduct"',
-    ),
     max_matches: int = Query(20, description="Maximum number of matches to return"),
     entropy: list[float] = Body(description="list of entropy values"),
     ctx: context.Context = Depends(qr.ctx),
 ):
     """Search for binaries with similar entropy to the entropy provided."""
-    start = time.time()
     result = binary_similar.read_similar_from_entropy(
-        ctx, original_sha256=sha256, entropy=entropy, max_matches=max_matches, entropy_vector_type=entropy_method
+        ctx, original_sha256=sha256, entropy=entropy, max_matches=max_matches
     )
-    # TODO remove logging statement
-    logger.warning(f"Total time to get similar entropy {time.time() - start:.2f}")
     return qr.fr(ctx, binary_similar.SimilarEntropyMatch(matches=result), resp)
 
 

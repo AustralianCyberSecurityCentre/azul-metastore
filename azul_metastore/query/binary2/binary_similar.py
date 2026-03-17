@@ -341,7 +341,7 @@ class SimilarEntropyMatch(bedr_binaries.BaseModelRepr):
 
 
 def read_similar_from_entropy(
-    ctx: Context, original_sha256: str, entropy: list[float], max_matches: int, entropy_vector_type: str
+    ctx: Context, original_sha256: str, entropy: list[float], max_matches: int
 ) -> list[SimilarEntropyMatchRow]:
     """Compares binaries in OpenSearch by Entropy.
 
@@ -356,9 +356,9 @@ def read_similar_from_entropy(
         "_source": {"includes": ["sha256"]},
         "query": {
             "knn": {
-                entropy_vector_type: {
+                "entropy_vector": {
                     "vector": search_entropy,
-                    "min_score": 0.9,
+                    "min_score": 0.95,
                     # Requires OpenSearch 2.4+
                     # https://opensearch.org/docs/latest/vector-search/filter-search-knn/efficient-knn-filtering/
                     "filter": {
