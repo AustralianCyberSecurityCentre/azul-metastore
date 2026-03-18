@@ -340,6 +340,9 @@ class SimilarEntropyMatch(bedr_binaries.BaseModelRepr):
     matches: list[SimilarEntropyMatchRow]
 
 
+MINIMUM_ENTROPY_SIMILARITY_PERCENTAGE = 90
+
+
 def read_similar_from_entropy(
     ctx: Context, original_sha256: str, entropy: list[float], max_matches: int
 ) -> list[SimilarEntropyMatchRow]:
@@ -390,6 +393,9 @@ def read_similar_from_entropy(
         different_bits = (1 / score) - 1
         # Calculate percentage similar
         percentage_score = 100 * ((TOTAL_ENTROPY_BITS - different_bits) / TOTAL_ENTROPY_BITS)
+        # Skip elements if they don't meet minimum similarity.
+        if percentage_score < MINIMUM_ENTROPY_SIMILARITY_PERCENTAGE:
+            continue
 
         similar_hashes.append(SimilarEntropyMatchRow(sha256=hit["_source"]["sha256"], score=percentage_score))
 

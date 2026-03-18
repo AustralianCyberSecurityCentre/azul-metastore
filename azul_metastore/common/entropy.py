@@ -4,7 +4,7 @@ import functools
 
 import numpy as np
 
-# Note - 40 is somewhat arbitrary, keeping this number smaller improves query efficiency
+# Note - 40 is somewhat arbitrary, keeping this number smaller improves query efficiency and include the most files.
 # The largest value that makes sense is 800 (because there are at most 800 values in entropy with the way the entropy plugin works)
 # 40 was selected because 800 divides into it equally but it wasn't so large it would cause problems
 ENTROPY_VECTOR_DIMENSION = 40

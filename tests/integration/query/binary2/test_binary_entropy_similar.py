@@ -1,3 +1,4 @@
+from azul_metastore.common.entropy import ENTROPY_VECTOR_DIMENSION
 from azul_metastore.query.binary2 import binary_similar
 from tests.support import gen
 from tests.support import integration_test as etb
@@ -18,8 +19,12 @@ class TestEntitySearch(etb.DynamicTestCase):
         series_5 = [4.0] * 100 + [4.1]  # e12_4
         series_6 = [0.0] * 100  # e13_4
         # Entropy shouldn't be more than 800 and has to be more than 40 to get calculated.
-        self.assertGreaterEqual(len(series_1), 40)
-        self.assertGreaterEqual(len(series_2), 40)
+        self.assertGreaterEqual(len(series_1), ENTROPY_VECTOR_DIMENSION)
+        self.assertGreaterEqual(len(series_2), ENTROPY_VECTOR_DIMENSION)
+        self.assertGreaterEqual(len(series_3), ENTROPY_VECTOR_DIMENSION)
+        self.assertGreaterEqual(len(series_4), ENTROPY_VECTOR_DIMENSION)
+        self.assertGreaterEqual(len(series_5), ENTROPY_VECTOR_DIMENSION)
+        self.assertGreaterEqual(len(series_6), ENTROPY_VECTOR_DIMENSION)
         self.assertLessEqual(len(series_1), 800)
         self.assertLessEqual(len(series_2), 800)
 
@@ -46,6 +51,7 @@ class TestEntitySearch(etb.DynamicTestCase):
                         }
                     },
                 ),
+                # These entropies are only slightly out of alignment with e1_1 but don't match at all due to the alignment mismatch.
                 gen.binary_event(
                     eid="e22_1",
                     authornv=("entropy", "1"),
@@ -202,13 +208,13 @@ class TestEntitySearch(etb.DynamicTestCase):
             max_matches=10,
         )
         print(similar_entropies)
-        # self.assertEqual(
-        #     similar_entropies,
-        #     [
-        #         binary_similar.SimilarEntropyMatchRow(sha256="e2_1", score=99.99),
-        #         binary_similar.SimilarEntropyMatchRow(sha256="e3_1", score=99.03),
-        #     ],
-        # )
+        self.assertEqual(
+            similar_entropies,
+            [
+                binary_similar.SimilarEntropyMatchRow(sha256="e2_1", score=99.60937500937501),
+                binary_similar.SimilarEntropyMatchRow(sha256="e3_1", score=94.7656248725),
+            ],
+        )
 
         # e5 - 1 identical and one close (series 2)
         # Expected to be similar to e6_2 and e8_2
@@ -219,13 +225,13 @@ class TestEntitySearch(etb.DynamicTestCase):
             max_matches=10,
         )
         print(similar_entropies)
-        # self.assertEqual(
-        #     similar_entropies,
-        #     [
-        #         binary_similar.SimilarEntropyMatchRow(sha256="e6_2", score=100.0),
-        #         binary_similar.SimilarEntropyMatchRow(sha256="e8_2", score=96.66),
-        #     ],
-        # )
+        self.assertEqual(
+            similar_entropies,
+            [
+                binary_similar.SimilarEntropyMatchRow(sha256="e6_2", score=100.0),
+                binary_similar.SimilarEntropyMatchRow(sha256="e8_2", score=97.96874999789063),
+            ],
+        )
 
         # e11 - two entropies that are flat and similar (there are two other flat entropies at different magnitudes) (series 3/4)
         # expected to be similar to e11_3
@@ -236,7 +242,9 @@ class TestEntitySearch(etb.DynamicTestCase):
             max_matches=10,
         )
         print(similar_entropies)
-        # self.assertEqual(similar_entropies, [binary_similar.SimilarEntropyMatchRow(sha256="e7_2", score=99.41)])
+        self.assertEqual(
+            similar_entropies, [binary_similar.SimilarEntropyMatchRow(sha256="e11_3", score=96.87499988148437)]
+        )
 
         # e12 - two entropies that are flat and similar (there are two other flat entropies at different magnitudes) (series 5/6)
         # expected to be similar to e13_4
@@ -247,13 +255,22 @@ class TestEntitySearch(etb.DynamicTestCase):
             max_matches=10,
         )
         print(similar_entropies)
+        self.assertEqual(similar_entropies, [])
 
+        # Allow matches at any level, as this inspects the worst possible match case which should be close to 0%
+        # The test verifies a flat entropy of 8.0 matches approximately 0% with an entropy of 0.0
+        original = binary_similar.MINIMUM_ENTROPY_SIMILARITY_PERCENTAGE
+        binary_similar.MINIMUM_ENTROPY_SIMILARITY_PERCENTAGE = 0
         similar_entropies = binary_similar.read_similar_from_entropy(
             ctx=self.writer,
             original_sha256="e13_4",
             entropy=series_6,
             max_matches=40,
         )
-        print(similar_entropies)
+        binary_similar.MINIMUM_ENTROPY_SIMILARITY_PERCENTAGE = original
+        self.assertGreater(len(similar_entropies), 3)
 
-        self.assertEqual(similar_entropies, [binary_similar.SimilarEntropyMatchRow(sha256="e7_2", score=99.41)])
+        worst_match = similar_entropies[-1]
+        # Should be less than 5% of bits matching
+        self.assertLessEqual(worst_match.score, 5)
+        self.assertEqual(worst_match.sha256, "e10_3")
