@@ -388,7 +388,12 @@ def read_similar_from_entropy(
         # Convert score to percentage of match
         # Original score form is score=1/(1+d)
         # Where d is the number of bits that didn't match in the hamming comparison
+        # %1 removes whole numbers added because opensearch adds a 1 as part of the score boosting provided by DSL.
+        # This does lose some precision but is insignificant
         score = hit["_score"]
+        if score != 1.0:
+            # If the score isn't exactly one perform modulus 1, it it is 1 it's an exact match.
+            score = score % 1
         # Total number of bits that differ between the two vectors d=(1/x) - 1
         different_bits = (1 / score) - 1
         # Calculate percentage similar
@@ -397,7 +402,9 @@ def read_similar_from_entropy(
         if percentage_score < MINIMUM_ENTROPY_SIMILARITY_PERCENTAGE:
             continue
 
-        similar_hashes.append(SimilarEntropyMatchRow(sha256=hit["_source"]["sha256"], score=percentage_score))
+        similar_hashes.append(
+            SimilarEntropyMatchRow(sha256=hit["_source"]["sha256"], score=round(percentage_score, 4))
+        )
 
     # sort hashes by score
     similar_hashes.sort(key=lambda x: x.score, reverse=True)
