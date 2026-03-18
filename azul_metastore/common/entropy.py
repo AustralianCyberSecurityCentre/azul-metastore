@@ -6,6 +6,7 @@ import numpy as np
 # The largest value that makes sense is 800 (because there are at most 800 values in entropy with the way the entropy plugin works)
 # 40 was selected because 800 divides into it equally but it wasn't so large it would cause problems
 ENTROPY_VECTOR_DIMENSION = 40
+TOTAL_ENTROPY_BITS = ENTROPY_VECTOR_DIMENSION * 8
 MAX_ENTROPY_VALUE = 8.0
 MIN_ENTROPY_VALUE = 0.0
 
@@ -29,17 +30,38 @@ def _interpolate_entropy(entropy_values: list[float]) -> np.ndarray | None:
     return np.asarray(new_values, dtype=float)
 
 
-def _convert_float_0_8_to_byte(entropy_values: np.ndarray) -> list[np.int8]:
-    """Convert an entropy array with values 0->8 to a byte array with values -128 to 127.
+def _convert_bit_sequence_to_number(bit_sequence: list[int]) -> int:
+    """Convert an array of bits into a signed int8 and then to an int."""
+    bit_array_np = np.array(bit_sequence, dtype=np.uint8)
+    packed_bytes = np.packbits(bit_array_np)
+    signed_int = packed_bytes.astype(np.int8)[0]
+    return int(signed_int)
 
-    This method allows for optimised storage of entropy vectors in Opensearch.
+
+# Convert an integer value to the appropriate binary representation
+_int_conversion_table = {
+    0: _convert_bit_sequence_to_number([0, 0, 0, 0, 0, 0, 0, 0]),  # 0
+    1: _convert_bit_sequence_to_number([0, 0, 0, 0, 0, 0, 0, 1]),  # 1
+    2: _convert_bit_sequence_to_number([0, 0, 0, 0, 0, 0, 1, 1]),  # 3
+    3: _convert_bit_sequence_to_number([0, 0, 0, 0, 0, 1, 1, 1]),  # 7
+    4: _convert_bit_sequence_to_number([0, 0, 0, 0, 1, 1, 1, 1]),  # 15
+    5: _convert_bit_sequence_to_number([0, 0, 0, 1, 1, 1, 1, 1]),  # 31
+    6: _convert_bit_sequence_to_number([0, 0, 1, 1, 1, 1, 1, 1]),  # 63
+    7: _convert_bit_sequence_to_number([0, 1, 1, 1, 1, 1, 1, 1]),  # 127
+    8: _convert_bit_sequence_to_number([1, 1, 1, 1, 1, 1, 1, 1]),  # -1
+}
+
+
+def _convert_float_0_8_to_binary(entropy_values: np.ndarray) -> list[np.int8]:
+    """Convert an entropy array with values 0->8 to a byte array that is useful for binary comparison.
+    (values in array range from -128 to 127, but the focus of conversion is on the bit vaules)
+    This method allows for hamming bit comparisons in opensearch nearest neighbour searches.
     """
-    y = (255.0 / MAX_ENTROPY_VALUE) * entropy_values - 128.0
-    # Round to nearest integer
-    y_rounded = np.rint(y)
-    # Ensure values are in the range -128 to 127
-    y_clamped = np.clip(y_rounded, -128, 127)
-    return y_clamped.astype(np.int8).tolist()
+    result = []
+    for v in entropy_values:
+        bin_value = _int_conversion_table[int(round(v, 0))]
+        result.append(int(bin_value))
+    return result
 
 
 def convert_entropy_to_opensearch_entropy(entropy_values: list[float]) -> list[np.int8] | None:
@@ -53,4 +75,5 @@ def convert_entropy_to_opensearch_entropy(entropy_values: list[float]) -> list[n
     entropy_numpy_array = _interpolate_entropy(entropy_values)
     if entropy_numpy_array is None or len(entropy_numpy_array) == 0:
         return None
-    return _convert_float_0_8_to_byte(entropy_numpy_array)
+    result = _convert_float_0_8_to_binary(entropy_numpy_array)
+    return result

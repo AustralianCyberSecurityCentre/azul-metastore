@@ -20,7 +20,7 @@ from azul_bedrock.exceptions_bedrock import BaseAzulException
 
 from azul_metastore import settings
 from azul_metastore.common import feature, memcache
-from azul_metastore.common.entropy import ENTROPY_VECTOR_DIMENSION, convert_entropy_to_opensearch_entropy
+from azul_metastore.common.entropy import TOTAL_ENTROPY_BITS, convert_entropy_to_opensearch_entropy
 from azul_metastore.common.tlsh import encode_tlsh_into_vector
 from azul_metastore.common.utils import azsec, md5, to_utc
 from azul_metastore.encoders import base_encoder, template_feature, template_node
@@ -86,11 +86,12 @@ map_common = {
     },
     "entropy_vector": {
         "type": "knn_vector",
-        "dimension": ENTROPY_VECTOR_DIMENSION,
-        "data_type": "byte",
+        # multipled by 8 to specify the number of bits as opposed to number of bytes.
+        "dimension": TOTAL_ENTROPY_BITS,
+        "data_type": "binary",
         # https://opensearch.org/docs/latest/field-types/supported-field-types/knn-spaces/
-        "space_type": "cosinesimil",
-        "method": {"name": "hnsw", "engine": "lucene"},
+        "space_type": "hamming",
+        "method": {"name": "hnsw", "engine": "faiss"},
     },
     # file identification
     "mime": {"type": "keyword"},

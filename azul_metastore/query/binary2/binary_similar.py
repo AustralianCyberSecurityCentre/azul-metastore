@@ -8,7 +8,7 @@ from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
 from azul_bedrock.models_restapi import binaries as bedr_binaries
 
-from azul_metastore.common.entropy import convert_entropy_to_opensearch_entropy
+from azul_metastore.common.entropy import TOTAL_ENTROPY_BITS, convert_entropy_to_opensearch_entropy
 from azul_metastore.common.tlsh import encode_tlsh_into_vector, strip_tlsh_version
 from azul_metastore.context import Context
 from azul_metastore.query import cache
@@ -358,7 +358,7 @@ def read_similar_from_entropy(
             "knn": {
                 "entropy_vector": {
                     "vector": search_entropy,
-                    "min_score": 0.95,
+                    "k": max_matches + 10,  # max matches plus a slight buffer in-case of collapsing sha256's
                     # Requires OpenSearch 2.4+
                     # https://opensearch.org/docs/latest/vector-search/filter-search-knn/efficient-knn-filtering/
                     "filter": {
@@ -382,15 +382,16 @@ def read_similar_from_entropy(
     similar_hashes: list[SimilarEntropyMatchRow] = []
 
     for hit in resp["hits"]["hits"]:
-        # OpenSearch natively provides the search score for kNN
+        # Convert score to percentage of match
+        # Original score form is score=1/(1+d)
+        # Where d is the number of bits that didn't match in the hamming comparison
+        score = hit["_score"]
+        # Total number of bits that differ between the two vectors d=(1/x) - 1
+        different_bits = (1 / score) - 1
+        # Calculate percentage similar
+        percentage_score = 100 * ((TOTAL_ENTROPY_BITS - different_bits) / TOTAL_ENTROPY_BITS)
 
-        # knn call in wrapper inserts security as filter, but this affects the score by adding whole numbers
-        # modulus removes these whole numbers so we get a useable percentage score
-        # multipy by 100 to get a nice percentage
-        # round to 2 decimal places because score can subtly vary
-        score = round((hit["_score"] % 1.00001) * 100, 2)
-
-        similar_hashes.append(SimilarEntropyMatchRow(sha256=hit["_source"]["sha256"], score=score))
+        similar_hashes.append(SimilarEntropyMatchRow(sha256=hit["_source"]["sha256"], score=percentage_score))
 
     # sort hashes by score
     similar_hashes.sort(key=lambda x: x.score, reverse=True)
