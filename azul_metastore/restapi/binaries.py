@@ -318,7 +318,7 @@ def get_similar_ssdeep_binaries(
 
 @router.post(
     "/v0/binaries/{sha256}/similar/entropy",
-    response_model=qr.gr(binary_similar.SimilarEntropyMatch),
+    response_model=qr.gr(bedr_binaries.SimilarEntropyMatch),
     **qr.kw,
 )
 def get_similar_entropy_binaries(
@@ -332,7 +332,7 @@ def get_similar_entropy_binaries(
     result = binary_similar.read_similar_from_entropy(
         ctx, original_sha256=sha256, entropy=entropy, max_matches=max_matches
     )
-    return qr.fr(ctx, binary_similar.SimilarEntropyMatch(matches=result), resp)
+    return qr.fr(ctx, bedr_binaries.SimilarEntropyMatch(matches=result), resp)
 
 
 @router.get("/v0/binaries/{sha256}/similar", response_model=qr.gr(bedr_binaries.SimilarMatch), **qr.kw)

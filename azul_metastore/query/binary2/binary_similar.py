@@ -326,26 +326,12 @@ def read_similar_from_features(
     yield ret
 
 
-# TODO - move this model to bedrock
-class SimilarEntropyMatchRow(bedr_binaries.BaseModelRepr):
-    """Entropy match result row."""
-
-    sha256: str
-    score: int | float
-
-
-class SimilarEntropyMatch(bedr_binaries.BaseModelRepr):
-    """Ssdeep similarity calculation result."""
-
-    matches: list[SimilarEntropyMatchRow]
-
-
 MINIMUM_ENTROPY_SIMILARITY_PERCENTAGE = 90
 
 
 def read_similar_from_entropy(
     ctx: Context, original_sha256: str, entropy: list[float], max_matches: int
-) -> list[SimilarEntropyMatchRow]:
+) -> list[bedr_binaries.SimilarEntropyMatchRow]:
     """Compares binaries in OpenSearch by Entropy.
 
     This uses the kNN binary vector searching algorithm to find similar Entropy vectors by bit difference.
@@ -382,7 +368,7 @@ def read_similar_from_entropy(
 
     resp = ctx.man.binary2.w.search(ctx.sd, body=body)
 
-    similar_hashes: list[SimilarEntropyMatchRow] = []
+    similar_hashes: list[bedr_binaries.SimilarEntropyMatchRow] = []
 
     for hit in resp["hits"]["hits"]:
         # Convert score to percentage of match
@@ -403,7 +389,7 @@ def read_similar_from_entropy(
             continue
 
         similar_hashes.append(
-            SimilarEntropyMatchRow(sha256=hit["_source"]["sha256"], score=round(percentage_score, 4))
+            bedr_binaries.SimilarEntropyMatchRow(sha256=hit["_source"]["sha256"], score=round(percentage_score, 4))
         )
 
     # sort hashes by score
