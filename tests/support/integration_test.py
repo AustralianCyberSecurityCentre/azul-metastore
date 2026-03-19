@@ -230,7 +230,7 @@ class DynamicTestCase(basic_test.BasicTest):
         if refresh:
             cls.flush()
         if must_error != failed:
-            raise BaseAzulException(f"expected _write_events() failures {failed=} did not match {must_error=}")
+            raise Exception(f"expected _write_events() failures {failed=} did not match {must_error=}")
 
     @classmethod
     def write_plugin_events(cls, plugin_events=None, *, now=None, must_error: int = 0):

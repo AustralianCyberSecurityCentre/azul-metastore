@@ -20,6 +20,7 @@ from azul_bedrock.exceptions_bedrock import BaseAzulException
 
 from azul_metastore import settings
 from azul_metastore.common import feature, memcache
+from azul_metastore.common.entropy import TOTAL_ENTROPY_BITS, convert_entropy_to_opensearch_entropy
 from azul_metastore.common.tlsh import encode_tlsh_into_vector
 from azul_metastore.common.utils import azsec, md5, to_utc
 from azul_metastore.encoders import base_encoder, template_feature, template_node
@@ -82,6 +83,15 @@ map_common = {
         # https://opensearch.org/docs/latest/field-types/supported-field-types/knn-spaces/
         "space_type": "cosinesimil",
         "method": {"name": "hnsw", "engine": "lucene"},
+    },
+    "entropy_vector": {
+        "type": "knn_vector",
+        # multipled by 8 to specify the number of bits as opposed to number of bytes.
+        "dimension": TOTAL_ENTROPY_BITS,
+        "data_type": "binary",
+        # https://opensearch.org/docs/latest/field-types/supported-field-types/knn-spaces/
+        "space_type": "hamming",
+        "method": {"name": "hnsw", "engine": "faiss"},
     },
     # file identification
     "mime": {"type": "keyword"},
@@ -386,6 +396,13 @@ class Binary2(base_encoder.BaseIndexEncoder):
             if result:
                 encoded_event["tlsh_vector"] = result
 
+        # encoded entropy if it's available in info
+        entropy = encoded_event.get("info", {}).get("entropy")
+        if entropy:
+            entropy_blocks = entropy.get("blocks", [])
+            entropy_converted = convert_entropy_to_opensearch_entropy(entropy_blocks)
+            encoded_event["entropy_vector"] = entropy_converted
+
         for node in event_source_path:
             laggs = node["encoded"]
             node_author = uid(node["author"]["category"], node["author"]["name"])
@@ -638,6 +655,7 @@ class Binary2(base_encoder.BaseIndexEncoder):
             "encoded_ssdeep",
             "tlsh",
             "tlsh_vector",
+            "entropy_vector",
             "mime",
             "magic",
             "file_format",
@@ -680,6 +698,7 @@ class Binary2(base_encoder.BaseIndexEncoder):
         event.get("source", {}).pop("encoded_settings", None)
         event.get("entity", {}).pop("encoded_ssdeep", None)
         event.get("entity", {}).pop("tlsh_vector", None)
+        event.get("entity", {}).pop("entropy_vector", None)
         for feat in event.get("source", {}).get("path", []):
             feat.pop("encoded", None)
         for feat in event.get("entity", {}).get("features", []):

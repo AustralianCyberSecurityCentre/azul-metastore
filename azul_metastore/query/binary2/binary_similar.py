@@ -6,7 +6,9 @@ from typing import Iterable
 import pendulum
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
+from azul_bedrock.models_restapi import binaries as bedr_binaries
 
+from azul_metastore.common.entropy import TOTAL_ENTROPY_BITS, convert_entropy_to_opensearch_entropy
 from azul_metastore.common.tlsh import encode_tlsh_into_vector, strip_tlsh_version
 from azul_metastore.context import Context
 from azul_metastore.query import cache
@@ -322,3 +324,76 @@ def read_similar_from_features(
     ret["status"] = "complete"
     _cache()
     yield ret
+
+
+MINIMUM_ENTROPY_SIMILARITY_PERCENTAGE = 90
+
+
+def read_similar_from_entropy(
+    ctx: Context, original_sha256: str, entropy: list[float], max_matches: int
+) -> list[bedr_binaries.SimilarEntropyMatchRow]:
+    """Compares binaries in OpenSearch by Entropy.
+
+    This uses the kNN binary vector searching algorithm to find similar Entropy vectors by bit difference.
+    """
+    search_entropy = convert_entropy_to_opensearch_entropy(entropy)
+    # Entropy can't be searched because it's too small so return empty list.
+    if not search_entropy:
+        return []
+
+    body = {
+        "_source": {"includes": ["sha256"]},
+        "query": {
+            "knn": {
+                "entropy_vector": {
+                    "vector": search_entropy,
+                    "k": max_matches + 10,  # max matches plus a slight buffer in-case of collapsing sha256's
+                    # Requires OpenSearch 2.4+
+                    # https://opensearch.org/docs/latest/vector-search/filter-search-knn/efficient-knn-filtering/
+                    "filter": {
+                        "bool": {
+                            "must_not": [
+                                # Don't match on yourself.
+                                {"match": {"sha256": original_sha256}},
+                            ],
+                        }
+                    },
+                }
+            }
+        },
+        "size": max_matches,
+        # we only care about unique entity ids
+        "collapse": {"field": "sha256"},
+    }
+
+    resp = ctx.man.binary2.w.search(ctx.sd, body=body)
+
+    similar_hashes: list[bedr_binaries.SimilarEntropyMatchRow] = []
+
+    for hit in resp["hits"]["hits"]:
+        # Convert score to percentage of match
+        # Original score form is score=1/(1+d)
+        # Where d is the number of bits that didn't match in the hamming comparison
+        # %1 removes whole numbers added because opensearch adds a 1 as part of the score boosting provided by DSL.
+        # This does lose some precision but is insignificant
+        score = hit["_score"]
+        if score != 1.0:
+            # If the score isn't exactly one perform modulus 1, it it is 1 it's an exact match.
+            score = score % 1
+        # Total number of bits that differ between the two vectors d=(1/x) - 1
+        different_bits = (1 / score) - 1
+        # Calculate percentage similar
+        percentage_score = 100 * ((TOTAL_ENTROPY_BITS - different_bits) / TOTAL_ENTROPY_BITS)
+        # Skip elements if they don't meet minimum similarity.
+        if percentage_score < MINIMUM_ENTROPY_SIMILARITY_PERCENTAGE:
+            continue
+
+        similar_hashes.append(
+            bedr_binaries.SimilarEntropyMatchRow(sha256=hit["_source"]["sha256"], score=round(percentage_score, 4))
+        )
+
+    # sort hashes by score
+    similar_hashes.sort(key=lambda x: x.score, reverse=True)
+
+    # Limit to max_matches if the number of hashes exceeded that value.
+    return similar_hashes[:max_matches]

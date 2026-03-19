@@ -33,6 +33,7 @@ dependencies = [
     "httpx>=0.28.1",
     "lark>=1.1.9",
     "malpz>=10.0.3",
+    "numpy>=2.4.3",
     "opensearch-py>=2.3.0",
     "pendulum>=3.0.0",
     "prometheus-client>=0.24.1",
@@ -58,6 +59,10 @@ plugins = "azul_metastore.restapi.plugins:router"
 purge = "azul_metastore.restapi.purge:router"
 sources = "azul_metastore.restapi.sources:router"
 statistics = "azul_metastore.restapi.statistics:router"
+
+[[tool.uv.index]]
+url = "https://devpi.acsc.internal/azul/stable/+simple"
+default = true
 
 [project.urls]
 Documentation = "https://australiancybersecuritycentre.github.io/azul/"

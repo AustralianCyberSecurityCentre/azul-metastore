@@ -316,6 +316,25 @@ def get_similar_ssdeep_binaries(
     return qr.fr(ctx, data, resp)
 
 
+@router.post(
+    "/v0/binaries/{sha256}/similar/entropy",
+    response_model=qr.gr(bedr_binaries.SimilarEntropyMatch),
+    **qr.kw,
+)
+def get_similar_entropy_binaries(
+    resp: Response,
+    sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"),
+    max_matches: int = Query(20, description="Maximum number of matches to return"),
+    entropy: list[float] = Body(description="list of entropy values"),
+    ctx: context.Context = Depends(qr.ctx),
+):
+    """Search for binaries with similar entropy to the entropy provided."""
+    result = binary_similar.read_similar_from_entropy(
+        ctx, original_sha256=sha256, entropy=entropy, max_matches=max_matches
+    )
+    return qr.fr(ctx, bedr_binaries.SimilarEntropyMatch(matches=result), resp)
+
+
 @router.get("/v0/binaries/{sha256}/similar", response_model=qr.gr(bedr_binaries.SimilarMatch), **qr.kw)
 def get_similar_feature_binaries(
     resp: Response,
