@@ -2,6 +2,7 @@ from azul_metastore.common.entropy import ENTROPY_VECTOR_DIMENSION
 from azul_metastore.query.binary2 import binary_similar
 from tests.support import gen
 from tests.support import integration_test as etb
+from azul_bedrock.models_restapi import binaries as bedr_binaries
 
 
 def it(x):
@@ -565,8 +566,8 @@ class TestEntitySearch(etb.DynamicTestCase):
         self.assertEqual(
             similar_entropies,
             [
-                binary_similar.SimilarEntropyMatchRow(sha256="e2_1", score=99.6094),
-                binary_similar.SimilarEntropyMatchRow(sha256="e3_1", score=94.7656),
+                bedr_binaries.SimilarEntropyMatchRow(sha256="e2_1", score=99.6094),
+                bedr_binaries.SimilarEntropyMatchRow(sha256="e3_1", score=94.7656),
             ],
         )
 
@@ -582,8 +583,8 @@ class TestEntitySearch(etb.DynamicTestCase):
         self.assertEqual(
             similar_entropies,
             [
-                binary_similar.SimilarEntropyMatchRow(sha256="e6_2", score=100.0),
-                binary_similar.SimilarEntropyMatchRow(sha256="e8_2", score=97.9687),
+                bedr_binaries.SimilarEntropyMatchRow(sha256="e6_2", score=100.0),
+                bedr_binaries.SimilarEntropyMatchRow(sha256="e8_2", score=97.9687),
             ],
         )
 
@@ -596,7 +597,7 @@ class TestEntitySearch(etb.DynamicTestCase):
             max_matches=10,
         )
         print(similar_entropies)
-        self.assertEqual(similar_entropies, [binary_similar.SimilarEntropyMatchRow(sha256="e11_3", score=96.875)])
+        self.assertEqual(similar_entropies, [bedr_binaries.SimilarEntropyMatchRow(sha256="e11_3", score=96.875)])
 
         # e12 - two entropies that are flat and similar (there are two other flat entropies at different magnitudes) (series 5/6)
         # expected to be similar to e13_4
@@ -640,10 +641,10 @@ class TestEntitySearch(etb.DynamicTestCase):
         self.assertEqual(
             similar_entropies,
             [
-                binary_similar.SimilarEntropyMatchRow(
+                bedr_binaries.SimilarEntropyMatchRow(
                     sha256="f677017665d7b9931407f952bdec0fd43ef526cb1645e64401cbbb29af05d128", score=93.4375
                 ),
-                binary_similar.SimilarEntropyMatchRow(
+                bedr_binaries.SimilarEntropyMatchRow(
                     sha256="9ecec72c5fe3c83c122043cad8ceb80d239d99d03b8ea665490bbced183ce42a", score=92.5781
                 ),
             ],
