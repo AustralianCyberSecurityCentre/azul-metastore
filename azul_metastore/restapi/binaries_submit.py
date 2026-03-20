@@ -54,8 +54,11 @@ def _log_high_level_submission(
     request: Request, ctx: context.Context, high_level_sub_response: list[bedr_binaries_data.BinaryData]
 ):
     """Log uploading files to various sources."""
+    # Get route name
+    route_name = request.scope.get("route", None)
+    action = route_name.name.replace("_", " ").title() if route_name else "-"
     for submitted_data in high_level_sub_response:
-        ctx.man.s.log_to_loki(ctx.user_info.username, request, submitted_data.sha256)
+        ctx.man.s.log_to_loki(ctx.user_info.username, request, submitted_data.sha256, action=action)
 
 
 def validate_json(field_name: str, field_value: str | None):

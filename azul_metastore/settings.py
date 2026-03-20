@@ -126,7 +126,8 @@ class Metastore(BaseSettings):
     )
     special_log_message_format: str = (
         'full_time="{time:%d/%b/%Y:%H:%M:%S.%f}" connection="{connection}" username="{username}"'
-        ' special_method="{method}" special_path="{path}" sha256="{sha256}"'
+        ' special_method="{method}" special_path="{path}" sha256="{sha256}" session_id="{session_id}"'
+        ' action="{action}" headers="{headers}"'
     )
     # File to log special audit events to for loki collection.
     special_log_file_path: str = ""
@@ -174,17 +175,19 @@ class Metastore(BaseSettings):
     # cache that prevents duplicate opensearch doc creation
     binary2_cache_count: int = 1_000_000  # number of ids to cache, approx 64 bytes per id
 
-    def log_to_loki(self, username: str, request: Request, sha256: str | None):
+    def log_to_loki(self, username: str, request: Request, sha256: str | None, action: str = "-"):
         """Log important information to loki that wouldn't otherwise be captured."""
         if loki_logger:
             fmt_vars = dict(
                 time=datetime.datetime.now(tz=datetime.timezone.utc),
                 connection=request.headers.get("connection", "-"),
+                session_id=request.headers.get("X-Session-ID", "-"),
                 username=username,
                 method=request.method,
                 path=request.url.path,
-                headers=request.headers,
+                headers=dict(request.headers),
                 sha256=sha256,
+                action=action,
             )
             loki_logger.info(self.special_log_message_format.format(**fmt_vars))
 
