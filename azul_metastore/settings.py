@@ -56,7 +56,8 @@ class Metastore(BaseSettings):
             h = logging.StreamHandler(sys.stdout)
             h.setLevel(log_level)
             log_format = logging.Formatter(
-                fmt="%(levelname)s\t%(asctime)s - %(name)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S%z"
+                fmt="%(levelname)s\t%(asctime)s - %(name)s - %(message)s",
+                datefmt="%Y-%m-%d %H:%M:%S%z",
             )
             h.setFormatter(log_format)
             logger.addHandler(h)
@@ -64,7 +65,9 @@ class Metastore(BaseSettings):
             # Logging handler to log to file for Loki to collect for audit purposes.
             if self.error_log_file_path:
                 fh = logging.handlers.TimedRotatingFileHandler(
-                    self.error_log_file_path, backupCount=self.error_log_days_to_retain, when="D"
+                    self.error_log_file_path,
+                    backupCount=self.error_log_days_to_retain,
+                    when="D",
                 )
                 fh.setLevel(logging.ERROR)
                 # Allow for setting extra parameters in errors as json to make them easier to parse in loki.
@@ -82,7 +85,9 @@ class Metastore(BaseSettings):
             loki_logger.setLevel(logging.INFO)
             special_log_format = logging.Formatter(fmt=self.special_log_outer_format, datefmt=r"%Y-%m-%dT%H:%M:%S")
             fh = logging.handlers.TimedRotatingFileHandler(
-                self.special_log_file_path, backupCount=self.special_log_file_days_to_retain, when="D"
+                self.special_log_file_path,
+                backupCount=self.special_log_file_days_to_retain,
+                when="D",
             )
             fh.setLevel(logging.INFO)
             fh.setFormatter(special_log_format)

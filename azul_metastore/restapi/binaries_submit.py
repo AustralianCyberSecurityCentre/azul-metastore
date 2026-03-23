@@ -55,7 +55,7 @@ def _log_high_level_submission(
 ):
     """Log uploading files to various sources."""
     for submitted_data in high_level_sub_response:
-        ctx.man.s.log_to_loki(ctx.user_info.username, request, submitted_data.sha256, action=action)
+        ctx.man.s.log_to_loki(ctx.user_info.username, request, submitted_data.sha256)
 
 
 def validate_json(field_name: str, field_value: str | None):
