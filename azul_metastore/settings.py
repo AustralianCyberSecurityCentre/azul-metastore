@@ -177,6 +177,9 @@ class Metastore(BaseSettings):
 
     def log_to_loki(self, username: str, request: Request, sha256: str | None, action: str = "-"):
         """Log important information to loki that wouldn't otherwise be captured."""
+        # Get route name
+        route_name = request.scope.get("route", None)
+        action = route_name.name.replace("_", " ").title() if route_name else "-"
         if loki_logger:
             fmt_vars = dict(
                 time=datetime.datetime.now(tz=datetime.timezone.utc),
