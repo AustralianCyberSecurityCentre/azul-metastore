@@ -56,7 +56,8 @@ class Metastore(BaseSettings):
             h = logging.StreamHandler(sys.stdout)
             h.setLevel(log_level)
             log_format = logging.Formatter(
-                fmt="%(levelname)s\t%(asctime)s - %(name)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S%z"
+                fmt="%(levelname)s\t%(asctime)s - %(name)s - %(message)s",
+                datefmt="%Y-%m-%d %H:%M:%S%z",
             )
             h.setFormatter(log_format)
             logger.addHandler(h)
@@ -64,7 +65,9 @@ class Metastore(BaseSettings):
             # Logging handler to log to file for Loki to collect for audit purposes.
             if self.error_log_file_path:
                 fh = logging.handlers.TimedRotatingFileHandler(
-                    self.error_log_file_path, backupCount=self.error_log_days_to_retain, when="D"
+                    self.error_log_file_path,
+                    backupCount=self.error_log_days_to_retain,
+                    when="D",
                 )
                 fh.setLevel(logging.ERROR)
                 # Allow for setting extra parameters in errors as json to make them easier to parse in loki.
@@ -82,7 +85,9 @@ class Metastore(BaseSettings):
             loki_logger.setLevel(logging.INFO)
             special_log_format = logging.Formatter(fmt=self.special_log_outer_format, datefmt=r"%Y-%m-%dT%H:%M:%S")
             fh = logging.handlers.TimedRotatingFileHandler(
-                self.special_log_file_path, backupCount=self.special_log_file_days_to_retain, when="D"
+                self.special_log_file_path,
+                backupCount=self.special_log_file_days_to_retain,
+                when="D",
             )
             fh.setLevel(logging.INFO)
             fh.setFormatter(special_log_format)
@@ -126,7 +131,8 @@ class Metastore(BaseSettings):
     )
     special_log_message_format: str = (
         'full_time="{time:%d/%b/%Y:%H:%M:%S.%f}" connection="{connection}" username="{username}"'
-        ' special_method="{method}" special_path="{path}" sha256="{sha256}"'
+        ' special_method="{method}" special_path="{path}" sha256="{sha256}" session_id="{session_id}"'
+        ' action="{action}"'
     )
     # File to log special audit events to for loki collection.
     special_log_file_path: str = ""
@@ -176,6 +182,9 @@ class Metastore(BaseSettings):
 
     def log_to_loki(self, username: str, request: Request, sha256: str | None):
         """Log important information to loki that wouldn't otherwise be captured."""
+        # Get route name
+        route_name = request.scope.get("route", None)
+        action = route_name.name.replace("_", " ").title() if route_name else "-"
         if loki_logger:
             fmt_vars = dict(
                 time=datetime.datetime.now(tz=datetime.timezone.utc),
@@ -185,6 +194,7 @@ class Metastore(BaseSettings):
                 path=request.url.path,
                 headers=request.headers,
                 sha256=sha256,
+                action=action,
             )
             loki_logger.info(self.special_log_message_format.format(**fmt_vars))
 
