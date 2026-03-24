@@ -397,7 +397,9 @@ async def submit_child_binary_to_source(
             priv_ctx=qr.writer,
             expedite=refresh,
         )
-        _log_high_level_submission(request, ctx, result)
+        _log_high_level_submission(
+            request, ctx, result, references={"parent_sha256": parent_sha256, **relationship.relationship_as_dict}
+        )
         return result
     except (HTTPException, ApiException) as e:
         qr.set_security_headers(ctx, resp, security, ex=e)
@@ -450,7 +452,9 @@ async def submit_child_binary_to_source_dataless(
             priv_ctx=qr.writer,
             expedite=refresh,
         )
-        _log_high_level_submission(request, ctx, result)
+        _log_high_level_submission(
+            request, ctx, result, references={"parent_sha256": parent_sha256, **relationship.relationship_as_dict}
+        )
         return result
     except (HTTPException, ApiException) as e:
         qr.set_security_headers(ctx, resp, security, ex=e)
