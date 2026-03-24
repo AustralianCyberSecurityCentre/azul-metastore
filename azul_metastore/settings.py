@@ -132,7 +132,7 @@ class Metastore(BaseSettings):
     special_log_message_format: str = (
         'full_time="{time:%d/%b/%Y:%H:%M:%S.%f}" connection="{connection}" username="{username}"'
         ' special_method="{method}" special_path="{path}" sha256="{sha256}" session_id="{session_id}"'
-        ' action="{action}" headers="{headers}"'
+        ' action="{action}"'
     )
     # File to log special audit events to for loki collection.
     special_log_file_path: str = ""
@@ -189,11 +189,9 @@ class Metastore(BaseSettings):
             fmt_vars = dict(
                 time=datetime.datetime.now(tz=datetime.timezone.utc),
                 connection=request.headers.get("connection", "-"),
-                session_id=request.headers.get("X-Session-ID", "-"),
                 username=username,
                 method=request.method,
                 path=request.url.path,
-                headers=dict(request.headers),
                 sha256=sha256,
                 action=action,
             )
