@@ -192,6 +192,7 @@ class Metastore(BaseSettings):
                 username=username,
                 method=request.method,
                 path=request.url.path,
+                headers=request.headers,
                 sha256=sha256,
                 action=action,
             )
