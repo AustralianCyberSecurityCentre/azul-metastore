@@ -180,7 +180,7 @@ class Metastore(BaseSettings):
     # cache that prevents duplicate opensearch doc creation
     binary2_cache_count: int = 1_000_000  # number of ids to cache, approx 64 bytes per id
 
-    def log_to_loki(self, username: str, request: Request, sha256: str | None, action: str = "-"):
+    def log_to_loki(self, username: str, request: Request, sha256: str | None):
         """Log important information to loki that wouldn't otherwise be captured."""
         # Get route name
         route_name = request.scope.get("route", None)
