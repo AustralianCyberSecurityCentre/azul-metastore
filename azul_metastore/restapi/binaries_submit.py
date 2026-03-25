@@ -397,6 +397,7 @@ async def submit_child_binary_to_source(
             priv_ctx=qr.writer,
             expedite=refresh,
         )
+        # log refs
         _log_high_level_submission(
             request, ctx, result, references={"parent_sha256": parent_sha256, **relationship.relationship_as_dict}
         )
