@@ -50,7 +50,7 @@ def load_generic(
     category: str,
     unique: str,
     version: str,
-    timestamp: str = None,
+    timestamp: str | None = None,
 ) -> dict | None:
     """Load cached dictionary for the id, divided by category."""
     user_security = ctx.get_user_security_unique()
@@ -65,7 +65,7 @@ def load_generic(
     if (
         resp
         and resp["version"] == version
-        and (not timestamp or pendulum.parse(resp["timestamp"]) >= pendulum.parse(timestamp))
+        and (not timestamp or pendulum.parse(resp["timestamp"]) >= pendulum.parse(timestamp))  # type: ignore
     ):
         return resp["data"]
     return None

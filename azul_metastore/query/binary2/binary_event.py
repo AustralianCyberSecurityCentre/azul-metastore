@@ -1,5 +1,7 @@
 """Inspect events for raw manipulations."""
 
+from typing import Any
+
 import cachetools
 from azul_bedrock import models_network as azm
 from azul_bedrock import models_restapi
@@ -45,11 +47,11 @@ def get_best_event(ctx: Context, sha256: str) -> azm.BinaryEvent | None:
 
 
 def get_binary_documents(
-    ctx: Context, sha256: str, event_type: azm.BinaryAction = None, size=1000
+    ctx: Context, sha256: str, event_type: azm.BinaryAction | None = None, size=1000
 ) -> models_restapi.OpensearchDocuments:
     """Get raw documents associated with the provided event type."""
     sha256 = sha256.lower()
-    body = {
+    body: dict = {
         "track_total_hits": True,
         "size": size,
         "query": {
@@ -68,7 +70,7 @@ def get_binary_documents(
     )
 
 
-def _convert_opensearch_mapping_to_flat(object: dict[str, any]) -> dict[str, str]:
+def _convert_opensearch_mapping_to_flat(object: dict[str, Any]) -> dict[str, str]:
     """Convert an OpenSearch mapping to a flat key:type dictionary."""
     results = {}
 

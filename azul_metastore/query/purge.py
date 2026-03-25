@@ -88,7 +88,7 @@ class Purger:
         return wasDeleted
 
     def _delete_event(self, ctx: context.Context, action: azm.DeleteAction, entity: azm.DeleteEvent.DeleteEntity):
-        now = pendulum.now(pendulum.UTC).to_iso8601_string()
+        now = pendulum.now(pendulum.UTC)
         author = azm.Author(
             name=ctx.user_info.username,
             category="user",
@@ -103,7 +103,9 @@ class Purger:
             action=action,
         )
 
-    def _perform_meta_deletion(self, ctx: context.Context, raw_search: dict, ev: azm.DeleteEvent) -> tuple[int, str]:
+    def _perform_meta_deletion(
+        self, ctx: context.Context, raw_search: dict, ev: azm.DeleteEvent
+    ) -> tuple[int, str | None]:
         """Delete metadata.
 
         Return number of delete events and filepath to a
@@ -169,7 +171,8 @@ class Purger:
         with open(path_purge_evaluate, "r") as fin, open(path_purge_binary2, "a") as fout:
             # iterate through all to be deleted for link consistency
             # group sha256s up into chunks
-            for sha256s in utils.chunker(x.strip().split(",")[2] for x in fin):
+            sha256_iter = (x.strip().split(",")[2] for x in fin)
+            for sha256s in utils.chunker(sha256_iter):
                 logger.info(f"removing bad links for {len(sha256s)} binaries")
                 # get binaries that are potentially also being removed
                 report = binary_consistency.LinkReport()
@@ -190,7 +193,7 @@ class Purger:
             # judge which binaries were deleted
             for line in fin:
                 source, label, sha256 = line.strip().split(",")
-                was_deleted = self._check_binary_deletion(ctx, source, label, sha256)
+                was_deleted = self._check_binary_deletion(ctx, source, azm.DataLabel(label), sha256)
                 logger.info(f"check {sha256} for completely removed {was_deleted=}")
                 if was_deleted:
                     fout.write(",".join((source, label, sha256)) + "\n")
@@ -212,7 +215,7 @@ class Purger:
         with open(filepath, "r") as f:
             for line in f:
                 source, label, sha256 = line.strip().split(",")
-                was_purged = self._perform_data_deletion(ctx, source, label, sha256)
+                was_purged = self._perform_data_deletion(ctx, source, azm.DataLabel(label), sha256)
                 logger.info(f"{sha256}: {was_purged=}")
                 if was_purged:
                     data_purged += 1
@@ -242,7 +245,7 @@ class Purger:
         for i in range(9):
             # delete metadata over a few rounds to ensure it is complete
             events_purged, purge_path = self._perform_meta_deletion(ctx, raw_search, ev)
-            if events_purged == 0:
+            if events_purged == 0 or purge_path is None:
                 break
             ret.events_purged += events_purged
 

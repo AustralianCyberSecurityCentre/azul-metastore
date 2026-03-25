@@ -36,7 +36,7 @@ SUBMIT_BINARY_TIMEOUT_SECONDS = 600
 
 
 def _transform_metadata_to_binary_entity(
-    bin_info: azm.Datastream, filename: str, augstreams: list[azm.Datastream]
+    bin_info: azm.Datastream, filename: str | None, augstreams: list[azm.Datastream]
 ) -> azm.BinaryEvent.Entity:
     """Transform metadata into an entity."""
     ret = bin_info.to_input_entity()
@@ -74,7 +74,7 @@ async def _submit_binary_data_with_sources(
 
 
 async def _process_augmented_streams(
-    ctx: context.Context, sources_to_submit: list[str], augstreams: list[tuple[str, UploadFile]]
+    ctx: context.Context, sources_to_submit: list[str], augstreams: list[tuple[str, UploadFile]] | None
 ) -> list[azm.Datastream]:
     """Process all the aug streams as a single async task."""
     aug_tasks: dict[str, asyncio.Task[azm.Datastream]] = {}
@@ -88,14 +88,16 @@ async def _process_augmented_streams(
                     internal=ExceptionCodeEnum.MetastoreBadAugmentedStreamLabel,
                 )
 
-            augTask = tg.create_task(_submit_binary_data_with_sources(ctx, sources_to_submit, label, aug_binary))
+            augTask = tg.create_task(
+                _submit_binary_data_with_sources(ctx, sources_to_submit, azm.DataLabel(label), aug_binary)
+            )
             aug_tasks[label] = augTask
 
     # Now all the aug
     augstream_meta = []
     for label, completed_task in aug_tasks.items():
         aug_meta = completed_task.result()
-        aug_meta.label = label
+        aug_meta.label = azm.DataLabel(label)
         augstream_meta.append(aug_meta)
 
     return augstream_meta
@@ -105,7 +107,7 @@ def _submit_binary_event(
     *,
     author: azm.Author,
     entity: azm.BinaryEvent.Entity,
-    filename: str,
+    filename: str | None,
     source: str,
     timestamp: str,
     references: dict[str, str],
@@ -125,7 +127,7 @@ def _submit_binary_event(
         )
     try:
         settings.check_source_references(source, references)
-    except settings.BadSourceRefsException as e:
+    except exceptions_metastore.BadSourceRefsException as e:
         raise ApiException(
             status_code=HTTP_400_BAD_REQUEST,
             internal=ExceptionCodeEnum.MetastoreBadSourceReferenceDefinition,
@@ -141,20 +143,20 @@ def _submit_binary_event(
         kafka_key="meta-tmp",  # temporary id so we can create the object
         action=azm.BinaryAction.Sourced,
         model_version=azm.CURRENT_MODEL_VERSION,
-        timestamp=timestamp,
+        timestamp=timestamp,  # type: ignore
         author=author,
         entity=entity,
         source=azm.Source(
             name=source,
-            timestamp=timestamp,
+            timestamp=timestamp,  # type: ignore
             references=references,
             settings=submit_settings,
             path=[
                 azm.PathNode(
                     author=author,
                     action=azm.BinaryAction.Sourced,
-                    timestamp=timestamp,
-                    sha256=entity.sha256,
+                    timestamp=timestamp,  # type: ignore
+                    sha256=entity.sha256 or "",
                     filename=data_common.basename(filename) if filename else None,
                     size=entity.size,
                     file_format=entity.file_format,
@@ -210,12 +212,12 @@ async def high_level_submit_binary(
     *,
     binary: UploadFile | None = None,
     sha256: str = "",
-    source: str = "",
+    source: str | None = "",
     references: dict | None = None,
     parent_sha256: str = "",
     relationship: dict | None = None,
     submit_settings: dict | None = None,
-    filename: str = "",
+    filename: str | None = "",
     timestamp: str = "",
     security: str = "",
     extract: bool = False,
@@ -352,7 +354,7 @@ async def high_level_submit_binary(
         if filename:
             new_model.filename = filename
 
-        if is_source_submission:
+        if is_source_submission and source:
             # build up a submission event
             return_model = _submit_binary_event(
                 author=author,

@@ -109,7 +109,7 @@ class TimeAndLogCommand:
         Pretend to return opensearchpy.OpenSearch so autocompletion still works.
         """
         self.start_time = time.time()
-        return self._es
+        return self._es  # ty:ignore[invalid-return-type]
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Save the total time the function was running for."""
@@ -124,7 +124,7 @@ class TimeAndLogCommand:
                 encoded = repr(e)
                 # only print limited amout of json response as may be very big
             logger.debug("%s resp %s", self._es.last_name, encoded[:10000])
-        if self._enable_capture_es_queries:
+        if self._enable_capture_es_queries and self.query_info:
             self.query_info.response = self._es.last_resp
 
 
@@ -594,7 +594,7 @@ class Wrapper:
         return rows
 
     @classmethod
-    def _map_errors_to_wrapped(cls, rows: list[dict], errors: dict) -> list[IngestError]:
+    def _map_errors_to_wrapped(cls, rows: list[dict], errors: list[dict]) -> list[IngestError]:
         """Maps errors from opensearch generated when trying to index a document to the original document.
 
         Assumes no duplicate ids for raw_results.
@@ -662,7 +662,7 @@ class Wrapper:
             return []
 
         # write docs to opensearch and update index
-        errors = []
+        errors: list[dict] = []
         if not refresh and len(docs) > 1:
             # complete in parallel since we aren't waiting for the data to be searchable
             for success, err in helpers.parallel_bulk(
@@ -681,7 +681,7 @@ class Wrapper:
         return cls._map_errors_to_wrapped(docs, errors)
 
     def wrap_and_index_docs(
-        self, sd: search_data.SearchData, docs: list[dict], refresh: bool = False, raise_on_errors: bool = True
+        self, sd: search_data.SearchData, docs: Iterable[dict], refresh: bool = False, raise_on_errors: bool = True
     ) -> list[IngestError]:
         """Save supplied documents to opensearch.
 

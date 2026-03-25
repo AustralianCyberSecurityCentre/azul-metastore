@@ -27,20 +27,20 @@ wheels = [
 
 [[package]]
 name = "anyio"
-version = "4.12.1"
+version = "4.13.0"
 source = { registry = "https://devpi.acsc.internal/azul/stable/+simple" }
 dependencies = [
     { name = "idna" },
     { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
-sdist = { url = "https://devpi.acsc.internal/root/pypi/+f/41c/fcc3a4c85d3f0/anyio-4.12.1.tar.gz", hash = "sha256:41cfcc3a4c85d3f05c932da7c26d0201ac36f72abd4435ba90d0464a3ffed703" }
+sdist = { url = "https://devpi.acsc.internal/root/pypi/+f/334/b70e641fd2221/anyio-4.13.0.tar.gz", hash = "sha256:334b70e641fd2221c1505b3890c69882fe4a2df910cba14d97019b90b24439dc" }
 wheels = [
-    { url = "https://devpi.acsc.internal/root/pypi/+f/d40/5828884fc140a/anyio-4.12.1-py3-none-any.whl", hash = "sha256:d405828884fc140aa80a3c667b8beed277f1dfedec42ba031bd6ac3db606ab6c" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/08b/310f9e24a9594/anyio-4.13.0-py3-none-any.whl", hash = "sha256:08b310f9e24a9594186fd75b4f73f4a4152069e3853f1ed8bfbf58369f4ad708" },
 ]
 
 [[package]]
 name = "azul-bedrock"
-version = "11.0.3"
+version = "11.0.19"
 source = { registry = "https://devpi.acsc.internal/azul/stable/+simple" }
 dependencies = [
     { name = "babel" },
@@ -58,7 +58,7 @@ dependencies = [
     { name = "yara-python" },
 ]
 wheels = [
-    { url = "https://devpi.acsc.internal/azul/stable/+f/ffd/6e38a09c6c35d/azul_bedrock-11.0.3-py3-none-any.whl", hash = "sha256:ffd6e38a09c6c35df220943fd2d78533189c267b37fa6296783555cb7e1f5655" },
+    { url = "https://devpi.acsc.internal/azul/stable/+f/c24/7463db29cf4fd/azul_bedrock-11.0.19-py3-none-any.whl", hash = "sha256:c247463db29cf4fdd1b987f482a073a0d313e27e3cae2601be46a33a3c1d896a" },
 ]
 
 [package.optional-dependencies]
@@ -84,6 +84,7 @@ dependencies = [
     { name = "httpx" },
     { name = "lark" },
     { name = "malpz" },
+    { name = "numpy" },
     { name = "opensearch-py" },
     { name = "pendulum" },
     { name = "prometheus-client" },
@@ -121,6 +122,7 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "lark", specifier = ">=1.1.9" },
     { name = "malpz", specifier = ">=10.0.3" },
+    { name = "numpy", specifier = ">=2.4.3" },
     { name = "opensearch-py", specifier = ">=2.3.0" },
     { name = "pendulum", specifier = ">=3.0.0" },
     { name = "prometheus-client", specifier = ">=0.24.1" },
@@ -149,7 +151,7 @@ dev = [
 
 [[package]]
 name = "azul-security"
-version = "11.0.1"
+version = "11.0.4"
 source = { registry = "https://devpi.acsc.internal/azul/stable/+simple" }
 dependencies = [
     { name = "azul-bedrock" },
@@ -158,20 +160,20 @@ dependencies = [
     { name = "pydantic-settings" },
 ]
 wheels = [
-    { url = "https://devpi.acsc.internal/azul/stable/+f/837/de27858301c36/azul_security-11.0.1-py3-none-any.whl", hash = "sha256:837de27858301c36cbcb224c6d4bbc8f61a9dec0ce9c5058b25229f896d91bca" },
+    { url = "https://devpi.acsc.internal/azul/stable/+f/427/e9edc1aefed3d/azul_security-11.0.4-py3-none-any.whl", hash = "sha256:427e9edc1aefed3dff636413b9a530efda0b88afa10c5cf035e44c1715ee483c" },
 ]
 
 [[package]]
 name = "azure-core"
-version = "1.38.3"
+version = "1.39.0"
 source = { registry = "https://devpi.acsc.internal/azul/stable/+simple" }
 dependencies = [
     { name = "requests" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://devpi.acsc.internal/root/pypi/+f/a79/31fd445cb4af8/azure_core-1.38.3.tar.gz", hash = "sha256:a7931fd445cb4af8802c6f39c6a326bbd1e34b115846550a8245fa656ead6f8e" }
+sdist = { url = "https://devpi.acsc.internal/root/pypi/+f/8a9/0a562998dd44c/azure_core-1.39.0.tar.gz", hash = "sha256:8a90a562998dd44ce84597590fff6249701b98c0e8797c95fcdd695b54c35d74" }
 wheels = [
-    { url = "https://devpi.acsc.internal/root/pypi/+f/bf5/9d29765bf4748/azure_core-1.38.3-py3-none-any.whl", hash = "sha256:bf59d29765bf4748ab9edf25f98a30b7ea9797f43e367c06d846a30b29c1f845" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/4ac/7b70fab5438c3/azure_core-1.39.0-py3-none-any.whl", hash = "sha256:4ac7b70fab5438c3f68770649a78daf97833caa83827f91df9c14e0e0ea7d34f" },
 ]
 
 [[package]]
@@ -504,7 +506,7 @@ wheels = [
 
 [[package]]
 name = "fastapi"
-version = "0.135.1"
+version = "0.135.2"
 source = { registry = "https://devpi.acsc.internal/azul/stable/+simple" }
 dependencies = [
     { name = "annotated-doc" },
@@ -513,9 +515,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "typing-inspection" },
 ]
-sdist = { url = "https://devpi.acsc.internal/root/pypi/+f/d04/115b508d936d2/fastapi-0.135.1.tar.gz", hash = "sha256:d04115b508d936d254cea545b7312ecaa58a7b3a0f84952535b4c9afae7668cd" }
+sdist = { url = "https://devpi.acsc.internal/root/pypi/+f/88a/8320953597555/fastapi-0.135.2.tar.gz", hash = "sha256:88a832095359755527b7f63bb4c6bc9edb8329a026189eed83d6c1afcf419d56" }
 wheels = [
-    { url = "https://devpi.acsc.internal/root/pypi/+f/46e/2fc5745924b7c/fastapi-0.135.1-py3-none-any.whl", hash = "sha256:46e2fc5745924b7c840f71ddd277382af29ce1cdb7d5eab5bf697e3fb9999c9e" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/0af/0447d541867e8/fastapi-0.135.2-py3-none-any.whl", hash = "sha256:0af0447d541867e8db2a6a25c23a8c4bd80e2394ac5529bd87501bbb9e240ca5" },
 ]
 
 [package.optional-dependencies]
@@ -573,70 +575,74 @@ wheels = [
 
 [[package]]
 name = "fastar"
-version = "0.8.0"
+version = "0.9.0"
 source = { registry = "https://devpi.acsc.internal/azul/stable/+simple" }
-sdist = { url = "https://devpi.acsc.internal/root/pypi/+f/f4d/4d68dbf1c4c28/fastar-0.8.0.tar.gz", hash = "sha256:f4d4d68dbf1c4c2808f0e730fac5843493fc849f70fe3ad3af60dfbaf68b9a12" }
+sdist = { url = "https://devpi.acsc.internal/root/pypi/+f/d49/114d5f0b76c5c/fastar-0.9.0.tar.gz", hash = "sha256:d49114d5f0b76c5cc242875d90fa4706de45e0456ddedf416608ecd0787fb410" }
 wheels = [
-    { url = "https://devpi.acsc.internal/root/pypi/+f/0f1/0d2adfe40f47f/fastar-0.8.0-cp312-cp312-macosx_10_12_x86_64.whl", hash = "sha256:0f10d2adfe40f47ff228f4efaa32d409d732ded98580e03ed37c9535b5fc923d" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/b93/0da9d598e3bc6/fastar-0.8.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:b930da9d598e3bc69513d131f397e6d6be4643926ef3de5d33d1e826631eb036" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/9d2/10da2de733ca8/fastar-0.8.0-cp312-cp312-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:9d210da2de733ca801de83e931012349d209f38b92d9630ccaa94bd445bdc9b8" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/aa0/2270721517078/fastar-0.8.0-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:aa02270721517078a5bd61a38719070ac2537a4aa6b6c48cf369cf2abc59174a" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/83c/391e5b789a720/fastar-0.8.0-cp312-cp312-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:83c391e5b789a720e4d0029b9559f5d6dee3226693c5b39c0eab8eaece997e0f" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/325/8d7a78a72793c/fastar-0.8.0-cp312-cp312-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:3258d7a78a72793cdd081545da61cabe85b1f37634a1d0b97ffee0ff11d105ef" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/e6e/ab95dd985cdb6/fastar-0.8.0-cp312-cp312-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:e6eab95dd985cdb6a50666cbeb9e4814676e59cfe52039c880b69d67cfd44767" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/829/b185416614186/fastar-0.8.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:829b1854166141860887273c116c94e31357213fa8e9fe8baeb18bd6c38aa8d9" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/b16/67eae13f9457a/fastar-0.8.0-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:b1667eae13f9457a3c737f4376d68e8c3e548353538b28f7e4273a30cb3965cd" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/b86/4a95229a7db08/fastar-0.8.0-cp312-cp312-musllinux_1_2_armv7l.whl", hash = "sha256:b864a95229a7db0814cd9ef7987cb713fd43dce1b0d809dd17d9cd6f02fdde3e" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/c05/fbc5618ce1767/fastar-0.8.0-cp312-cp312-musllinux_1_2_i686.whl", hash = "sha256:c05fbc5618ce17675a42576fa49858d79734627f0a0c74c0875ab45ee8de340c" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/7f4/1c51ee96f3386/fastar-0.8.0-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:7f41c51ee96f338662ee3c3df4840511ba3f9969606840f1b10b7cb633a3c716" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/d94/9a1a2ea7968b7/fastar-0.8.0-cp312-cp312-win32.whl", hash = "sha256:d949a1a2ea7968b734632c009df0571c94636a5e1622c87a6e2bf712a7334f47" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/fc6/45994d5b927d7/fastar-0.8.0-cp312-cp312-win_amd64.whl", hash = "sha256:fc645994d5b927d769121094e8a649b09923b3c13a8b0b98696d8f853f23c532" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/d81/ee82e8dc78a0a/fastar-0.8.0-cp312-cp312-win_arm64.whl", hash = "sha256:d81ee82e8dc78a0adb81728383bd39611177d642a8fa2d601d4ad5ad59e5f3bd" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/a32/53a06845462ca/fastar-0.8.0-cp313-cp313-macosx_10_12_x86_64.whl", hash = "sha256:a3253a06845462ca2196024c7a18f5c0ba4de1532ab1c4bad23a40b332a06a6a" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/5cb/eb3ebfa0980c6/fastar-0.8.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:5cbeb3ebfa0980c68ff8b126295cc6b208ccd81b638aebc5a723d810a7a0e5d2" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/1c0/d5956b917daac/fastar-0.8.0-cp313-cp313-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:1c0d5956b917daac77d333d48b3f0f3ff927b8039d5b32d8125462782369f761" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/27b/404db2b786b65/fastar-0.8.0-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:27b404db2b786b65912927ce7f3790964a4bcbde42cdd13091b82a89cd655e1c" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/090/2fc89dcf1e7f0/fastar-0.8.0-cp313-cp313-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:0902fc89dcf1e7f07b8563032a4159fe2b835e4c16942c76fd63451d0e5f76a3" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/069/347e2f0f7a8b9/fastar-0.8.0-cp313-cp313-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:069347e2f0f7a8b99bbac8cd1bc0e06c7b4a31dc964fc60d84b95eab3d869dc1" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/7fd/135306f6bfe9a/fastar-0.8.0-cp313-cp313-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:7fd135306f6bfe9a835918280e0eb440b70ab303e0187d90ab51ca86e143f70d" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/78d/06d6897f43c27/fastar-0.8.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:78d06d6897f43c27154b5f2d0eb930a43a81b7eec73f6f0b0114814d4a10ab38" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/a92/2f8439231fa0c/fastar-0.8.0-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:a922f8439231fa0c32b15e8d70ff6d415619b9d40492029dabbc14a0c53b5f18" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/a73/9abd51eb76638/fastar-0.8.0-cp313-cp313-musllinux_1_2_armv7l.whl", hash = "sha256:a739abd51eb766384b4caff83050888e80cd75bbcfec61e6d1e64875f94e4a40" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/5a6/5f419d808b23a/fastar-0.8.0-cp313-cp313-musllinux_1_2_i686.whl", hash = "sha256:5a65f419d808b23ac89d5cd1b13a2f340f15bc5d1d9af79f39fdb77bba48ff1b" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/7bb/2ae6c0cce58f0/fastar-0.8.0-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:7bb2ae6c0cce58f0db1c9f20495e7557cca2c1ee9c69bbd90eafd54f139171c5" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/b28/753e0d18a6432/fastar-0.8.0-cp313-cp313-win32.whl", hash = "sha256:b28753e0d18a643272597cb16d39f1053842aa43131ad3e260c03a2417d38401" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/620/e5d737dce8321/fastar-0.8.0-cp313-cp313-win_amd64.whl", hash = "sha256:620e5d737dce8321d49a5ebb7997f1fd0047cde3512082c27dc66d6ac8c1927a" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/c4c/4bd08df563120/fastar-0.8.0-cp313-cp313-win_arm64.whl", hash = "sha256:c4c4bd08df563120cd33e854fe0a93b81579e8571b11f9b7da9e84c37da2d6b6" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/50b/36ce654ba44b0/fastar-0.8.0-cp314-cp314-macosx_10_12_x86_64.whl", hash = "sha256:50b36ce654ba44b0e13fae607ae17ee6e1597b69f71df1bee64bb8328d881dfc" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/63a/892762683d7ab/fastar-0.8.0-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:63a892762683d7ab00df0227d5ea9677c62ff2cde9b875e666c0be569ed940f3" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/4ae/6a145c1bff592/fastar-0.8.0-cp314-cp314-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:4ae6a145c1bff592644bde13f2115e0239f4b7babaf506d14e7d208483cf01a5" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/6ae/0ff7c0a1c7e14/fastar-0.8.0-cp314-cp314-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:6ae0ff7c0a1c7e1428404b81faee8aebef466bfd0be25bfe4dabf5d535c68741" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/dbf/d87dbd217b45c/fastar-0.8.0-cp314-cp314-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:dbfd87dbd217b45c898b2dbcd0169aae534b2c1c5cbe3119510881f6a5ac8ef5" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/9a5/abd99fcba83ef/fastar-0.8.0-cp314-cp314-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:9a5abd99fcba83ef28c8fe6ae2927edc79053db43a0457a962ed85c9bf150d37" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/91d/4c685620c3a9d/fastar-0.8.0-cp314-cp314-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:91d4c685620c3a9d6b5ae091dbabab4f98b20049b7ecc7976e19cc9016c0d5d6" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/f77/c2f2cad76e9dc/fastar-0.8.0-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f77c2f2cad76e9dc7b6701297adb1eba87d0485944b416fc2ccf5516c01219a3" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/e7f/07c4a3dada775/fastar-0.8.0-cp314-cp314-musllinux_1_2_aarch64.whl", hash = "sha256:e7f07c4a3dada7757a8fc430a5b4a29e6ef696d2212747213f57086ffd970316" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/90c/0c3fe55105c0a/fastar-0.8.0-cp314-cp314-musllinux_1_2_armv7l.whl", hash = "sha256:90c0c3fe55105c0aed8a83135dbdeb31e683455dbd326a1c48fa44c378b85616" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/fb9/ee51e5bffe0da/fastar-0.8.0-cp314-cp314-musllinux_1_2_i686.whl", hash = "sha256:fb9ee51e5bffe0dab3d3126d3a4fac8d8f7235cedcb4b8e74936087ce1c157f3" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/e38/0b1e8d30317f5/fastar-0.8.0-cp314-cp314-musllinux_1_2_x86_64.whl", hash = "sha256:e380b1e8d30317f52406c43b11e98d11e1d68723bbd031e18049ea3497b59a6d" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/1c4/ffc06e9c4a8ca/fastar-0.8.0-cp314-cp314-win32.whl", hash = "sha256:1c4ffc06e9c4a8ca498c07e094670d8d8c0d25b17ca6465b9774da44ea997ab1" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/551/7a8ad4726267c/fastar-0.8.0-cp314-cp314-win_amd64.whl", hash = "sha256:5517a8ad4726267c57a3e0e2a44430b782e00b230bf51c55b5728e758bb3a692" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/580/30551046ff4a8/fastar-0.8.0-cp314-cp314-win_arm64.whl", hash = "sha256:58030551046ff4a8616931e52a36c83545ff05996db5beb6e0cd2b7e748aa309" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/1e7/d29b6bfecb29d/fastar-0.8.0-cp314-cp314t-macosx_10_12_x86_64.whl", hash = "sha256:1e7d29b6bfecb29db126a08baf3c04a5ab667f6cea2b7067d3e623a67729c4a6" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/05e/b7b96940f9526/fastar-0.8.0-cp314-cp314t-macosx_11_0_arm64.whl", hash = "sha256:05eb7b96940f9526b485f1d0b02393839f0f61cac4b1f60024984f8b326d2640" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/619/352d8ac011794/fastar-0.8.0-cp314-cp314t-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:619352d8ac011794e2345c462189dc02ba634750d23cd9d86a9267dd71b1f278" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/74e/bfecef3fe6d7a/fastar-0.8.0-cp314-cp314t-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:74ebfecef3fe6d7a90355fac1402fd30636988332a1d33f3e80019a10782bb24" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/297/5aca5a639e26a/fastar-0.8.0-cp314-cp314t-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:2975aca5a639e26a3ab0d23b4b0628d6dd6d521146c3c11486d782be621a35aa" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/afc/438eaed8ff0dc/fastar-0.8.0-cp314-cp314t-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:afc438eaed8ff0dcdd9308268be5cb38c1db7e94c3ccca7c498ca13a4a4535a3" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/6ce/d0a5399cc0a84/fastar-0.8.0-cp314-cp314t-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:6ced0a5399cc0a84a858ef0a31ca2d0c24d3bbec4bcda506a9192d8119f3590a" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/ec9/b23da8c4c039d/fastar-0.8.0-cp314-cp314t-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ec9b23da8c4c039da3fe2e358973c66976a0c8508aa06d6626b4403cb5666c19" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/dfb/a078fcd534780/fastar-0.8.0-cp314-cp314t-musllinux_1_2_aarch64.whl", hash = "sha256:dfba078fcd53478032fd0ceed56960ec6b7ff0511cfc013a8a3a4307e3a7bac4" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/ade/56c94c14be356/fastar-0.8.0-cp314-cp314t-musllinux_1_2_armv7l.whl", hash = "sha256:ade56c94c14be356d295fecb47a3fcd473dd43a8803ead2e2b5b9e58feb6dcfa" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/e48/d938f9366db5e/fastar-0.8.0-cp314-cp314t-musllinux_1_2_i686.whl", hash = "sha256:e48d938f9366db5e59441728f70b7f6c1ccfab7eff84f96f9b7e689b07786c52" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/79c/441dc1482ff51/fastar-0.8.0-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:79c441dc1482ff51a54fb3f57ae6f7bb3d2cff88fa2cc5d196c519f8aab64a56" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/187/f61dc739afe45/fastar-0.8.0-cp314-cp314t-win32.whl", hash = "sha256:187f61dc739afe45ac8e47ed7fd1adc45d52eac110cf27d579155720507d6fbe" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/40e/9d763cf8bf85c/fastar-0.8.0-cp314-cp314t-win_amd64.whl", hash = "sha256:40e9d763cf8bf85ce2fa256e010aa795c0fe3d3bd1326d5c3084e6ce7857127e" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/e59/673307b6a0821/fastar-0.8.0-cp314-cp314t-win_arm64.whl", hash = "sha256:e59673307b6a08210987059a2bdea2614fe26e3335d0e5d1a3d95f49a05b1418" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/7a8/b5daa50d9b4c0/fastar-0.9.0-cp312-cp312-macosx_10_12_x86_64.whl", hash = "sha256:7a8b5daa50d9b4c07367dffc40880467170bf1c31ca63a2286506edbe6d3d65b" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/9ec/841a69fea7336/fastar-0.9.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:9ec841a69fea73361c6df6d9183915c09e9ce3bd96493763fa46019e79918400" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/ad4/6bc23040142e9/fastar-0.9.0-cp312-cp312-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:ad46bc23040142e9be4b4005ea366834dbf0f1b6a90b8ecdc3ec96c42dec4adf" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/de2/64da9e8ef6407/fastar-0.9.0-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:de264da9e8ef6407aa0b23c7c47ed4e34fde867e7c1f6e3cb98945a93e5f89f2" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/75c/70be3a7da3ff9/fastar-0.9.0-cp312-cp312-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:75c70be3a7da3ff9342f64c15ec3749c13ef56bc28e69075d82d03768532a8d0" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/4a7/34506b071d2a8/fastar-0.9.0-cp312-cp312-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:4a734506b071d2a8844771fe735fbd6d67dd0eec80eef5f189bbe763ebe7a0b8" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/8ea/c084ab215aaf6/fastar-0.9.0-cp312-cp312-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:8eac084ab215aaf65fa406c9b9da1ac4e697c3d3a1a183e09c488e555802f62d" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/acb/62e2369834fb2/fastar-0.9.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:acb62e2369834fb23d26327157f0a2dbec40b230c709fa85b1ce96cf010e6fbf" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/f2f/399fffb74bcd9/fastar-0.9.0-cp312-cp312-manylinux_2_31_riscv64.whl", hash = "sha256:f2f399fffb74bcd9e9d4507e253ace2430b5ccf61000596bda41e90414bcf4f2" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/870/06c8770dfc558/fastar-0.9.0-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:87006c8770dfc558aefe927590bbcdaf9648ca4472a9ee6d10dfb7c0bda4ce5b" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/4d0/12644421d669d/fastar-0.9.0-cp312-cp312-musllinux_1_2_armv7l.whl", hash = "sha256:4d012644421d669d9746157193f4eafd371e8ae56ff7aef97612a4922418664c" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/094/fd03b2e41b20a/fastar-0.9.0-cp312-cp312-musllinux_1_2_i686.whl", hash = "sha256:094fd03b2e41b20a2602d340e2b52ad10051d82caa1263411cf247c1b1bc139f" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/59b/c500d7b6bdaf2/fastar-0.9.0-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:59bc500d7b6bdaf2ffb2b632bc6b0f97ddfb3bb7d31b54d61ceb00b5698d6484" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/25a/1fd512ce23eb5/fastar-0.9.0-cp312-cp312-win32.whl", hash = "sha256:25a1fd512ce23eb5aaab514742e7c6120244c211c349b86af068c3ae35792ec3" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/b10/a409797d01ee4/fastar-0.9.0-cp312-cp312-win_amd64.whl", hash = "sha256:b10a409797d01ee4062547e95e4a89f6bb52677b144076fd5a1f9d28d463ab10" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/ea4/d98fc62990986/fastar-0.9.0-cp312-cp312-win_arm64.whl", hash = "sha256:ea4d98fc62990986ce00d2021f08ff2aa6eae71636415c5a5f65f3a6a657dc5e" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/7b5/5ae4a3a481fd9/fastar-0.9.0-cp313-cp313-macosx_10_12_x86_64.whl", hash = "sha256:7b55ae4a3a481fd90a63ac558a7e8aab652ac1dfd15d8657266e71bf65346408" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/f07/c6bdeedfeb30e/fastar-0.9.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:f07c6bdeedfeb30ef459f21fa9ab06e2b6727f7e7653176d3abb7a85f447c400" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/90f/46492e0514108/fastar-0.9.0-cp313-cp313-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:90f46492e05141089766699e95c79d470e8013192fbbb16ef16b576281f3b8ee" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/108/bb46c080ca152/fastar-0.9.0-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:108bb46c080ca152bb331f1e0576177d36e9badba51b1d5724d2823542e0dd1f" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/d17/d311cfbb55915/fastar-0.9.0-cp313-cp313-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:d17d311cfbb559154ba940972b6d07a3a7ac221a2a01208f119ad03495f01d32" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/d2e/f34e7088f308e/fastar-0.9.0-cp313-cp313-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:d2ef34e7088f308e73460e1b8d9b0479a743f679816782a80db6ae87ee68714a" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/c93/bf4732d0dd6ad/fastar-0.9.0-cp313-cp313-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:c93bf4732d0dd6adae4a8b3bbebe19af76ee1072b7688bf39c5a1d120425a772" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/5a6/7b061b1099cf3/fastar-0.9.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5a67b061b1099cf3b8b6234dd3605fa16f5078ab6b51c8d77ad7a5d11c3cf834" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/912/efe3121dc1f3c/fastar-0.9.0-cp313-cp313-manylinux_2_31_riscv64.whl", hash = "sha256:912efe3121dc1f3c05940cfa1c6b09b8868d702d24566506aa1d0d96e429923a" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/239/4980cc126a326/fastar-0.9.0-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:2394980cc126a3263e115600bc4ff9e7320cddde83c99fc334ab530be5b7166e" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/d0a/ff74ea9864278/fastar-0.9.0-cp313-cp313-musllinux_1_2_armv7l.whl", hash = "sha256:d0aff74ea98642784c941d3cd8c35943258d4b9626157858901c5b181683339b" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/3e8/a1deaf490f4ec/fastar-0.9.0-cp313-cp313-musllinux_1_2_i686.whl", hash = "sha256:3e8a1deaf490f4ec15eca7e66127ff89cdefd20217f358739d4b7b1cb322f663" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/c9b/d8879ebf05aa2/fastar-0.9.0-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:c9bd8879ebf05aa247e60e454bb7568cbdd44f016b8c58e31e5398039403e61d" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/11b/35e6453a2da87/fastar-0.9.0-cp313-cp313-win32.whl", hash = "sha256:11b35e6453a2da8715dd8415b3999ea57805125493e44ce41a32404bf9a510a7" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/10a/1e7f7bfa1c6f0/fastar-0.9.0-cp313-cp313-win_amd64.whl", hash = "sha256:10a1e7f7bfa1c6f03e4c657fdc0a32ebe42d8e48f681403dc0c67258e1cb5bef" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/e54/84ac1415e0ca8/fastar-0.9.0-cp313-cp313-win_arm64.whl", hash = "sha256:e5484ac1415e0ca8bc7b69231e3e3afb52887fed10b839ca676767635a13f06f" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/ccb/2289f24ee6555/fastar-0.9.0-cp314-cp314-macosx_10_12_x86_64.whl", hash = "sha256:ccb2289f24ee6555330eb77149486d3a2ec8926450a96157dd20c636a0eec085" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/2bf/ee749a4666678/fastar-0.9.0-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:2bfee749a46666785151b33980aef8f916e6e0341c3d241bde4d3de6be23f00c" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/f60/96ec3f216a21f/fastar-0.9.0-cp314-cp314-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:f6096ec3f216a21fa9ac430ce509447f56c5bd979170c4c0c3b4f3cb2051c1a8" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/f7a/806e54d429f7f/fastar-0.9.0-cp314-cp314-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f7a806e54d429f7f57e35dc709e801da8c0ba9095deb7331d6574c05ae4537ea" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/f9a/06abf8c7f7464/fastar-0.9.0-cp314-cp314-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:f9a06abf8c7f74643a75003334683eb6e94fabef05f60449b7841eeb093a47b0" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/1e9/b5c155946f20c/fastar-0.9.0-cp314-cp314-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:1e9b5c155946f20ce3f999fb1362ed102876156ad6539e1b73a921f14efb758c" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/fbd/edac6a84ef9eb/fastar-0.9.0-cp314-cp314-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:fbdedac6a84ef9ebc1cee6d777599ad51c9e98ceb8ebb386159483dcd60d0e16" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/51d/f60a2f7af09f7/fastar-0.9.0-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:51df60a2f7af09f75b2a4438b25cb903d8774e24c492acf2bca8b0863026f34c" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/150/16d0da7dbc664/fastar-0.9.0-cp314-cp314-manylinux_2_31_riscv64.whl", hash = "sha256:15016d0da7dbc664f09145fc7db549ba8fe32628c6e44e20926655b82de10658" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/c66/a8e1f7dae6357/fastar-0.9.0-cp314-cp314-musllinux_1_2_aarch64.whl", hash = "sha256:c66a8e1f7dae6357be8c1f83ce6330febbc08e49fc40a5a2e91061e7867bbcbf" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/1c6/829be3f55d297/fastar-0.9.0-cp314-cp314-musllinux_1_2_armv7l.whl", hash = "sha256:1c6829be3f55d2978cb62921ef4d7c3dd58fe68ee994f81d49bd0a3c5240c977" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/68d/b849e01d49543/fastar-0.9.0-cp314-cp314-musllinux_1_2_i686.whl", hash = "sha256:68db849e01d49543f31d56ef2fe15527afe2b9e0fb21794edc4d772553d83407" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/556/9510407c0ded5/fastar-0.9.0-cp314-cp314-musllinux_1_2_x86_64.whl", hash = "sha256:5569510407c0ded580cfeec99e46ebe85ce27e199e020c5c1ea6f570e302c946" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/3f7/be0a34ffbead5/fastar-0.9.0-cp314-cp314-win32.whl", hash = "sha256:3f7be0a34ffbead52ab5f4a1e445e488bf39736acb006298d3b3c5b4f2c5915e" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/cf7/f68b98ed34ce6/fastar-0.9.0-cp314-cp314-win_amd64.whl", hash = "sha256:cf7f68b98ed34ce628994c9bbd4f56cf6b4b175b3f7b8cbe35c884c8efec0a5b" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/155/dae97aca4b245/fastar-0.9.0-cp314-cp314-win_arm64.whl", hash = "sha256:155dae97aca4b245eabb25e23fd16bfd42a0447f9db7f7789ab1299b02d94487" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/a63/df018232623e1/fastar-0.9.0-cp314-cp314t-macosx_10_12_x86_64.whl", hash = "sha256:a63df018232623e136178953031057c7ac0dbf0acc6f0e8c1dc7dbc19e64c22f" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/6fb/44f8675ef8708/fastar-0.9.0-cp314-cp314t-macosx_11_0_arm64.whl", hash = "sha256:6fb44f8675ef87087cb08f9bf4dfa15e818571a5f567ff692f3ea007cff867b5" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/810/92daa991d0f09/fastar-0.9.0-cp314-cp314t-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:81092daa991d0f095424e0e28ed589e03c81a21eeddc9b981184ddda5869bf9d" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/9e8/793e2618d0d6d/fastar-0.9.0-cp314-cp314t-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:9e8793e2618d0d6d5a7762d6007371f57f02544364864e40e6b9d304b0f151b2" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/83f/7ef7056791fc9/fastar-0.9.0-cp314-cp314t-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:83f7ef7056791fc95b6afa987238368c9a73ad0edcedc6bc80076f9fbd3a2a78" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/b3a/456230fcc0e56/fastar-0.9.0-cp314-cp314t-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:b3a456230fcc0e560823f5d04ae8e4c867300d8ee710b14ddcdd1b316ac3dd8d" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/a60/b117ebadc46c1/fastar-0.9.0-cp314-cp314t-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:a60b117ebadc46c10c87852d2158a4d6489adbfbbec37be036b4cfbeca07b449" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/7a6/199b4ca0c092a/fastar-0.9.0-cp314-cp314t-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7a6199b4ca0c092a7ae47f5f387492d46a0a2d82cb3b7aa0bf50d7f7d5d8d57f" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/34e/fe114caf10b4d/fastar-0.9.0-cp314-cp314t-manylinux_2_31_riscv64.whl", hash = "sha256:34efe114caf10b4d5ea404069ff1f6cc0e55a708c7091059b0fc087f65c0a331" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/4d4/4c1f8d9c5a3e4/fastar-0.9.0-cp314-cp314t-musllinux_1_2_aarch64.whl", hash = "sha256:4d44c1f8d9c5a3e4e58e6ffb77f4ca023ba9d9ddd88e7c613b3419a8feaa3db7" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/d2a/f970a1f773965/fastar-0.9.0-cp314-cp314t-musllinux_1_2_armv7l.whl", hash = "sha256:d2af970a1f773965b05f1765017a417380ad080ea49590516eb25b23c039158a" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/167/5346d7cbdde0d/fastar-0.9.0-cp314-cp314t-musllinux_1_2_i686.whl", hash = "sha256:1675346d7cbdde0d21869c3b597be19b5e31a36442bdf3a48d83a49765b269dc" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/dc4/40daa28591aeb/fastar-0.9.0-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:dc440daa28591aeb4d387c171e824f179ad2ab256ce7a315472395b8d5f80392" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/327/87880600a988d/fastar-0.9.0-cp314-cp314t-win32.whl", hash = "sha256:32787880600a988d11547628034993ef948499ae4514a30509817242c4eb98b1" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/92f/a18ec4958f334/fastar-0.9.0-cp314-cp314t-win_amd64.whl", hash = "sha256:92fa18ec4958f33473259980685d29248ac44c96eed34026ad7550f93dd9ee23" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/34f/646ac4f5bed36/fastar-0.9.0-cp314-cp314t-win_arm64.whl", hash = "sha256:34f646ac4f5bed3661a106ca56c1744e7146a02aacf517d47b24fd3f25dc1ff6" },
 ]
 
 [[package]]
@@ -814,10 +820,10 @@ wheels = [
 
 [[package]]
 name = "malpz"
-version = "11.0.1"
+version = "11.0.3"
 source = { registry = "https://devpi.acsc.internal/azul/stable/+simple" }
 wheels = [
-    { url = "https://devpi.acsc.internal/azul/stable/+f/b74/37086f8be1ca6/malpz-11.0.1-py3-none-any.whl", hash = "sha256:b7437086f8be1ca63a699b1f0a35539d382f09779d183a5e9575397afcbc3e96" },
+    { url = "https://devpi.acsc.internal/azul/stable/+f/a55/3cdf1290bb0b8/malpz-11.0.3-py3-none-any.whl", hash = "sha256:a553cdf1290bb0b85723676aa3822835cca98483390be1b106da9c6f8d14b3ab" },
 ]
 
 [[package]]
@@ -920,6 +926,67 @@ source = { registry = "https://devpi.acsc.internal/azul/stable/+simple" }
 sdist = { url = "https://devpi.acsc.internal/root/pypi/+f/52e/68efc3284861e/mypy_extensions-1.1.0.tar.gz", hash = "sha256:52e68efc3284861e772bbcd66823fde5ae21fd2fdb51c62a211403730b916558" }
 wheels = [
     { url = "https://devpi.acsc.internal/root/pypi/+f/1be/4cccdb0f24823/mypy_extensions-1.1.0-py3-none-any.whl", hash = "sha256:1be4cccdb0f2482337c4743e60421de3a356cd97508abadd57d47403e94f5505" },
+]
+
+[[package]]
+name = "numpy"
+version = "2.4.3"
+source = { registry = "https://devpi.acsc.internal/azul/stable/+simple" }
+sdist = { url = "https://devpi.acsc.internal/root/pypi/+f/483/a201202b73495/numpy-2.4.3.tar.gz", hash = "sha256:483a201202b73495f00dbc83796c6ae63137a9bdade074f7648b3e32613412dd" }
+wheels = [
+    { url = "https://devpi.acsc.internal/root/pypi/+f/61b/0cbabbb6126c8/numpy-2.4.3-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:61b0cbabbb6126c8df63b9a3a0c4b1f44ebca5e12ff6997b80fcf267fb3150ef" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/739/5e69ff3252671/numpy-2.4.3-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:7395e69ff32526710748f92cd8c9849b361830968ea3e24a676f272653e8983e" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/abd/ce0f71dcb4a00/numpy-2.4.3-cp312-cp312-macosx_14_0_arm64.whl", hash = "sha256:abdce0f71dcb4a00e4e77f3faf05e4616ceccfe72ccaa07f47ee79cda3b7b0f4" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/48d/a3a4ee1336454/numpy-2.4.3-cp312-cp312-macosx_14_0_x86_64.whl", hash = "sha256:48da3a4ee1336454b07497ff7ec83903efa5505792c4e6d9bf83d99dc07a1e18" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/32e/3bef222ad6b05/numpy-2.4.3-cp312-cp312-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:32e3bef222ad6b052280311d1d60db8e259e4947052c3ae7dd6817451fc8a4c5" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/e7d/d01a46700b196/numpy-2.4.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:e7dd01a46700b1967487141a66ac1a3cf0dd8ebf1f08db37d46389401512ca97" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/76f/0f283506c28b1/numpy-2.4.3-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:76f0f283506c28b12bba319c0fab98217e9f9b54e6160e9c79e9f7348ba32e9c" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/737/f630a33736466/numpy-2.4.3-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:737f630a337364665aba3b5a77e56a68cc42d350edd010c345d65a3efa3addcc" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/269/52e18d82a1dbb/numpy-2.4.3-cp312-cp312-win32.whl", hash = "sha256:26952e18d82a1dbbc2f008d402021baa8d6fc8e84347a2072a25e08b46d698b9" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/65f/3c2455188f096/numpy-2.4.3-cp312-cp312-win_amd64.whl", hash = "sha256:65f3c2455188f09678355f5cae1f959a06b778bc66d535da07bf2ef20cd319d5" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/2ab/ad5c7fef172b3/numpy-2.4.3-cp312-cp312-win_arm64.whl", hash = "sha256:2abad5c7fef172b3377502bde47892439bae394a71bc329f31df0fd829b41a9e" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/b34/6845443716c8e/numpy-2.4.3-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:b346845443716c8e542d54112966383b448f4a3ba5c66409771b8c0889485dd3" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/262/9289168f4897a/numpy-2.4.3-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:2629289168f4897a3c4e23dc98d6f1731f0fc0fe52fb9db19f974041e4cc12b9" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/bb2/e3cf958542337/numpy-2.4.3-cp313-cp313-macosx_14_0_arm64.whl", hash = "sha256:bb2e3cf95854233799013779216c57e153c1ee67a0bf92138acca0e429aefaee" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/7f3/408ff897f8ab0/numpy-2.4.3-cp313-cp313-macosx_14_0_x86_64.whl", hash = "sha256:7f3408ff897f8ab07a07fbe2823d7aee6ff644c097cc1f90382511fe982f647f" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/dec/b0eb8a53c3b00/numpy-2.4.3-cp313-cp313-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:decb0eb8a53c3b009b0962378065589685d66b23467ef5dac16cbe818afde27f" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/d5f/51900414fc920/numpy-2.4.3-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:d5f51900414fc9204a0e0da158ba2ac52b75656e7dce7e77fb9f84bfa343b4cc" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/6bd/06731541f89cd/numpy-2.4.3-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:6bd06731541f89cdc01b261ba2c9e037f1543df7472517836b78dfb15bd6e476" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/226/54fe6be0e5206/numpy-2.4.3-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:22654fe6be0e5206f553a9250762c653d3698e46686eee53b399ab90da59bd92" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/d71/e379452a2f670/numpy-2.4.3-cp313-cp313-win32.whl", hash = "sha256:d71e379452a2f670ccb689ec801b1218cd3983e253105d6e83780967e899d687" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/0a6/0e17a14d640f4/numpy-2.4.3-cp313-cp313-win_amd64.whl", hash = "sha256:0a60e17a14d640f49146cb38e3f105f571318db7826d9b6fef7e4dce758faecd" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/c96/19741e9da2059/numpy-2.4.3-cp313-cp313-win_arm64.whl", hash = "sha256:c9619741e9da2059cd9c3f206110b97583c7152c1dc9f8aafd4beb450ac1c89d" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/7aa/4e54f6469300e/numpy-2.4.3-cp313-cp313t-macosx_11_0_arm64.whl", hash = "sha256:7aa4e54f6469300ebca1d9eb80acd5253cdfa36f2c03d79a35883687da430875" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/d1b/90d840b25874c/numpy-2.4.3-cp313-cp313t-macosx_14_0_arm64.whl", hash = "sha256:d1b90d840b25874cf5cd20c219af10bac3667db3876d9a495609273ebe679070" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/a74/9547700de0a20/numpy-2.4.3-cp313-cp313t-macosx_14_0_x86_64.whl", hash = "sha256:a749547700de0a20a6718293396ec237bb38218049cfce788e08fcb716e8cf73" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/94f/3c4a151a2e529/numpy-2.4.3-cp313-cp313t-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:94f3c4a151a2e529adf49c1d54f0f57ff8f9b233ee4d44af623a81553ab86368" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/22c/31dc07025123a/numpy-2.4.3-cp313-cp313t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:22c31dc07025123aedf7f2db9e91783df13f1776dc52c6b22c620870dc0fab22" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/148/d59127ac95979/numpy-2.4.3-cp313-cp313t-musllinux_1_2_aarch64.whl", hash = "sha256:148d59127ac95979d6f07e4d460f934ebdd6eed641db9c0db6c73026f2b2101a" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/a97/cbf7e905c4358/numpy-2.4.3-cp313-cp313t-musllinux_1_2_x86_64.whl", hash = "sha256:a97cbf7e905c435865c2d939af3d93f99d18eaaa3cabe4256f4304fb51604349" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/be3/b8487d725a77a/numpy-2.4.3-cp313-cp313t-win32.whl", hash = "sha256:be3b8487d725a77acccc9924f65fd8bce9af7fac8c9820df1049424a2115af6c" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/1ec/84fd7c8e652b0/numpy-2.4.3-cp313-cp313t-win_amd64.whl", hash = "sha256:1ec84fd7c8e652b0f4aaaf2e6e9cc8eaa9b1b80a537e06b2e3a2fb176eedcb26" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/120/df8c0a81ebbf5/numpy-2.4.3-cp313-cp313t-win_arm64.whl", hash = "sha256:120df8c0a81ebbf5b9020c91439fccd85f5e018a927a39f624845be194a2be02" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/588/4ce5c7acfae1e/numpy-2.4.3-cp314-cp314-macosx_10_15_x86_64.whl", hash = "sha256:5884ce5c7acfae1e4e1b6fde43797d10aa506074d25b531b4f54bde33c0c31d4" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/297/837823f5bc572/numpy-2.4.3-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:297837823f5bc572c5f9379b0c9f3a3365f08492cbdc33bcc3af174372ebb168" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/a11/1698b4a3f8dcb/numpy-2.4.3-cp314-cp314-macosx_14_0_arm64.whl", hash = "sha256:a111698b4a3f8dcbe54c64a7708f049355abd603e619013c346553c1fd4ca90b" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/4bd/4741a6a676770/numpy-2.4.3-cp314-cp314-macosx_14_0_x86_64.whl", hash = "sha256:4bd4741a6a676770e0e97fe9ab2e51de01183df3dcbcec591d26d331a40de950" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/54f/29b877279d51e/numpy-2.4.3-cp314-cp314-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:54f29b877279d51e210e0c80709ee14ccbbad647810e8f3d375561c45ef613dd" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/679/f2a834bae9020/numpy-2.4.3-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:679f2a834bae9020f81534671c56fd0cc76dd7e5182f57131478e23d0dc59e24" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/d84/f0f881cb2225c/numpy-2.4.3-cp314-cp314-musllinux_1_2_aarch64.whl", hash = "sha256:d84f0f881cb2225c2dfd7f78a10a5645d487a496c6668d6cc39f0f114164f3d0" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/d21/3c7e6e8d21188/numpy-2.4.3-cp314-cp314-musllinux_1_2_x86_64.whl", hash = "sha256:d213c7e6e8d211888cc359bab7199670a00f5b82c0978b9d1c75baf1eddbeac0" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/520/77feedeff7c76/numpy-2.4.3-cp314-cp314-win32.whl", hash = "sha256:52077feedeff7c76ed7c9f1a0428558e50825347b7545bbb8523da2cd55c547a" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/044/8e7f9caefb34b/numpy-2.4.3-cp314-cp314-win_amd64.whl", hash = "sha256:0448e7f9caefb34b4b7dd2b77f21e8906e5d6f0365ad525f9f4f530b13df2afc" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/b44/fd60341c4d978/numpy-2.4.3-cp314-cp314-win_arm64.whl", hash = "sha256:b44fd60341c4d9783039598efadd03617fa28d041fc37d22b62d08f2027fa0e7" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/0a1/95f4216be9305/numpy-2.4.3-cp314-cp314t-macosx_11_0_arm64.whl", hash = "sha256:0a195f4216be9305a73c0e91c9b026a35f2161237cf1c6de9b681637772ea657" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/cd3/2fbacb9fd1bf0/numpy-2.4.3-cp314-cp314t-macosx_14_0_arm64.whl", hash = "sha256:cd32fbacb9fd1bf041bf8e89e4576b6f00b895f06d00914820ae06a616bdfef7" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/2e0/3c05abaee1f67/numpy-2.4.3-cp314-cp314t-macosx_14_0_x86_64.whl", hash = "sha256:2e03c05abaee1f672e9d67bc858f300b5ccba1c21397211e8d77d98350972093" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/7d1/ce23cce91fcea/numpy-2.4.3-cp314-cp314t-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:7d1ce23cce91fcea443320a9d0ece9b9305d4368875bab09538f7a5b4131938a" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/c59/020932feb24ed/numpy-2.4.3-cp314-cp314t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:c59020932feb24ed49ffd03704fbab89f22aa9c0d4b180ff45542fe8918f5611" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/968/4823a78a6cd6a/numpy-2.4.3-cp314-cp314t-musllinux_1_2_aarch64.whl", hash = "sha256:9684823a78a6cd6ad7511fc5e25b07947d1d5b5e2812c93fe99d7d4195130720" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/020/0b25c68703331/numpy-2.4.3-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:0200b25c687033316fb39f0ff4e3e690e8957a2c3c8d22499891ec58c37a3eb5" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/5e1/0da9e93247e55/numpy-2.4.3-cp314-cp314t-win32.whl", hash = "sha256:5e10da9e93247e554bb1d22f8edc51847ddd7dde52d85ce31024c1b4312bfba0" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/45f/003dbdffb997a/numpy-2.4.3-cp314-cp314t-win_amd64.whl", hash = "sha256:45f003dbdffb997a03da2d1d0cb41fbd24a87507fb41605c0420a3db5bd4667b" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/4d3/82735cecd7bcf/numpy-2.4.3-cp314-cp314t-win_arm64.whl", hash = "sha256:4d382735cecd7bcf090172489a525cd7d4087bc331f7df9f60ddc9a296cf208e" },
 ]
 
 [[package]]
@@ -1041,17 +1108,17 @@ wheels = [
 
 [[package]]
 name = "protobuf"
-version = "7.34.0"
+version = "7.34.1"
 source = { registry = "https://devpi.acsc.internal/azul/stable/+simple" }
-sdist = { url = "https://devpi.acsc.internal/root/pypi/+f/387/1a3df67c710aa/protobuf-7.34.0.tar.gz", hash = "sha256:3871a3df67c710aaf7bb8d214cc997342e63ceebd940c8c7fc65c9b3d697591a" }
+sdist = { url = "https://devpi.acsc.internal/root/pypi/+f/9ce/42245e704cc50/protobuf-7.34.1.tar.gz", hash = "sha256:9ce42245e704cc5027be797c1db1eb93184d44d1cdd71811fb2d9b25ad541280" }
 wheels = [
-    { url = "https://devpi.acsc.internal/root/pypi/+f/8e3/29966799f2c27/protobuf-7.34.0-cp310-abi3-macosx_10_9_universal2.whl", hash = "sha256:8e329966799f2c271d5e05e236459fe1cbfdb8755aaa3b0914fa60947ddea408" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/9d7/a5005fb96f3c1/protobuf-7.34.0-cp310-abi3-manylinux2014_aarch64.whl", hash = "sha256:9d7a5005fb96f3c1e64f397f91500b0eb371b28da81296ae73a6b08a5b76cdd6" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/4a7/2a8ec94e7a9f7/protobuf-7.34.0-cp310-abi3-manylinux2014_s390x.whl", hash = "sha256:4a72a8ec94e7a9f7ef7fe818ed26d073305f347f8b3b5ba31e22f81fd85fca02" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/964/cf977e07f479c/protobuf-7.34.0-cp310-abi3-manylinux2014_x86_64.whl", hash = "sha256:964cf977e07f479c0697964e83deda72bcbc75c3badab506fb061b352d991b01" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/f79/1ec509707a1d9/protobuf-7.34.0-cp310-abi3-win32.whl", hash = "sha256:f791ec509707a1d91bd02e07df157e75e4fb9fbdad12a81b7396201ec244e2e3" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/9f9/079f1dde4e323/protobuf-7.34.0-cp310-abi3-win_amd64.whl", hash = "sha256:9f9079f1dde4e32342ecbd1c118d76367090d4aaa19da78230c38101c5b3dd40" },
-    { url = "https://devpi.acsc.internal/root/pypi/+f/e3b/914dd77fa33fa/protobuf-7.34.0-py3-none-any.whl", hash = "sha256:e3b914dd77fa33fa06ab2baa97937746ab25695f389869afdf03e81f34e45dc7" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/d8b/2cc79c4d8f62b/protobuf-7.34.1-cp310-abi3-macosx_10_9_universal2.whl", hash = "sha256:d8b2cc79c4d8f62b293ad9b11ec3aebce9af481fa73e64556969f7345ebf9fc7" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/518/5e0e948d07abe/protobuf-7.34.1-cp310-abi3-manylinux2014_aarch64.whl", hash = "sha256:5185e0e948d07abe94bb76ec9b8416b604cfe5da6f871d67aad30cbf24c3110b" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/403/b093a6e28a960/protobuf-7.34.1-cp310-abi3-manylinux2014_s390x.whl", hash = "sha256:403b093a6e28a960372b44e5eb081775c9b056e816a8029c61231743d63f881a" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/8ff/40ce8cd688f72/protobuf-7.34.1-cp310-abi3-manylinux2014_x86_64.whl", hash = "sha256:8ff40ce8cd688f7265326b38d5a1bed9bfdf5e6723d49961432f83e21d5713e4" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/34b/84ce27680df7c/protobuf-7.34.1-cp310-abi3-win32.whl", hash = "sha256:34b84ce27680df7cca9f231043ada0daa55d0c44a2ddfaa58ec1d0d89d8bf60a" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/e97/b55646e6ce5cb/protobuf-7.34.1-cp310-abi3-win_amd64.whl", hash = "sha256:e97b55646e6ce5cbb0954a8c28cd39a5869b59090dfaa7df4598a7fba869468c" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/bb3/812cd53aefea2/protobuf-7.34.1-py3-none-any.whl", hash = "sha256:bb3812cd53aefea2b028ef42bd780f5b96407247f20c6ef7c679807e9d188f11" },
 ]
 
 [[package]]
@@ -1301,15 +1368,15 @@ wheels = [
 
 [[package]]
 name = "python-discovery"
-version = "1.1.3"
+version = "1.2.0"
 source = { registry = "https://devpi.acsc.internal/azul/stable/+simple" }
 dependencies = [
     { name = "filelock" },
     { name = "platformdirs" },
 ]
-sdist = { url = "https://devpi.acsc.internal/root/pypi/+f/7ac/ca36e818cd88e/python_discovery-1.1.3.tar.gz", hash = "sha256:7acca36e818cd88e9b2ba03e045ad7e93e1713e29c6bbfba5d90202310b7baa5" }
+sdist = { url = "https://devpi.acsc.internal/root/pypi/+f/7d3/3e350704818b0/python_discovery-1.2.0.tar.gz", hash = "sha256:7d33e350704818b09e3da2bd419d37e21e7c30db6e0977bb438916e06b41b5b1" }
 wheels = [
-    { url = "https://devpi.acsc.internal/root/pypi/+f/90e/795f0121bc845/python_discovery-1.1.3-py3-none-any.whl", hash = "sha256:90e795f0121bc84572e737c9aa9966311b9fde44ffb88a5953b3ec9b31c6945e" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/1e1/08f1bbe2ed0ef/python_discovery-1.2.0-py3-none-any.whl", hash = "sha256:1e108f1bbe2ed0ef089823d28805d5ad32be8e734b86a5f212bf89b71c266e4a" },
 ]
 
 [[package]]
@@ -1559,15 +1626,15 @@ wheels = [
 
 [[package]]
 name = "sentry-sdk"
-version = "2.55.0"
+version = "2.56.0"
 source = { registry = "https://devpi.acsc.internal/azul/stable/+simple" }
 dependencies = [
     { name = "certifi" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://devpi.acsc.internal/root/pypi/+f/377/4c4d8820720ca/sentry_sdk-2.55.0.tar.gz", hash = "sha256:3774c4d8820720ca4101548131b9c162f4c9426eb7f4d24aca453012a7470f69" }
+sdist = { url = "https://devpi.acsc.internal/root/pypi/+f/fda/b72030b696256/sentry_sdk-2.56.0.tar.gz", hash = "sha256:fdab72030b69625665b2eeb9738bdde748ad254e8073085a0ce95382678e8168" }
 wheels = [
-    { url = "https://devpi.acsc.internal/root/pypi/+f/970/26981cb156993/sentry_sdk-2.55.0-py2.py3-none-any.whl", hash = "sha256:97026981cb15699394474a196b88503a393cbc58d182ece0d3abe12b9bd978d4" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/5af/afb744ceb91d2/sentry_sdk-2.56.0-py2.py3-none-any.whl", hash = "sha256:5afafb744ceb91d22f4cc650c6bd048ac6af5f7412dcc6c59305a2e36f4dbc02" },
 ]
 
 [[package]]
@@ -1600,15 +1667,15 @@ sdist = { url = "https://devpi.acsc.internal/root/pypi/+f/255/de1f034652b3e/ssde
 
 [[package]]
 name = "starlette"
-version = "0.52.1"
+version = "1.0.0"
 source = { registry = "https://devpi.acsc.internal/azul/stable/+simple" }
 dependencies = [
     { name = "anyio" },
     { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
-sdist = { url = "https://devpi.acsc.internal/root/pypi/+f/834/edd1b0a231676/starlette-0.52.1.tar.gz", hash = "sha256:834edd1b0a23167694292e94f597773bc3f89f362be6effee198165a35d62933" }
+sdist = { url = "https://devpi.acsc.internal/root/pypi/+f/6a4/beaf1f81bb472/starlette-1.0.0.tar.gz", hash = "sha256:6a4beaf1f81bb472fd19ea9b918b50dc3a77a6f2e190a12954b25e6ed5eea149" }
 wheels = [
-    { url = "https://devpi.acsc.internal/root/pypi/+f/002/9d43eb3d273bc/starlette-0.52.1-py3-none-any.whl", hash = "sha256:0029d43eb3d273bc4f83a08720b4912ea4b071087a3b48db01b7c839f7954d74" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/d3e/c55e0bb321692/starlette-1.0.0-py3-none-any.whl", hash = "sha256:d3ec55e0bb321692d275455ddfd3df75fff145d009685eb40dc91fc66b03d38b" },
 ]
 
 [[package]]
@@ -1622,7 +1689,7 @@ wheels = [
 
 [[package]]
 name = "tox"
-version = "4.50.0"
+version = "4.50.3"
 source = { registry = "https://devpi.acsc.internal/azul/stable/+simple" }
 dependencies = [
     { name = "cachetools" },
@@ -1635,9 +1702,9 @@ dependencies = [
     { name = "tomli-w" },
     { name = "virtualenv" },
 ]
-sdist = { url = "https://devpi.acsc.internal/root/pypi/+f/1d9/c1d678bb5c1a2/tox-4.50.0.tar.gz", hash = "sha256:1d9c1d678bb5c1a2d59c19ae58df7d033578ac1d91c5625aaa62aac792093401" }
+sdist = { url = "https://devpi.acsc.internal/root/pypi/+f/c74/5641de6cc4f19/tox-4.50.3.tar.gz", hash = "sha256:c745641de6cc4f19d066bd9f98c1c25f7affb005b381b7f3694a1f142ea0946b" }
 wheels = [
-    { url = "https://devpi.acsc.internal/root/pypi/+f/fb0/bf14043b8d9d6/tox-4.50.0-py3-none-any.whl", hash = "sha256:fb0bf14043b8d9d6cbe56b322b2860da50f6b898788ebfec621b84396dc948d6" },
+    { url = "https://devpi.acsc.internal/root/pypi/+f/5e7/88a512bfe6f74/tox-4.50.3-py3-none-any.whl", hash = "sha256:5e788a512bfe6f7447e0c8d7c1b666eb2e56e5e676c65717490423bec37d1a07" },
 ]
 
 [[package]]

@@ -86,7 +86,7 @@ class BaseIndexControl:
     }
     w: wrapper.Wrapper
 
-    def __init__(self, *, setting_overrides: dict = None) -> None:
+    def __init__(self, *, setting_overrides: dict | None = None) -> None:
         # If settings overrides are provided, apply the override.
         if setting_overrides:
             self.index_settings: dict = copy.deepcopy(self.index_settings)
@@ -133,7 +133,7 @@ class BaseIndexControl:
             }
 
         # count number of exclusives
-        d["encoded_security"]["num_exclusive"] = len(d["encoded_security"][EXCLUSIVE])
+        d["encoded_security"]["num_exclusive"]: int = len(d["encoded_security"][EXCLUSIVE])
 
     @classmethod
     def _decode_security(cls, d: dict) -> None:

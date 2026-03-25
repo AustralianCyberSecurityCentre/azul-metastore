@@ -19,7 +19,7 @@ def read_source_references(
     term: Optional[str] = None,
 ) -> list[bedr_sources.ReferenceSet]:
     """Return source reference information for the source."""
-    body = {
+    body: dict = {
         "query": {
             "bool": {
                 "filter": [{"term": {"depth": 0}}, {"term": {"source.name": source}}],
@@ -45,14 +45,14 @@ def read_source_references(
     }
 
     if term:
-        body["query"]["bool"]["should"] = [
+        body["query"]["bool"]["should"]: list = [
             {
                 "regexp": {
                     "source.encoded_references.value": {"value": f".*{re.escape(term)}.*", "case_insensitive": True}
                 }
             }
         ]
-        body["query"]["bool"]["minimum_should_match"] = 1
+        body["query"]["bool"]["minimum_should_match"]: int = 1
 
     resp = ctx.man.binary2.w.search(ctx.sd, body=body)
 
@@ -76,10 +76,14 @@ def read_source_references(
 
 
 def read_submissions(
-    ctx: Context, source: str, *, track_source_references: str = None, submission_timestamp: datetime = None
+    ctx: Context,
+    source: str,
+    *,
+    track_source_references: str | None = None,
+    submission_timestamp: datetime | None = None,
 ) -> list[bedr_sources.ReferenceSet]:
     """Return all of a sources submission or a specific submission if a timestamp and tracking id is given."""
-    body = {
+    body: dict = {
         "query": {"bool": {"filter": [{"term": {"depth": 0}}, {"term": {"source.name": source}}]}},
         "aggs": {
             "datas": {

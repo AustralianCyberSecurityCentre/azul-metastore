@@ -1,7 +1,7 @@
 """Queries for finding similar binaries."""
 
 from ctypes import CDLL, create_string_buffer
-from typing import Iterable
+from typing import Generator
 
 import pendulum
 from azul_bedrock.exception_enums import ExceptionCodeEnum
@@ -166,9 +166,7 @@ def read_similar_from_ssdeep(ctx: Context, fuzzy_hash: str, maxCount: int) -> li
     return similarHashes
 
 
-def read_similar_from_features(
-    ctx: Context, sha256: str, *, recalculate: bool = False, only_cache: bool = False
-) -> Iterable[dict]:
+def read_similar_from_features(ctx: Context, sha256: str, *, recalculate: bool = False) -> Generator[dict, None, None]:
     """Find similar entities based on features.
 
     Ignores special parsed values for features like uri host, path, etc.
@@ -180,7 +178,7 @@ def read_similar_from_features(
     """
     sha256 = sha256.lower()
     ret = cache.load_generic(ctx, "similar", sha256, "v2")
-    if (not recalculate and ret) or only_cache:
+    if not recalculate and ret:
         yield ret
         yield ret
         return
@@ -222,7 +220,7 @@ def read_similar_from_features(
     resp = ctx.man.binary2.w.search(ctx.sd, body=body, routing=sha256)
 
     # for each result that the entity has, look for similar documents
-    author_docs: dict[str, dict] = {}
+    author_docs: dict[str, list[dict]] = {}
     author_features: dict[str, set[str]] = {}
     author_feature_vals: dict[str, set[tuple[str, str]]] = {}
     num_fvals = 0

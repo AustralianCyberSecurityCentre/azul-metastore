@@ -1,6 +1,6 @@
 """Queries to assist with dataless submissions."""
 
-from typing import Iterable
+from typing import Generator
 
 from azul_bedrock import models_network as azm
 
@@ -11,7 +11,7 @@ from azul_metastore.encoders import binary2 as rc
 def stream_dispatcher_events_for_binary(
     ctx: Context,
     sha256: str,
-) -> Iterable[dict]:
+) -> Generator[dict, None, None]:
     """Read binary information that has enough info to resubmit under a different entry.
 
     This is designed for azul-restapi-content to have enough information to

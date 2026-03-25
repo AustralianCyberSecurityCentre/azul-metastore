@@ -4,6 +4,7 @@ import logging
 
 from azul_bedrock import models_network as azm
 from azul_bedrock import models_restapi
+from azul_bedrock.models_restapi import PathNode
 from azul_bedrock.models_restapi import binaries as bedr_binaries
 
 from azul_metastore.context import Context
@@ -60,8 +61,8 @@ def read_children(ctx: Context, sha256: str, detail: bool = False, bucket_size=1
 
 def _read_nearby_find_children(sha256s: set[str], index_alias: str, max_nodes: int) -> list[dict]:
     """Generate the body of an msearch query to get all children for the supplied sha256s."""
-    sha256s = list(sha256s)
-    if not sha256s:
+    sha256s_list = list(sha256s)
+    if not sha256s_list:
         return []
     queries = []
     body = {
@@ -79,14 +80,14 @@ def _read_nearby_find_children(sha256s: set[str], index_alias: str, max_nodes: i
                         }
                     },
                     # get child documents - matching parent sha256
-                    {"terms": {"parent.sha256": sha256s}},
+                    {"terms": {"parent.sha256": sha256s_list}},
                 ],
             }
         },
         "aggs": {
             # group by parent sha256
             "RELATED": {
-                "terms": {"field": "parent.sha256", "size": len(sha256s)},
+                "terms": {"field": "parent.sha256", "size": len(sha256s_list)},
                 "aggs": {
                     # group by child sha256
                     "RELATED": {
@@ -114,8 +115,8 @@ def _read_nearby_find_children(sha256s: set[str], index_alias: str, max_nodes: i
 
 def _read_nearby_find_parents(sha256s: set[str], index_alias: str, max_nodes: int) -> list[dict]:
     """Generate the body of an msearch query to get all parents for the supplied sha256s."""
-    sha256s = list(sha256s)
-    if not sha256s:
+    sha256s_list = list(sha256s)
+    if not sha256s_list:
         return []
     queries = []
     body = {
@@ -134,14 +135,14 @@ def _read_nearby_find_parents(sha256s: set[str], index_alias: str, max_nodes: in
                         }
                     },
                     # get child documents - matching sha256
-                    {"terms": {"sha256": sha256s}},
+                    {"terms": {"sha256": sha256s_list}},
                 ],
             }
         },
         "aggs": {
             # group by child sha256
             "RELATED": {
-                "terms": {"field": "sha256", "size": len(sha256s)},
+                "terms": {"field": "sha256", "size": len(sha256s_list)},
                 "aggs": {
                     # group by parent sha256
                     "RELATED": {
@@ -217,7 +218,7 @@ def _read_nearby_process_resp(
                     tmp_link = models_restapi.ReadNearbyLink(
                         id=sha256_author_action + source.name,  # Might not make sense for parent case
                         child=child_node["sha256"],
-                        child_node=child_node,
+                        child_node=PathNode.model_validate(child_node),
                         source=source,
                     )
                     # If depth is 0 this is a submission to a source.
@@ -240,7 +241,7 @@ def _read_nearby_process_resp(
                 tmp_link = models_restapi.ReadNearbyLink(
                     id=sha256_author_action + "." + parent_node["encoded"]["sha256_author_action"],
                     child=child_node["sha256"],
-                    child_node=child_node,
+                    child_node=PathNode.model_validate(child_node),
                     parent=parent_node["sha256"],
                 )
                 if raw["sha256"] in in_parents:
@@ -280,11 +281,11 @@ def read_nearby(
     """
     sha256 = sha256.lower()
     # Do an initial search for all children and parents for the starting node.
-    searches = _read_nearby_find_children([sha256], ctx.man.binary2.w.alias, max_nodes=30)
-    searches += _read_nearby_find_parents([sha256], ctx.man.binary2.w.alias, max_nodes=30)
+    searches = _read_nearby_find_children({sha256}, ctx.man.binary2.w.alias, max_nodes=30)
+    searches += _read_nearby_find_parents({sha256}, ctx.man.binary2.w.alias, max_nodes=30)
     resp = ctx.man.binary2.w.msearch(ctx.sd, searches=searches)
     unique_links, parents, children, cousins = _read_nearby_process_resp(
-        resp, in_parents=[sha256], in_children=[sha256]
+        resp, in_parents={sha256}, in_children={sha256}
     )
     logger.debug(f"nearby initial - next query for {len(parents)=} {len(children)=}")
 

@@ -35,7 +35,7 @@ def feature_count_tags(ctx: context.Context, features: list[str]) -> list[dict]:
 
 
 def count_values_in_features(
-    ctx: context.Context, features: list[str], *, skip_count=False, filters: list[dict] = None
+    ctx: context.Context, features: list[str], *, skip_count=False, filters: list[dict] | None = None
 ) -> list[models_restapi.FeatureMulticountRet]:
     """Count features."""
     category = "feature.values"
@@ -72,7 +72,7 @@ def count_values_in_features(
 
 
 def count_binaries_with_feature_names(
-    ctx: context.Context, features: list[str], *, skip_count=False, filters: list[dict] = None
+    ctx: context.Context, features: list[str], *, skip_count=False, filters: list[dict] | None = None
 ) -> list[models_restapi.FeatureMulticountRet]:
     """Count features."""
     category = "feature.entities"
@@ -118,7 +118,7 @@ def count_binaries_with_feature_values(
     features: list[models_restapi.ValueCountItem],
     *,
     skip_count=False,
-    filters: list[dict] = None,
+    filters: list[dict] | None = None,
 ) -> list[models_restapi.ValueCountRet]:
     """Return counts for all feature values required."""
     category = "feature_value.entities"
@@ -130,7 +130,7 @@ def count_binaries_with_feature_values(
         f"{x.name}.{md5(x.value)}": models_restapi.ValueCountRet(entities=-1, **x.model_dump()) for x in features
     }
     # read from cache
-    counted = cache.load_counts(ctx, category, uniq, feature_values.keys())
+    counted = cache.load_counts(ctx, category, uniq, list(feature_values.keys()))
     # list of things not in the cache that we need to calculate manually
     missing_ids = list(set(feature_values.keys()).difference(counted.keys()))
     missing_items = {x: y for x, y in feature_values.items() if x in missing_ids}
@@ -177,7 +177,7 @@ def count_binaries_with_part_values(
     parts: list[models_restapi.ValuePartCountItem],
     *,
     skip_count=False,
-    filters: list[dict] = None,
+    filters: list[dict] | None = None,
 ) -> list[models_restapi.ValuePartCountRet]:
     """Return counts for all feature parts required."""
     category = "feature_derived.entities"
@@ -189,7 +189,7 @@ def count_binaries_with_part_values(
         f"{x.part}.{md5(x.value)}": models_restapi.ValuePartCountRet(entities=-1, **x.model_dump()) for x in parts
     }
     # read from cache
-    counted = cache.load_counts(ctx, category, uniq, featureparts.keys())
+    counted = cache.load_counts(ctx, category, uniq, list(featureparts.keys()))
     # list of things not in the cache that we need to calculate manually
     missing_ids = list(set(featureparts.keys()).difference(counted.keys()))
     missing_items = {x: y for x, y in featureparts.items() if x in missing_ids}
@@ -240,7 +240,7 @@ def find_feature_values(
     term: str = "",
     sort_asc: bool = True,
     case_insensitive: bool = False,
-    filters: list[dict] = None,
+    filters: list[dict] | None = None,
     after: str | None = None,
 ) -> models_restapi.ReadFeatureValues:
     """Search for a feature's value matching the provided term.
@@ -276,7 +276,7 @@ def find_feature_values(
     ftype = None
     retvals_final: list[models_restapi.ReadFeatureValuesValue] = []
     while len(retvals_final) < num_values and after_key_value is not None:
-        body = {
+        body: dict = {
             "size": 1,
             "_source": ["features"],
             "query": {
@@ -322,7 +322,9 @@ def find_feature_values(
             body["aggs"]["COMPOSITE"]["composite"]["after"] = json_loaded_after
         else:
             # first request so count expected number of records
-            body["aggs"]["TOTAL"] = {"cardinality": {"field": f"features_map.{feature}", "precision_threshold": 1000}}
+            body["aggs"]["TOTAL"]: dict = {
+                "cardinality": {"field": f"features_map.{feature}", "precision_threshold": 1000}
+            }
 
         resp = ctx.man.binary2.w.search(ctx.sd, body=body)
 
