@@ -4,6 +4,8 @@ import logging
 import re
 from typing import AsyncIterable
 
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import BaseAzulException
 from azul_bedrock.models_restapi import binaries_data as bedr_bdata
 
 from azul_metastore.common import data_common
@@ -26,7 +28,9 @@ async def get_strings(
     return matching strings, total amount of content read, and True if there are more strings available.
     """
     if strings_to_read_before_stopping <= 0:
-        return []
+        raise BaseAzulException(
+            internal=ExceptionCodeEnum.MetastoreInvalidGetStringsQuantity,
+        )
     # regex taken from https://github.com/mandiant/flare-floss/blob/master/floss/strings.py (Apache License 2.0)
     ASCII_BYTE = rb" !\"#\$%&\'\(\)\*\+,-\./0123456789:;<=>\?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\[\]\^_`abcdefghijklmnopqrstuvwxyz\{\|\}\\\~\t"  # noqa: E501
     ASCII_RE = re.compile(rb"([%s]{%d,})" % (ASCII_BYTE, min_length))

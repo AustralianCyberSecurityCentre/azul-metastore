@@ -107,7 +107,7 @@ def submit(
     relationship: dict,
     submit_settings: dict[str, str],
     timestamp: str,
-    filename: str,
+    filename: str | None,
     ctx: context.Context,
     priv_ctx: context.Context,
     expedite: bool,
@@ -130,15 +130,15 @@ def submit(
             child_history=azm.PathNode(
                 author=author,
                 action=azm.BinaryAction.Extracted,
-                sha256=entity.sha256,
+                sha256=entity.sha256 if entity.sha256 else "",
                 filename=filename,
                 size=entity.size,
                 file_format=entity.file_format,
                 relationship=relationship,
-                timestamp=timestamp,
+                timestamp=timestamp,  # type: ignore
             ),
         ),
-        timestamp=timestamp,
+        timestamp=timestamp,  # type: ignore
     )
 
     # send to dispatcher and get enhanced copy of events

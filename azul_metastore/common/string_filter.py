@@ -36,7 +36,7 @@ def call_string_filter(
 
 def extract_string_and_offset(
     searchResult: list[models_restapi.SearchResult],
-) -> list[dict[str, int]]:
+) -> list[dict[str, str | int]]:
     """Extract the string and offset from each SearchResult.strings."""
     filtered_results = [{"string": sr.string, "offset": sr.offset} for sr in searchResult]
     return filtered_results

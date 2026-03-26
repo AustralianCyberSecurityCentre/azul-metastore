@@ -46,7 +46,7 @@ def find_all_binaries(
     # FUTURE could use PIT point-in-time to stabilise these results.
     #  Right now, if new docs enter the system after the first search, they may
     #  be included in results depending on timing.
-    body = {
+    body: dict = {
         "query": {
             "bool": {
                 "filter": [{"has_child": {"type": "metadata", "query": {"exists": {"field": "source.name"}}}}],
@@ -74,7 +74,7 @@ def find_all_binaries(
         body["aggs"]["COMPOSITE"]["composite"]["after"] = json_loaded_after
     else:
         # first request so count expected number of records
-        body["aggs"]["TOTAL"] = {"cardinality": {"field": "_id", "precision_threshold": 1000}}
+        body["aggs"]["TOTAL"]: dict = {"cardinality": {"field": "_id", "precision_threshold": 1000}}
 
     if term is not None:
         # Transform an Azul free-text search expression to an OpenSearch query
@@ -142,7 +142,6 @@ def find_all_family_binaries(
     # FUTURE could use PIT point-in-time to stabilise these results.
     #  Right now, if new docs enter the system after the first search, they may
     #  be included in results depending on timing.
-    body = None
     if not sha256:
         raise BaseAzulException(internal=ExceptionCodeEnum.MetastoreSha256NotProvidedForFindFamily)
     sha256 = sha256.lower()
@@ -151,7 +150,7 @@ def find_all_family_binaries(
     sha256_field = "parent.sha256" if is_parent else "sha256"
     sha256_term = "sha256" if is_parent else "parent.sha256"
 
-    body = {
+    body: dict = {
         "track_total_hits": True,
         "size": 0,
         "query": {
@@ -191,7 +190,7 @@ def find_all_family_binaries(
         body["aggs"]["FAMILY"]["composite"]["after"] = json_loaded_after
     else:
         # first request so count expected number of records
-        body["aggs"]["TOTAL"] = {"cardinality": {"field": sha256_field, "precision_threshold": 1000}}
+        body["aggs"]["TOTAL"]: dict = {"cardinality": {"field": sha256_field, "precision_threshold": 1000}}
 
     # perform search
     resp = ctx.man.binary2.w.search(ctx.sd, body=body)

@@ -56,7 +56,7 @@ def create_plugin(ctx: Context, raw_events: list[azm.PluginEvent]) -> tuple[list
             )
             # Check if the existing data is newer than the data to be added
             # If it is keep the old data and drop the new data.
-            if pendulum.parse(results[key_to_add]["timestamp"]) >= pendulum.parse(encoded["timestamp"]):
+            if pendulum.parse(results[key_to_add]["timestamp"]) >= pendulum.parse(encoded["timestamp"]):  # type: ignore
                 continue
         results[key_to_add] = encoded
     # No docs to go to opensearch.
@@ -197,7 +197,9 @@ def get_all_plugin_latest_activity(ctx: Context):
     for plugin in get_all_plugins(ctx):
         new_result = models_restapi.PluginStatusSummary.model_validate(plugin.model_dump())
         # Construct plugin d_name which matches the d.author field in OpenSearch
-        d_name = new_result.newest_version.name + ".plugin." + new_result.newest_version.version
+        d_name = ".plugin-with-no-newest-version."
+        if new_result.newest_version:
+            d_name = f"{new_result.newest_version.name}.plugin.{new_result.newest_version.version}"
         # Insert last_completion information
         if d_name in recent:
             new_result.last_completion = recent[d_name]
@@ -343,7 +345,7 @@ def get_raw_feature_names(ctx: Context) -> list[str]:
     return sorted(set(basic + loaded))
 
 
-def find_features(ctx: Context, *, filters: list[dict] = None) -> list[models_restapi.Feature]:
+def find_features(ctx: Context, *, filters: list[dict] | None = None) -> list[models_restapi.Feature]:
     """Find all features in metastore, and returns approximate counts."""
     if not filters:
         filters = []

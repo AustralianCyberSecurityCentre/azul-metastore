@@ -6,10 +6,13 @@ from azul_bedrock import dispatcher
 from azul_security import security
 
 from azul_metastore.common import memcache
-from azul_metastore.context import Context
+from azul_metastore.common.search_data import SearchData
+from azul_metastore.context import BaseContext, Context
 from tests.support import basic_test, gen
-
+from azul_bedrock.datastore import Credentials, CredentialFormat
 from . import system
+
+from azul_bedrock import models_auth
 
 
 class BaseUnitTestCase(basic_test.BasicTest):
@@ -87,7 +90,13 @@ class BaseUnitTestCase(basic_test.BasicTest):
                 author_version="1",
                 deployment_key="",
             ),
-            man=None,
+            man=None,  # type: ignore
+            sd=SearchData(
+                credentials=Credentials(format=CredentialFormat.none, unique="unique-test-creds"),
+                security_exclude=[],
+                security_include=[],
+            ),
+            user_info=models_auth.UserInfo(unique_id="unique_test_user_id"),
         )
 
 

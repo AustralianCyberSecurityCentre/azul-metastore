@@ -9,7 +9,7 @@ from azul_bedrock.datastore import get_user_account
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException
 from azul_bedrock.exceptions_security import SecurityException
-from azul_bedrock.models_restapi.basic import UserAccess
+from azul_bedrock.models_restapi.basic import UserAccess, UserSecurity
 from azul_security import admin
 from azul_security import security as sec
 from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT
@@ -25,7 +25,7 @@ def _get_user_access(sd: search_data.SearchData, azsec: sec.Security) -> UserAcc
     This information is returned with every restapi query.
     It is also used to determine access permissions of opensearch-cached data like counts of binaries.
     """
-    ret = UserAccess()
+    ret = UserAccess(security=UserSecurity())
     s = settings.get()
     if s.no_security_plugin_compatibility:
         # security is disabled so all access granted
@@ -63,24 +63,18 @@ def _get_user_access(sd: search_data.SearchData, azsec: sec.Security) -> UserAcc
     return ret
 
 
-@dataclass
-class Context:
+@dataclass(kw_only=True)
+class BaseContext:
     """Helper context for interacting with metastore. used to maintain state."""
 
     azsec: sec.Security
     man: manager.Manager
 
-    user_info: models_auth.UserInfo | None = None
-    sd: search_data.SearchData | None = None
-    dispatcher: b_dispatcher.DispatcherAPI | None = None
+    dispatcher: b_dispatcher.DispatcherAPI
 
-    def refresh(self):
-        """Refresh the searchable docs for all indices in partition."""
-        self.sd.es().indices.refresh(index=".".join(["azul", "*"]))
-
-    def copy_with(self, user_info: models_auth.UserInfo, sd: search_data.SearchData, **kwargs):
+    def copy_with(self, user_info: models_auth.UserInfo, sd: search_data.SearchData, **kwargs) -> "Context":
         """Copy the object using a new search data arg."""
-        return self.__class__(
+        return Context(
             azsec=self.azsec,
             man=self.man,
             user_info=user_info,
@@ -88,6 +82,18 @@ class Context:
             dispatcher=self.dispatcher,
             **kwargs,
         )
+
+
+@dataclass(kw_only=True)
+class Context(BaseContext):
+    """Helper context for interacting with metastore. used to maintain state."""
+
+    sd: search_data.SearchData
+    user_info: models_auth.UserInfo
+
+    def refresh(self):
+        """Refresh the searchable docs for all indices in partition."""
+        self.sd.es().indices.refresh(index=".".join(["azul", "*"]))
 
     def clear_state(self):
         """Clear any state on the context."""
@@ -123,11 +129,11 @@ class Context:
             ) from None
 
 
-def get_general_context() -> Context:
+def get_general_context() -> BaseContext:
     """Get a generic context. opensearch object must be loaded before this can be used for querying."""
     s = settings.get()
 
-    return Context(
+    return BaseContext(
         azsec=sec.Security(),
         man=manager.Manager(),
         dispatcher=b_dispatcher.DispatcherAPI(

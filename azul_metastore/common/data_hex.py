@@ -3,6 +3,8 @@
 import logging
 from typing import AsyncIterable, ByteString
 
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import BaseAzulException
 from azul_bedrock.models_restapi import binaries_data as bedr_bdata
 
 from azul_metastore.common import data_common
@@ -24,7 +26,9 @@ async def get_hex_hits(
     hits = []
 
     if max_results <= 0:
-        return hits
+        raise BaseAzulException(
+            internal=ExceptionCodeEnum.MetastoreInvalidGetHexQuantity,
+        )
 
     seen_offsets: set[int] = set()
 

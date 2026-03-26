@@ -33,7 +33,7 @@ def purge_submission(
         raise ApiException(
             status_code=HTTP_403_FORBIDDEN,
             internal=ExceptionCodeEnum.MetastoreUserNotAllowedToPurge,
-            ref=f"user '{ctx.user_info.username}' not superuser",
+            ref=f"user '{ctx.user_info}' not superuser",
             parameters={"username": ctx.user_info.username},
         )
     try:

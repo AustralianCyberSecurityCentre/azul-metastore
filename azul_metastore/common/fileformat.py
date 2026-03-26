@@ -99,17 +99,17 @@ async def async_extract_neutered(
         return DispatcherAPI.async_convert_to_async_iterable(data), fname
     except malpz.MetadataException:
         pass
-    return data, fname
+    return None, fname
 
 
-def extract_archive(istream: io.BytesIO, password: str = None) -> Iterable[Tuple[UploadFile, Optional[str]]]:
+def extract_archive(istream: io.BytesIO, password: str | None = None) -> Iterable[Tuple[UploadFile, Optional[str]]]:
     """Handle extracting data from zip archive file format."""
     extracted = False
-    password = password.encode("utf8") if password else None
+    encoded_password = password.encode("utf8") if password else None
     istream.seek(0)
     try:
         with pyzipper.AESZipFile(istream) as zpf:
-            zpf.setpassword(password)
+            zpf.setpassword(encoded_password)
             namelist = list(zpf.namelist())
             if len(namelist) > MAX_BUNDLED_FILES:
                 raise exceptions_metastore.ExtractException(

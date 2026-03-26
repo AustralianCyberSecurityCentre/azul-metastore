@@ -148,7 +148,7 @@ def create_feature_value_tag(
             parameters={"security": security},
         ) from None
 
-    tag = dict(
+    tag_dict = dict(
         security=security,
         timestamp=pendulum.now().isoformat(),
         feature_name=feature,
@@ -156,7 +156,7 @@ def create_feature_value_tag(
         tag=tag,
     )
     try:
-        annotation.create_feature_value_tags(qr.writer, ctx.user_info.username, [tag])
+        annotation.create_feature_value_tags(qr.writer, ctx.user_info.username, [tag_dict])
         qr.set_security_headers(ctx, resp)
     except InvalidAnnotation as e:
         e = exceptions_metastore.convert_exception_to_api_exception(
@@ -184,7 +184,10 @@ def delete_feature_value_tag(
 
 @router.get("/v0/features", response_model=qr.gr(bedr_features.Features), **qr.kw)
 def find_features(
-    resp: Response, author: str = Query(""), author_version: str = Query(""), ctx: context.Context = Depends(qr.ctx)
+    resp: Response,
+    author: str = Query(""),
+    author_version: str = Query(""),
+    ctx: context.Context = Depends(qr.ctx),
 ):
     """Return features present in system."""
     filters = (

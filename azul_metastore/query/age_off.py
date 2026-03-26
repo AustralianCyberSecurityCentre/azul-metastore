@@ -41,7 +41,7 @@ def _should_delete(expire_events_ms: int, most_recent: str) -> bool:
     # get oldest timestamp we need to keep
     cutoff = _cutoff(expire_events_ms)
     # parse the timestamp
-    most_recent_date = pendulum.parse(most_recent).in_tz(pendulum.UTC)
+    most_recent_date = pendulum.parse(most_recent).in_tz(pendulum.UTC)  # type: ignore
     # if the most recent entry in the index is newer than the cutoff date, should delete
     return most_recent_date < cutoff
 

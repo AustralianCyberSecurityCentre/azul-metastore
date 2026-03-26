@@ -4,13 +4,14 @@ import itertools
 import logging
 from typing import Optional
 
+from azul_bedrock import exceptions_metastore
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException
 from azul_bedrock.models_restapi import binaries as bedr_binaries
 from azul_bedrock.models_restapi.binaries_auto_complete import AutocompleteContext
 from lark import UnexpectedInput
 
-from azul_metastore.common import search_query, wrapper
+from azul_metastore.common import search_query
 from azul_metastore.common.search_query import QueryExtraInfo, az_query_to_opensearch
 from azul_metastore.common.search_query_parser import parse
 from azul_metastore.context import Context
@@ -124,7 +125,7 @@ def _summarise_hashes(
             tmp = [x for x in vals if x]
             return tmp[0] if tmp else None
 
-        ret = {
+        ret: dict = {
             "exists": any([x["exists"] for x in summaries]),
             "has_content": any([x["has_content"] for x in summaries]),
             "sha256": sha256,
@@ -161,7 +162,7 @@ def _summarise_hashes(
             binaries[k] = {"exists": False, "has_content": False}
 
 
-def _wrap_search_has_child(query: list[dict], include_highlights: bool) -> dict:
+def _wrap_search_has_child(query: list[dict], include_highlights: bool) -> list:
     """Wraps a query in appropriate has_child query with highlighting."""
     counter = 0
 
@@ -235,7 +236,7 @@ def find_binaries(
     """
     MAX_ALLOWED_BINARIES = 1000
     if max_binaries > MAX_ALLOWED_BINARIES:
-        raise wrapper.exceptions_metastore.InvalidSearchException(
+        raise exceptions_metastore.InvalidSearchException(
             internal=ExceptionCodeEnum.MetastoreBinaryFindTooManyBinariesRequested,
             parameters={"requested_binaries": max_binaries, "max_allowed_binaries": MAX_ALLOWED_BINARIES},
         )
@@ -245,7 +246,7 @@ def find_binaries(
     asc_or_desc = "asc" if sort_asc else "desc"
 
     # begin constructing main search object
-    body = {
+    body: dict = {
         "query": {
             "bool": {
                 # ensure we can access a child doc with submission info
@@ -267,7 +268,7 @@ def find_binaries(
         sort == bedr_binaries.FindBinariesSortEnum.source_timestamp
         or sort == bedr_binaries.FindBinariesSortEnum.timestamp
     ):
-        body["query"]["bool"]["must"] = {
+        body["query"]["bool"]["must"]: dict = {
             "has_child": {
                 "type": "metadata",
                 "query": {
@@ -276,7 +277,7 @@ def find_binaries(
                             # Painless script that converts the current documents datetime field (or 0 if it's unset)
                             # (probably timestamp or source.timestamp) and converts it to a numeric value for scoring.
                             # This allows sorting by the child date fields via score sorting.
-                            "script": f"if(doc['{sort}'].size() != 0){{doc['{sort}'].value.toInstant().toEpochMilli()}} else{{0}}"  # noqa: E501
+                            "script": f"if(doc['{sort.value}'].size() != 0){{doc['{sort.value}'].value.toInstant().toEpochMilli()}} else{{0}}"  # noqa: E501
                         }
                     }
                 },
@@ -429,7 +430,7 @@ def find_binaries(
         found_binaries = list(binary_info.values())[:max_binaries]
 
     # assemble final result object
-    ret = {"items": found_binaries}
+    ret: dict = {"items": found_binaries}
     if count_binaries:
         ret["items_count"] = resp["hits"]["total"]["value"]
     return bedr_binaries.EntityFind(**ret)

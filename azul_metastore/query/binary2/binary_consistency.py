@@ -8,7 +8,7 @@ from azul_metastore import context
 from azul_metastore.common import utils
 
 
-def get_dispatcher_datastreams(ctx: context.Context, sha256: str) -> Generator[tuple[str, str, str], None, None]:
+def get_dispatcher_datastreams(ctx: context.Context, sha256: str) -> Iterable[tuple[str, azm.DataLabel, str]]:
     """Return source, label and sha256 for every datastream associated with the binary."""
     body = {
         "query": {
@@ -52,7 +52,7 @@ def get_dispatcher_datastreams(ctx: context.Context, sha256: str) -> Generator[t
         ]
 
     # yield every combination of source and sha256 for dispatcher object store operations
-    return [(source, label, sha256) for source in sources for (label, sha256) in datastreams]
+    return [(source, azm.DataLabel(label), sha256) for source in sources for (label, sha256) in datastreams]
 
 
 def ensure_valid_binaries(ctx: context.Context) -> int:
@@ -116,11 +116,11 @@ class LinkReport:
 
 def ensure_valid_links(
     ctx: context.Context,
-    sha256s: Iterable[str] | None = None,
+    sha256s: Iterable[str],
     *,
     recursion: int = 20,
     report: LinkReport | None = None,
-) -> Generator[tuple[str, str, str], None, None]:
+) -> Generator[str, None, None]:
     """This function will ensure that links to supplied parent binaries are 'consistent'.
 
     Consistent is defined as 'no children have links to non-existent parents'.

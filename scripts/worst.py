@@ -40,7 +40,7 @@ from azul_metastore.restapi.quick import qr  # noqa: E402
 from tests.support import gen  # noqa: E402
 
 # Aligning this with the remote environment.
-gen.g1_1, gen.g2_1, gen.g3_1, gen.g1_12, gen.g2_12, gen.g3_12 = (
+gen.g1_1, gen.g2_1, gen.g3_1, gen.g1_12, gen.g2_12, gen.g3_12 = (  # ty: ignore
     "LESS OFFICIAL TLP:CLEAR",
     "OFFICIAL REL:APPLE",
     "OFFICIAL MOD1 REL:APPLE",

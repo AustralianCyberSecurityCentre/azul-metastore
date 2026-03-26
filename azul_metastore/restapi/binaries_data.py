@@ -5,7 +5,7 @@ import itertools
 import logging
 import re
 import time
-from typing import AsyncIterable, Callable, Generator
+from typing import AsyncIterable, Awaitable, Callable, Generator
 
 import pyzipper
 from azul_bedrock.exception_enums import ExceptionCodeEnum
@@ -216,11 +216,12 @@ async def download_binary_raw(
         attachment_type = get_attachment_type(stream_data.file_format, sha256, stream)
         if not attachment_type:
             # we currently block any streams that don't match whitelisted types
+            params: dict = {"file_format": stream_data.file_format}
             raise ApiException(
                 status_code=HTTP_400_BAD_REQUEST,
                 ref="Stream file type not allowed for direct download",
                 internal=ExceptionCodeEnum.MetastoreDownloadingBadStreamType,
-                parameters={"file_format": stream_data.file_format},
+                parameters=params,
             )
 
         asyncIterable = await ctx.dispatcher.async_get_binary(source, stream_data.label, stream)
@@ -370,7 +371,9 @@ async def _handle_search_query(
     max_bytes_to_read: int | None,
     max_results: int,
     ctx: context.Context,
-    provider: Callable[[bytes, int], tuple[list[bedr_binaries_data.SearchResult], int, bool]],
+    provider: Callable[
+        [AsyncIterable[bytes], int], Awaitable[tuple[list[bedr_binaries_data.SearchResult], int, bool]]
+    ],
     is_ai_filtering: bool = False,
 ) -> bedr_binaries_data.BinaryStrings:
     """Generic handler that searches for content in a file with a given search engine."""
@@ -439,7 +442,7 @@ async def get_strings(
         description="How many bytes to search for, if this is not set, "
         + "returns 10MB of the file, if it set to larger than the file the whole file will be searched.",
     ),
-    take_n_strings: int = Query(1000, ge=0, description="How many strings to return"),
+    take_n_strings: int = Query(1000, gt=0, description="How many strings to return"),
     filter: str | None = Query(None, description="Case-insensitive search string to filter strings with"),
     regex: str | None = Query(None, description="Regex pattern to search strings with"),
     ctx: context.Context = Depends(qr.ctx),
@@ -459,11 +462,12 @@ async def get_strings(
         if regex is not None:
             exported_regex = re.compile(regex)
     except Exception:
+        params: dict = {"regex": regex}
         raise ApiException(
             status_code=HTTP_400_BAD_REQUEST,
             ref="Invalid regex pattern",
             internal=ExceptionCodeEnum.MetastoreInvalidStringsRegexProvided,
-            parameters={"regex": regex},
+            parameters=params,
         ) from None
 
     # If AI string filter is enabled; call it to add file type labels to strings

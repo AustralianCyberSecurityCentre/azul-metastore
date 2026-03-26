@@ -40,7 +40,11 @@ def _parse_feature_value(value: str, _type: str) -> dict:
     }
 
     if _type not in cases.keys():
-        raise exceptions_bedrock.BaseAzulException(f"unhandled type: {_type} with value {value}")
+        raise exceptions_bedrock.BaseAzulException(
+            internal=ExceptionCodeEnum.MetastoreFailedToParseFeatureValues,
+            ref=f"unhandled type: {_type} with value {value}",
+            parameters={"type": _type, "value": value},
+        )
 
     return cases[_type](value)
 
