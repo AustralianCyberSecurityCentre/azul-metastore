@@ -11,7 +11,7 @@ from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
 from azul_bedrock.exceptions_security import SecurityAccessException, SecurityParseException
 from azul_bedrock.models_restapi import binaries_data as bedr_bdata
-from starlette.datastructures import UploadFile
+from fastapi import UploadFile
 from starlette.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND,

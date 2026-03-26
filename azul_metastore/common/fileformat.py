@@ -12,8 +12,8 @@ from azul_bedrock.dispatcher import DispatcherAPI
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException
 from cart import cart
+from fastapi import UploadFile
 from pydantic import ByteSize
-from starlette.datastructures import UploadFile
 from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT
 
 logger = logging.getLogger(__name__)
