@@ -59,7 +59,9 @@ def _log_high_level_submission(
 ):
     """Log uploading files to various sources."""
     for submitted_data in high_level_sub_response:
-        ctx.man.s.log_to_loki(ctx.user_info.username, request, submitted_data.sha256, references=references, filename=filename)
+        ctx.man.s.log_to_loki(
+            ctx.user_info.username, request, submitted_data.sha256, references=references, filename=filename
+        )
 
 
 def validate_json(field_name: str, field_value: str | None):
@@ -271,7 +273,9 @@ async def submit_binary_to_source(
             augstreams=augstreams,
             expedite=refresh,
         )
-        _log_high_level_submission(request, ctx, result, references=references.references_as_dict, filename=commonMeta.filename)
+        _log_high_level_submission(
+            request, ctx, result, references=references.references_as_dict, filename=commonMeta.filename
+        )
         return result
     except (HTTPException, ApiException) as e:
         qr.set_security_headers(ctx, resp, security, ex=e)
@@ -341,7 +345,9 @@ async def submit_binary_to_source_dataless(
             augstreams=augstreams,
             expedite=refresh,
         )
-        _log_high_level_submission(request, ctx, result, references=references.references_as_dict, filename=commonMeta.filename)
+        _log_high_level_submission(
+            request, ctx, result, references=references.references_as_dict, filename=commonMeta.filename
+        )
         return result
     except (HTTPException, ApiException) as e:
         qr.set_security_headers(ctx, resp, security, ex=e)
@@ -399,7 +405,11 @@ async def submit_child_binary_to_source(
             expedite=refresh,
         )
         _log_high_level_submission(
-            request, ctx, result, references={"parent_sha256": parent_sha256, **relationship.relationship_as_dict}, filename=commonMeta.filename
+            request,
+            ctx,
+            result,
+            references={"parent_sha256": parent_sha256, **relationship.relationship_as_dict},
+            filename=commonMeta.filename,
         )
         return result
     except (HTTPException, ApiException) as e:
@@ -454,7 +464,11 @@ async def submit_child_binary_to_source_dataless(
             expedite=refresh,
         )
         _log_high_level_submission(
-            request, ctx, result, references={"parent_sha256": parent_sha256, **relationship.relationship_as_dict}, filename=commonMeta.filename
+            request,
+            ctx,
+            result,
+            references={"parent_sha256": parent_sha256, **relationship.relationship_as_dict},
+            filename=commonMeta.filename,
         )
         return result
     except (HTTPException, ApiException) as e:
