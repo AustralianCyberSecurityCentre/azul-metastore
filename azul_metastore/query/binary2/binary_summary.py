@@ -19,14 +19,14 @@ logger = logging.getLogger(__name__)
 def read(
     ctx: context.Context,
     sha256: str,
-    details: list[Detail] = None,
+    details: list[Detail] | None = None,
     author: str | None = None,
     bucket_size=100,
 ) -> models_restapi.BinaryMetadata:
     """Read all critical metadata for a given binary."""
     if not details:
         # default to returning all detail information
-        details = [x.value for x in Detail]
+        details: list[Detail] = [x for x in Detail]
 
     sha256 = sha256.lower()
     ret = _read_within(ctx, sha256, details=details, bucket_size=bucket_size, author=author)
@@ -50,20 +50,20 @@ def read(
 def _read_within(
     ctx: context.Context,
     sha256: str,
-    details: list[models_restapi.BinaryMetadataDetail] = None,
+    details: list[models_restapi.BinaryMetadataDetail] | None = None,
     author: str | None = None,
     bucket_size=100,
 ) -> models_restapi.BinaryMetadata:
     """Return plugin information about a specific binary."""
     if not details:
         # default to returning all detail information
-        details = [x.value for x in Detail]
+        details = [x for x in Detail]
 
     if Detail.feature_tags in details:
         # requires features to enrich tags on
         details.append(Detail.features)
 
-    body = {
+    body: dict = {
         # usually caps at 10k but we want the full count when detail is requested
         "track_total_hits": True if Detail.total_hits in details else 10000,
         # don't want individual docs

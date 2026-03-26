@@ -73,7 +73,7 @@ def find_binaries(
         data = binary_find.find_binaries(
             ctx,
             term=term,
-            sort=sort.value,
+            sort=sort,
             sort_asc=sort_asc,
             max_binaries=max_entities,
             count_binaries=count_entities,
@@ -223,7 +223,7 @@ def find_autocomplete(resp: Response, term: str, offset: int, ctx: context.Conte
     keys = binary_find.generate_autocomplete(term, offset)
     # although this looks like it doesn't do anything, it actually works around the
     # default dropping behaviour of unset values during the pydantic dump
-    keys.type = keys.type
+    keys.type = keys.type  # type: ignore
     return qr.fr(ctx, keys, resp)
 
 
@@ -426,7 +426,7 @@ def create_tag_on_binary(
 
     qr.set_security_headers(ctx, resp, security)
 
-    tag = dict(
+    tag_dict = dict(
         security=security,
         timestamp=pendulum.now().isoformat(),
         tag=tag,
@@ -434,7 +434,7 @@ def create_tag_on_binary(
     )
 
     try:
-        annotation.create_binary_tags(qr.writer, ctx.user_info.username, [tag])
+        annotation.create_binary_tags(qr.writer, ctx.user_info.username, [tag_dict])
     except InvalidAnnotation as e:
         raise exceptions_metastore.convert_exception_to_api_exception(
             base_exception=e, status_code=400, new_error_enum=ExceptionCodeEnum.MetastoreInvalidAnnotationForCreate
@@ -449,7 +449,8 @@ def delete_tag_on_binary(
     ctx: context.Context = Depends(qr.ctx),
 ):
     """Delete a tag from an entity."""
-    tag = unquote(tag) if tag else None
+    if tag:
+        tag = unquote(tag)
     try:
         data = annotation.delete_binary_tag(qr.writer, sha256, tag)
     except FileNotFoundError:

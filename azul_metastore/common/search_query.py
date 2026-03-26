@@ -371,7 +371,7 @@ def generate_autocomplete(input: str, offset: int) -> bedr_bauto.AutocompleteCon
     return bedr_bauto.AutocompleteNone()
 
 
-def _validate_term_query(parse_ast: Expression, model_valid_keys: list[str]) -> list[str]:
+def _validate_term_query(parse_ast: Expression | None, model_valid_keys: list[str]) -> list[str]:
     """Check if a term queries keys are found in the model and return any invalid keys."""
     if isinstance(parse_ast, LogicalOperator):
         found_invalid_keys = []

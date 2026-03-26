@@ -34,7 +34,6 @@ class Metastore(BaseSettings):
 
     def __init__(self):
         """Init function."""
-        global printed
         global loki_logger
         super().__init__()
 

@@ -200,7 +200,8 @@ def read_feature_values_for_tag(ctx: Context, tag: str) -> models_restapi.ReadFe
     resp = ctx.man.annotation.w.search(ctx.sd, body=body)
     fvs = [x["_source"] for x in resp["hits"]["hits"]]
     fvs = [ctx.man.annotation.decode(x) for x in fvs]
-    return models_restapi.ReadFeatureTagValues(**{"items": fvs})
+    fvs_dict: dict = {"items": fvs}
+    return models_restapi.ReadFeatureTagValues(**fvs_dict)
 
 
 def create_feature_value_tags(ctx: Context, owner: str, tags: list[dict]) -> None:

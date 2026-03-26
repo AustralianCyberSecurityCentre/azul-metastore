@@ -8,9 +8,10 @@ import traceback
 from typing import Any
 
 from azul_bedrock import dispatcher as b_dispatcher
-from azul_bedrock import exception_enums, exceptions_bedrock, exceptions_metastore
+from azul_bedrock import exceptions_bedrock, exceptions_metastore
 from azul_bedrock import models_api as azapi
 from azul_bedrock import models_network as azm
+from azul_bedrock.exception_enums import ExceptionCodeEnum
 
 from azul_metastore import context, settings
 from azul_metastore.query import binary_create, plugin, status
@@ -32,7 +33,11 @@ class BaseIngestor:
         self.s = settings.get()
         self.url = self.s.dispatcher_events_url
         if not self.model:
-            raise exceptions_bedrock.BaseAzulException(f"event type not set for {self.__class__.__name__}")
+            raise exceptions_bedrock.BaseAzulException(
+                internal=ExceptionCodeEnum.MetastoreIngestorEventTypeNotSet,
+                ref=f"event type not set for {self.__class__.__name__}",
+                parameters={"class_name": self.__class__.__name__},
+            )
 
         self.ctx = ctx
 
@@ -60,13 +65,13 @@ class BaseIngestor:
                 if e.response is not None:
                     content_slice = e.response.content[:1000]
                 raise exceptions_metastore.DataException(
-                    internal=exception_enums.MetastoreIngestorBadStatusDocument,
+                    internal=ExceptionCodeEnum.MetastoreIngestorBadStatusDocument,
                     ref=f"bad status {e.status_code}\n{content_slice}",
                     parameters={"status_code": str(e.status_code), "content_text": str(content_slice)},
                 ) from e
             raise exceptions_metastore.DataException(
                 ref="connection error",
-                internal=exception_enums.MetastoreIngestorGetDataNetworkError,
+                internal=ExceptionCodeEnum.MetastoreIngestorGetDataNetworkError,
             ) from e
         return events
 
@@ -155,9 +160,9 @@ class BinaryIngestor(BaseIngestor):
             require_historic=True,
         )
 
-    def set_data(self, results: list[azm.BinaryEvent]) -> None:
+    def set_data(self, docs: list[azm.BinaryEvent]) -> None:
         """Write docs continually, logging errors."""
-        results = self._prefilter(results)
+        results = self._prefilter(docs)
         binary_create.create_binary_events(self.ctx, results)
 
 
@@ -175,9 +180,9 @@ class PluginIngestor(BaseIngestor):
             require_historic=True,
         )
 
-    def set_data(self, results: list[azm.PluginEvent]) -> None:
+    def set_data(self, docs: list[azm.PluginEvent]) -> None:
         """Write docs continually, logging errors."""
-        plugin.create_plugin(self.ctx, results)
+        plugin.create_plugin(self.ctx, docs)
 
 
 class StatusIngestor(BaseIngestor):
@@ -194,6 +199,6 @@ class StatusIngestor(BaseIngestor):
             require_historic=True,
         )
 
-    def set_data(self, results: list[azm.StatusEvent]) -> None:
+    def set_data(self, docs: list[azm.StatusEvent]) -> None:
         """Write docs continually, logging errors."""
-        status.create_status(self.ctx, results)
+        status.create_status(self.ctx, docs)

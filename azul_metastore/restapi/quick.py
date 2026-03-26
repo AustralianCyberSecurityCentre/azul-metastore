@@ -1,7 +1,7 @@
 """Fastapi helpers for constructing queries."""
 
 import logging
-from typing import Optional
+from typing import Any, Optional
 
 import cachetools
 from azul_bedrock import exceptions_metastore
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 @cachetools.cached(cache=memcache.get_lru_cache("restapi_get_base"))
-def _get_base() -> context.Context:
+def _get_base() -> context.BaseContext:
     """Return the general context object, cache so it only gets created once."""
     logger.info("metastore - create commonly used objects")
     return context.get_general_context()
@@ -32,9 +32,11 @@ def _get_base() -> context.Context:
     key=lambda x, y, z: x.credentials.unique + "." + ".".join(y) + "." + ".".join(z),
 )
 def _get_subctx_cached(
-    user_info: UserInfo, security_exclude: list[str], security_include: list[str] = None
+    user_info: UserInfo, security_exclude: list[str], security_include: list[str] | None = None
 ) -> context.Context:
     """Get the context for making queries to Opensearch."""
+    if security_include is None:
+        security_include = []
     return _get_subctx(user_info, security_exclude, security_include)
 
 
@@ -42,6 +44,8 @@ def _get_subctx(user_info: UserInfo, security_exclude: list[str], security_inclu
     """Get the context for making queries to Opensearch and get a cached version if it's available."""
     security_exclude = [x.upper() for x in security_exclude]  # FUTURE use security module for this.
     security_include = [i.upper() for i in security_include]
+    if user_info.credentials is None:
+        raise Exception()  # TODO
     ctx = _get_base().copy_with(
         user_info=user_info,
         sd=search_data.SearchData(
@@ -69,7 +73,7 @@ class QuickRefs:
     models = {}
 
     @classmethod
-    def gen_response(cls, _type):
+    def gen_response(cls, _type: Any):
         """Response objects are generated dynamically as I was sick of wrapping objects in (data:object,meta:dict)."""
         name = f"Response:{str(_type)}"
         if name not in cls.models:
@@ -89,9 +93,13 @@ class QuickRefs:
             security_label = ctx.get_user_current_security()
         # Raised HTTPResponses might not encode a regular response. Do this ourselves:
         if ex is not None:
-            if ex.headers is None:
-                ex.headers = dict()
-            ex.headers["x-azul-security"] = security_label
+            new_headers: dict = dict()
+            # Make headers into a mutable structure.
+            if ex.headers:
+                for k, v in ex.headers:
+                    new_headers[k] = v
+            new_headers["x-azul-security"] = security_label
+            ex.headers = new_headers
         elif response is not None:
             response.headers["x-azul-security"] = security_label
             # Now that a security label has been set manually, remove the defaulted marker
@@ -168,7 +176,7 @@ class QuickRefs:
 
     gr = gen_response
     fr = format_response
-    kw = {
+    kw: dict = {
         "response_model_exclude_unset": True,
     }
 

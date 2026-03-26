@@ -71,11 +71,12 @@ def validate_json(field_name: str, field_value: str | None):
         if field_value:
             json.loads(field_value)
     except ValueError as e:
+        params: dict = {"field_name": field_name, "field_value": field_value}
         raise ApiException(
             status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref="bad_json",
             internal=ExceptionCodeEnum.MetastoreInvalidJson,
-            parameters={"field_name": field_name, "field_value": field_value},
+            parameters=params,
         ) from e
 
 

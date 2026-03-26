@@ -35,7 +35,7 @@ def _already_aged_off(event: dict) -> bool:
     else:
         # source ages off, compare timestamps
         source_time = event["source"]["timestamp"]
-        sourced = pendulum.parse(source_time).in_timezone(pendulum.UTC)
+        sourced = pendulum.parse(source_time).in_timezone(pendulum.UTC)  # type: ignore
         if sourced > cutoff:
             return False
 
@@ -44,7 +44,7 @@ def _already_aged_off(event: dict) -> bool:
 
 @capture_write_stats("binary")
 def create_binary_events(
-    priv_ctx: Context, raw_events: list[azm.StatusEvent], immediate: bool = False
+    priv_ctx: Context, raw_events: list[azm.BinaryEvent], immediate: bool = False
 ) -> tuple[list[IngestError], list[azm.BinaryEvent]]:
     """Write binary events to metastore.
 

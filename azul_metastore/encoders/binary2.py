@@ -29,7 +29,7 @@ from .base_encoder import uid
 
 logger = logging.getLogger(__name__)
 
-cache_ids: cachetools.TTLCache = None
+cache_ids: cachetools.TTLCache | cachetools.LRUCache
 
 
 def reset_doc_id_cache():
@@ -281,7 +281,7 @@ class Binary2(base_encoder.BaseIndexEncoder):
             # Because there should be a sourced event + the plugin that produced the augmented event.
             if depth < 0:
                 depth = 0
-        ret = {
+        ret: dict = {
             "_id": unique_submission,
             "depth": depth,
             "source": copy.deepcopy(event["source"]),
@@ -713,8 +713,8 @@ class Binary2(base_encoder.BaseIndexEncoder):
 
         This doesn't need to add historical feature names added previously, as opensearch combines them.
         """
-        mp = copy.copy(cls.mapping)
-        featmap = mp["properties"]["features_map"]["properties"]
+        mp: dict = copy.copy(cls.mapping)
+        featmap: dict = mp["properties"]["features_map"]["properties"]  # type: ignore
         for feat in features:
             featmap.update({feat: {"type": "keyword"}})
         return mp

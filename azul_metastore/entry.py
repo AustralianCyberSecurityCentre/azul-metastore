@@ -158,11 +158,11 @@ def apply_opensearch_config(print_only: bool, rolesmapping: bool, no_input: bool
             )
         elif selected == AuthOptions.jwt:
             token = click.prompt(text="Please provide the JWT for Opensearch: ")
-            Credentials(unique="local-user-jwt", format=CredentialFormat.jwt, token=token)
+            credentials = Credentials(unique="local-user-jwt", format=CredentialFormat.jwt, token=token)
         elif selected == AuthOptions.oauth_token:
             token = click.prompt(text="Please provide the OAuth token for Opensearch: ")
             credentials = Credentials(unique="local-user-oauth", format=CredentialFormat.jwt, token=token)
-        else:
+        if credentials is None:
             click.echo("Error. Must provide credentials.")
             return 7
         credentials = search_data.SearchData(credentials, security_exclude=[], security_include=[])

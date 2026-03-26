@@ -1,5 +1,6 @@
 from azul_metastore.query.binary2 import binary_read
 from tests.support import gen, integration_test
+from azul_bedrock import models_network as azm
 
 
 class TestBinaryRead(integration_test.DynamicTestCase):
@@ -153,12 +154,12 @@ class TestBinaryRead(integration_test.DynamicTestCase):
         result = binary_read.find_stream_references(self.writer, "e1")
         self.assertEqual((True, "s1", "content"), result)
         result = binary_read.find_stream_references(self.writer, "e10")
-        self.assertEqual((False, None, None), result)
+        self.assertEqual((False, "", azm.DataLabel.TEST), result)
 
         result = binary_read.find_stream_references(self.writer, "E1")
         self.assertEqual((True, "s1", "content"), result)
         result = binary_read.find_stream_references(self.writer, "E10")
-        self.assertEqual((False, None, None), result)
+        self.assertEqual((False, "", azm.DataLabel.TEST), result)
 
     def test_binary_count(self):
         self.write_binary_events(

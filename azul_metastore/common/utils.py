@@ -7,7 +7,7 @@ import hashlib
 import json
 import logging
 import time
-from typing import Callable, Iterable
+from typing import Callable, Iterable, TypeVar
 
 import cachetools
 import pendulum
@@ -17,6 +17,7 @@ from fastapi.encoders import jsonable_encoder
 from prometheus_client import Counter
 from pydantic import BaseModel
 
+from azul_metastore import context
 from azul_metastore.common import memcache
 from azul_metastore.common.query_info import IngestError
 
@@ -27,6 +28,8 @@ prom_duplicates = Counter(
     ["type", "plugin"],
 )
 logger = logging.getLogger(__name__)
+T = TypeVar("T")
+F = TypeVar("F", bound=azm.BaseEvent)
 
 
 def jsondict(d: BaseModel) -> dict:
@@ -65,10 +68,10 @@ class Measurer:
 
 def to_utc(x: str) -> str:
     """Convert a iso 8601 string to equivalent in UTC."""
-    return pendulum.parse(x).in_timezone(pendulum.UTC).to_iso8601_string()
+    return pendulum.parse(x).in_timezone(pendulum.UTC).to_iso8601_string()  # type: ignore
 
 
-def chunker(iterator: list, max_items: int = 100) -> Iterable[list]:
+def chunker(iterator: Iterable[T], max_items: int = 100) -> Iterable[list[T]]:
     """Return items from iterator in chunks of 100."""
     ret = []
     for item in iterator:
@@ -84,9 +87,12 @@ def capture_write_stats(format: str):
     """Capture stats about event creation."""
 
     def _capture_write_stats(
-        func: Callable[[], tuple[list[IngestError], list[azm.BaseEvent]]],
+        func: Callable[
+            [context.Context, list[F]],
+            tuple[list[IngestError], list[F]],
+        ],
     ):
-        def _stats_inner(ctx, docs, *args, **kwargs) -> tuple[int, int]:
+        def _stats_inner(ctx: context.Context, docs: list[F], *args, **kwargs) -> tuple[int, int]:
             bad_docs, duplicate_docs = func(ctx, docs, *args, **kwargs)
 
             if len(bad_docs) > len(docs):

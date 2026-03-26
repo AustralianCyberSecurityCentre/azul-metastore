@@ -6,7 +6,7 @@ import black
 from azul_bedrock import models_api
 from azul_bedrock import models_network as azm
 from azul_bedrock.dispatcher import DispatcherAPI
-from starlette.datastructures import UploadFile
+from fastapi import UploadFile
 
 from tests.support import gen
 

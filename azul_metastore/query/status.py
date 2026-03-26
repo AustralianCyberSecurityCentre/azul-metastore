@@ -167,7 +167,7 @@ def get_binary_status(ctx: Context, sha256: str) -> list[models_restapi.StatusEv
     for status in statuses:
         if status.entity.status != "heartbeat":
             continue
-        if pendulum.now(pendulum.UTC).subtract(minutes=2) > pendulum.parse(status.timestamp):
+        if pendulum.now(pendulum.UTC).subtract(minutes=2) > pendulum.parse(status.timestamp):  # type: ignore
             # timed out
             status.entity.status += "-lost"
             status.entity.error = "more than 2 minutes after last heartbeat"
@@ -184,7 +184,7 @@ def create_status(ctx: Context, raw_events: list[azm.StatusEvent]) -> tuple[list
     :param raw_results: Results to be saved
     :return tuple[list[dict], list[dict]]: a tuple with the bad_results and the duplicate results in seperate lists.
     """
-    results = dict()
+    results: dict[str, dict] = dict()
     bad_raw_results: list[IngestError] = []
     duplicate_docs: list[azm.StatusEvent] = []
     # Reverse raw_results so if there are duplicate ids we get the newest event.
@@ -206,7 +206,13 @@ def create_status(ctx: Context, raw_events: list[azm.StatusEvent]) -> tuple[list
             duplicate_docs.append(raw_event)
             # Check if the existing data is newer than the data to be added
             # If it is keep the old data and drop the new data.
-            if pendulum.parse(results[key_to_add]["timestamp"]) >= pendulum.parse(encoded["timestamp"]):
+            time_existing = pendulum.parse(results[key_to_add]["timestamp"])
+            time_new = pendulum.parse(encoded["timestamp"])
+            if (
+                isinstance(time_existing, pendulum.DateTime)
+                and isinstance(time_new, pendulum.DateTime)
+                and time_existing >= time_new
+            ):
                 logger.debug(f"There are duplicate document keys when encoding status events id: '{key_to_add}'")
                 continue
         results[key_to_add] = encoded

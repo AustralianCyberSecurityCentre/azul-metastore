@@ -1,7 +1,5 @@
 """Queries for reading various information about binaries that doesn't fit elsewhere."""
 
-from typing import Optional
-
 from azul_bedrock import models_network as azm
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import BaseAzulException
@@ -25,7 +23,7 @@ def get_total_binary_count(ctx: Context) -> int:
     return aggs["entities"]["value"]
 
 
-def find_stream_references(ctx: Context, sha256: str) -> tuple[bool, str, str]:
+def find_stream_references(ctx: Context, sha256: str) -> tuple[bool, str, azm.DataLabel]:
     """Return (True, exemplar source_id, exemplar label) if we have bytes backing the given sha256."""
     if not sha256:
         raise BaseAzulException(internal=ExceptionCodeEnum.MetastoreSha256NotProvidedForFindingStreamRefs)
@@ -73,18 +71,24 @@ def find_stream_references(ctx: Context, sha256: str) -> tuple[bool, str, str]:
     aggs = resp["aggregations"]["CHILDREN"]
 
     if not aggs["SOURCES"]["buckets"]:
-        return (False, None, None)
+        return (False, "", azm.DataLabel.TEST)
 
     source = aggs["SOURCES"]["buckets"][0]["key"]
+    label: azm.DataLabel | None = None
     for candidate in aggs["DATASTREAMS"]["buckets"]:
         doc = candidate["DATASTREAMS"]["hits"]["hits"][0]["_source"]["datastreams"]
         for stream in doc:
             if stream["sha256"] == sha256:
-                label = stream["label"]
+                try:
+                    label = azm.DataLabel(stream["label"])
+                except ValueError:
+                    raise  # TODO raise appropriate error.
+    if label is None:
+        return (False, "", azm.DataLabel.TEST)
     return (True, source, label)
 
 
-def find_stream_metadata(ctx: Context, sha256: str, stream_hash: str) -> Optional[tuple[str, azm.Datastream]]:
+def find_stream_metadata(ctx: Context, sha256: str, stream_hash: str) -> tuple[str | None, azm.Datastream | None]:
     """Return exemplar stream metadata and an exemplar source for the specified entity id.
 
     :param ctx: context
