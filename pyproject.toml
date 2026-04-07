@@ -63,7 +63,7 @@ statistics = "azul_metastore.restapi.statistics:router"
 [tool.uv]
 package = true
 exclude-newer = "1 week"
-exclude-newer-package = { azul-bedrock = false, azul-runner = false, azul-security=false, azul-metastore = false, azul-nsrl-lookup-serve=false, azul-plugin-retrohunt = false }
+exclude-newer-package = { azul-bedrock = false, azul-runner = false, azul-security=false, azul-metastore = false, azul-nsrl-lookup-serve=false, azul-nsrl-lookup-server=false, azul-plugin-retrohunt = false, ssdeep = false }
 
 [tool.uv.sources]
 azul-bedrock = { index="cache"}
