@@ -147,6 +147,10 @@ class Metastore(BaseSettings):
     # Valid values are <number> 'years'|'months'|'weeks'|'days' e.g 4 months.
     status_expire_events: str = "2 weeks"
 
+    # Disable opensearch similar_entropy indexing due to incompatiblities (e.g opensearch 3+ is required)
+    # FUTURE remove with disable_entropy_similarity - look for these for other content that should be removed.
+    disable_entropy_similarity: bool = False
+
     # Opensearch plugin index config override
     plugin_index_config: IndexSettings = IndexSettings()
 
