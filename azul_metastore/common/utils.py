@@ -7,7 +7,7 @@ import hashlib
 import json
 import logging
 import time
-from typing import Callable, Iterable, TypeVar
+from typing import Any, Callable, Iterable, TypeVar
 
 import cachetools
 import pendulum
@@ -17,7 +17,6 @@ from fastapi.encoders import jsonable_encoder
 from prometheus_client import Counter
 from pydantic import BaseModel
 
-from azul_metastore import context
 from azul_metastore.common import memcache
 from azul_metastore.common.query_info import IngestError
 
@@ -88,11 +87,11 @@ def capture_write_stats(format: str):
 
     def _capture_write_stats(
         func: Callable[
-            [context.Context, list[F]],
+            [Any, list[F]],
             tuple[list[IngestError], list[F]],
         ],
     ):
-        def _stats_inner(ctx: context.Context, docs: list[F], *args, **kwargs) -> tuple[int, int]:
+        def _stats_inner(ctx, docs: list[F], *args, **kwargs) -> tuple[int, int]:
             bad_docs, duplicate_docs = func(ctx, docs, *args, **kwargs)
 
             if len(bad_docs) > len(docs):

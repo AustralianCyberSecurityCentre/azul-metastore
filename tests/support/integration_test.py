@@ -8,12 +8,7 @@ import pendulum
 import urllib3
 from azul_bedrock import models_api as mapi
 from azul_bedrock import models_network as azm
-from azul_bedrock import exceptions_bedrock
-from azul_bedrock import exceptions_metastore
 from azul_bedrock import settings as bed_settings
-from azul_bedrock.dispatcher import DispatcherAPI
-from azul_bedrock.exception_enums import ExceptionCodeEnum
-from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
 from azul_metastore import context, opensearch_config, settings
 from azul_metastore.common import memcache, search_data
 from azul_metastore.encoders import binary2 as rc2
@@ -52,7 +47,6 @@ class DynamicTestCase(basic_test.BasicTest):
     @classmethod
     def alter_environment(cls):
         # if these vars are unset, use defaults that work with docker-compose.yml
-        sius("metastore_disable_entropy_similarity", "false")
         sius("metastore_opensearch_username", "azul_writer")
         sius("metastore_opensearch_password", "dummyPassword!")
         sius("metastore_opensearch_url", "https://localhost:9204")
