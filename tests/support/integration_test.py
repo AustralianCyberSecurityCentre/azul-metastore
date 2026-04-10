@@ -52,6 +52,7 @@ class DynamicTestCase(basic_test.BasicTest):
     @classmethod
     def alter_environment(cls):
         # if these vars are unset, use defaults that work with docker-compose.yml
+        sius("metastore_disable_entropy_similarity", "false")
         sius("metastore_opensearch_username", "azul_writer")
         sius("metastore_opensearch_password", "dummyPassword!")
         sius("metastore_opensearch_url", "https://localhost:9204")

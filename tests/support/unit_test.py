@@ -30,6 +30,7 @@ class BaseUnitTestCase(basic_test.BasicTest):
                 "generic_source": {},
             }
         )
+        os.environ["metastore_disable_entropy_similarity"] = "false"
         os.environ["security_allow_releasability_priority_gte"] = "30"
         os.environ["security_labels"] = json.dumps(
             {

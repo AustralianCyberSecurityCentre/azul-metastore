@@ -149,7 +149,7 @@ class Metastore(BaseSettings):
 
     # Disable opensearch similar_entropy indexing due to incompatiblities (e.g opensearch 3+ is required)
     # FUTURE remove with disable_entropy_similarity - look for these for other content that should be removed.
-    disable_entropy_similarity: bool = False
+    disable_entropy_similarity: bool = True
 
     # Opensearch plugin index config override
     plugin_index_config: IndexSettings = IndexSettings()
