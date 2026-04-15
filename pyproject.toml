@@ -108,7 +108,7 @@ dev = [
     "respx>=0.22.0",
     # pinned to avoid issues installing 3.4, which fails on debian.
     "ruff>=0.15.8",
-    "ssdeep==3.3",
+    "ssdeep==3.4",
     "tox>=4.34.1",
     "ty>=0.0.27",
 ]
