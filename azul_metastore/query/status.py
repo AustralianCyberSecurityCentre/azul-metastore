@@ -2,14 +2,16 @@
 
 import logging
 import traceback
+from collections import defaultdict
 
 import pendulum
 from azul_bedrock import models_network as azm
 from azul_bedrock import models_restapi
 from prometheus_client import Counter
+from pydantic import BaseModel
 
 from azul_metastore.common.query_info import IngestError
-from azul_metastore.common.utils import capture_write_stats
+from azul_metastore.common.utils import capture_write_stats, get_author_from_generic_event
 from azul_metastore.context import Context
 from azul_metastore.encoders import status as st
 from azul_metastore.models import basic_events
@@ -177,7 +179,9 @@ def get_binary_status(ctx: Context, sha256: str) -> list[models_restapi.StatusEv
 
 
 @capture_write_stats("status")
-def create_status(ctx: Context, raw_events: list[azm.StatusEvent]) -> tuple[list[IngestError], list[azm.StatusEvent]]:
+def create_status(
+    ctx: Context, raw_events: list[azm.StatusEvent]
+) -> tuple[list[IngestError], list[azm.StatusEvent], dict[str, int]]:
     """Save list of statuses to opensearch.
 
     :param ctx: Context
@@ -218,7 +222,18 @@ def create_status(ctx: Context, raw_events: list[azm.StatusEvent]) -> tuple[list
         results[key_to_add] = encoded
     # No models are valid, nothing to send to opensearch.
     if not results:
-        return bad_raw_results, duplicate_docs
+        return bad_raw_results, duplicate_docs, dict()
 
     doc_errors = ctx.man.status.w.wrap_and_index_docs(ctx.sd, results.values(), raise_on_errors=False)
-    return bad_raw_results + doc_errors, duplicate_docs
+
+    author_results: dict[str, int] = defaultdict(int)
+    for r in results.values():
+        author_results[get_author_from_generic_event(r)] += 1
+    # Subtract bad author events from expected good ones.
+    for brr in doc_errors:
+        if isinstance(brr.doc, BaseModel):
+            author_results[get_author_from_generic_event(brr.doc.model_dump())] -= 1
+        else:
+            author_results[get_author_from_generic_event(brr.doc)] -= 1
+
+    return bad_raw_results + doc_errors, duplicate_docs, author_results

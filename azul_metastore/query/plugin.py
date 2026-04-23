@@ -6,6 +6,7 @@ import copy
 import json
 import logging
 import traceback
+from collections import defaultdict
 from threading import RLock
 from typing import Optional
 
@@ -13,6 +14,7 @@ import cachetools
 import pendulum
 from azul_bedrock import models_network as azm
 from azul_bedrock import models_restapi
+from pydantic import BaseModel
 
 from azul_metastore.common import memcache
 from azul_metastore.common.query_info import IngestError
@@ -21,12 +23,15 @@ from azul_metastore.context import Context
 from azul_metastore.encoders import plugin as plg
 from azul_metastore.encoders import status as st
 from azul_metastore.models import basic_events
+from azul_metastore.query.binary_create import get_author_from_generic_event
 
 logger = logging.getLogger(__name__)
 
 
 @capture_write_stats("plugin")
-def create_plugin(ctx: Context, raw_events: list[azm.PluginEvent]) -> tuple[list[IngestError], list[azm.PluginEvent]]:
+def create_plugin(
+    ctx: Context, raw_events: list[azm.PluginEvent]
+) -> tuple[list[IngestError], list[azm.PluginEvent], dict[str, int]]:
     """Save list of plugin register events to opensearch."""
     results = dict()
     bad_raw_results = []
@@ -61,10 +66,22 @@ def create_plugin(ctx: Context, raw_events: list[azm.PluginEvent]) -> tuple[list
         results[key_to_add] = encoded
     # No docs to go to opensearch.
     if not results:
-        return bad_raw_results, duplicate_docs
+        return bad_raw_results, duplicate_docs, dict()
 
     doc_errors = ctx.man.plugin.w.wrap_and_index_docs(ctx.sd, results.values(), refresh=True, raise_on_errors=False)
-    return bad_raw_results + doc_errors, duplicate_docs
+
+    author_results: dict[str, int] = defaultdict(int)
+    for r in results.values():
+        author_results[get_author_from_generic_event(r)] += 1
+
+    # Subtract bad author events from expected good ones.
+    for brr in doc_errors:
+        if isinstance(brr.doc, BaseModel):
+            author_results[get_author_from_generic_event(brr.doc.model_dump())] -= 1
+        else:
+            author_results[get_author_from_generic_event(brr.doc)] -= 1
+
+    return bad_raw_results + doc_errors, duplicate_docs, author_results
 
 
 @cachetools.cached(cache=memcache.get_ttl_cache("plugins.full", ttl=60), lock=RLock(), key=lambda x: x.sd.unique())

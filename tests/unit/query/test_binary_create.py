@@ -25,7 +25,7 @@ class TestBinaryCreateEvents(unit_test.BaseUnitTestCase):
 
         mock_filter_age_off.side_effect = lambda x: False
 
-        failures, duplicate_results = binary_create._create_binary_events(
+        failures, duplicate_results, doc_success = binary_create._create_binary_events(
             self.ctx,
             [
                 gen.binary_event(
@@ -41,3 +41,5 @@ class TestBinaryCreateEvents(unit_test.BaseUnitTestCase):
         self.assertEqual(len(duplicate_results), 0)
         self.assertEqual(failures[0].error_type, "not_strict_dyno_mapping_yay")
         self.assertEqual(failures[0].error_reason, "no reason")
+        self.assertEqual(len(doc_success.keys()), 3)
+        self.assertEqual(list(doc_success.values()), [1, 1, -1])
