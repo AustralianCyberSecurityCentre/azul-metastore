@@ -72,7 +72,10 @@ def create_plugin(
 
     author_results: dict[str, int] = defaultdict(int)
     for r in results.values():
-        author_results[get_author_from_generic_event(r)] += 1
+        if isinstance(r, BaseModel):
+            author_results[get_author_from_generic_event(r.model_dump())] += 1
+        else:
+            author_results[get_author_from_generic_event(r)] += 1
 
     # Subtract bad author events from expected good ones.
     for brr in doc_errors:
