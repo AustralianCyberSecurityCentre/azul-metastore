@@ -12,6 +12,13 @@
   ],
   "index_permissions": [
     {
+      "index_patterns": [
+        ".opensearch_dashboards*",
+        ".kibana*"
+      ],
+      "allowed_actions": ["read"]
+    },
+    {
       "index_patterns": ["azul.*"],
       "allowed_actions": ["unlimited"]
     },
