@@ -131,4 +131,8 @@ def _create_binary_events(
         else:
             author_results[get_author_from_generic_event(brr.doc)] -= 1
 
+    # Unknown events are actually root binary creation events for binary events.
+    author_results["root-binary-creation"] = author_results["unknown-"]
+    del author_results["unknown-"]
+
     return bad_raw_results + doc_errors, duplicate_docs, author_results

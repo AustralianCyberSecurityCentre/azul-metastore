@@ -41,5 +41,6 @@ class TestBinaryCreateEvents(unit_test.BaseUnitTestCase):
         self.assertEqual(len(duplicate_results), 0)
         self.assertEqual(failures[0].error_type, "not_strict_dyno_mapping_yay")
         self.assertEqual(failures[0].error_reason, "no reason")
+        print(doc_success)
         self.assertEqual(len(doc_success.keys()), 3)
-        self.assertEqual(list(doc_success.values()), [1, 1, -1])
+        self.assertEqual(list(doc_success.values()), [1, -1, 1])
