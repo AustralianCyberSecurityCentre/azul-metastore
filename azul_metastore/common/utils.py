@@ -105,7 +105,8 @@ def capture_write_stats(format: str):
             # count all the successful indexed docs.
             # FUTURE the ingestor splits docs into parts which breaks prom tracking
             for plugin_name, plugin_success_count in success_author_counts.items():
-                prom_ingest.labels(type=format, status="success", plugin=plugin_name).inc(plugin_success_count)
+                if plugin_success_count > 0:
+                    prom_ingest.labels(type=format, status="success", plugin=plugin_name).inc(plugin_success_count)
 
             # count all errors
             for err in bad_docs:
