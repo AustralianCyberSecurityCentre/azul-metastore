@@ -6,6 +6,7 @@ from collections import defaultdict
 
 import pendulum
 from azul_bedrock import models_network as azm
+from prometheus_client import Counter
 from pydantic import BaseModel
 
 from azul_metastore.common.query_info import IngestError
@@ -14,6 +15,12 @@ from azul_metastore.context import Context
 from azul_metastore.encoders import binary2
 from azul_metastore.models import basic_events
 from azul_metastore.query import age_off
+
+azul_ingest_drop_already_aged_off = Counter(
+    "azul_ingest_drop_already_aged_off",
+    "Ingestion events dropped that were already aged off.",
+    ["type", "status", "plugin"],
+)
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +48,7 @@ def _already_aged_off(event: dict) -> bool:
         if sourced > cutoff:
             return False
 
+    azul_ingest_drop_already_aged_off.labels(plugin=get_author_from_generic_event(event)).inc()
     return True
 
 
