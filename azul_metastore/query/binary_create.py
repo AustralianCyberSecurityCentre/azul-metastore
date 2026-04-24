@@ -48,6 +48,7 @@ def _already_aged_off(event: dict) -> bool:
         if sourced > cutoff:
             return False
 
+    logger.debug("already aged off event was: ", event)
     azul_ingest_drop_already_aged_off.labels(plugin=get_author_from_generic_event(event)).inc()
     return True
 
