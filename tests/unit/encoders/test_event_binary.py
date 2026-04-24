@@ -357,6 +357,18 @@ class TestBinaryEventFiltering(unit_test.BaseUnitTestCase):
         after_filtering = esc.Binary2.filter_seen_and_create_parent_events(data3)
         self.assertEqual(1, len(after_filtering))
 
+        # Same again but with a different plugin version (should mean just the new version of the plugin gets through)
+        for plugin_version in ["1.4", "1.7"]:
+            data4 = gen.binary_event(
+                model=False,
+                eid="pizza",
+                authornv=("plugin4", plugin_version),
+                action=azm.BinaryAction.Extracted,
+            )
+            data4 = esc.Binary2.encode(data4)
+            after_filtering = esc.Binary2.filter_seen_and_create_parent_events(data4)
+            self.assertEqual(1, len(after_filtering))
+
     def test_filtering_mapped(self):
         """Mapped events are never filtered out, sending the same event doesn't do anything."""
         data = gen.binary_event(
