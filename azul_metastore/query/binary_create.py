@@ -19,7 +19,7 @@ from azul_metastore.query import age_off
 azul_ingest_drop_already_aged_off = Counter(
     "azul_ingest_drop_already_aged_off",
     "Ingestion events dropped that were already aged off.",
-    ["type", "status", "plugin"],
+    ["plugin"],
 )
 
 logger = logging.getLogger(__name__)
