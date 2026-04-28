@@ -63,6 +63,7 @@ def _read_within(
         # requires features to enrich tags on
         details.append(Detail.features)
 
+    # sorting done on top hits to ensure latest doc is acquired at each bucket
     body: dict = {
         # usually caps at 10k but we want the full count when detail is requested
         "track_total_hits": True if Detail.total_hits in details else 10000,
@@ -91,6 +92,7 @@ def _read_within(
                         "aggs": {
                             "HITS": {
                                 "top_hits": {
+                                    "sort": [{"timestamp": {"order": "desc"}}],
                                     "size": 1,
                                     "_source": {"includes": rc.fields_submission},
                                 }
@@ -106,6 +108,7 @@ def _read_within(
                 "aggs": {
                     "HITS": {
                         "top_hits": {
+                            "sort": [{"timestamp": {"order": "desc"}}],
                             "size": 1,
                             "_source": {"includes": ["features", "sha256_author_action"]},
                         }
@@ -118,6 +121,7 @@ def _read_within(
                 "aggs": {
                     "HITS": {
                         "top_hits": {
+                            "sort": [{"timestamp": {"order": "desc"}}],
                             "size": 1,
                             "_source": {"includes": ["info", "sha256_author_action"]},
                         }
@@ -130,6 +134,7 @@ def _read_within(
                 "aggs": {
                     "HITS": {
                         "top_hits": {
+                            "sort": [{"timestamp": {"order": "desc"}}],
                             "size": 1,
                             "_source": {"includes": ["datastreams", "sha256_author_action"]},
                         }
@@ -142,6 +147,7 @@ def _read_within(
                 "aggs": {
                     "HITS": {
                         "top_hits": {
+                            "sort": [{"timestamp": {"order": "desc"}}],
                             "size": 1,
                             "_source": {
                                 "includes": [
@@ -164,6 +170,7 @@ def _read_within(
                 "aggs": {
                     "HITS": {
                         "top_hits": {
+                            "sort": [{"timestamp": {"order": "desc"}}],
                             "size": 1,
                             "_source": {"includes": rc.fields_link + rc.fields_recover_source_binary_node},
                         }
