@@ -1,5 +1,6 @@
 from azul_bedrock import models_network as azm
 from azul_bedrock import models_restapi
+import pendulum
 
 from azul_metastore.query.binary2 import binary_summary
 from tests.support import gen, integration_test
@@ -39,6 +40,27 @@ class TestBinaryRead(integration_test.DynamicTestCase):
                     spathl=[("e1", ("me", "1"))],
                     action=azm.BinaryAction.Mapped,
                     sourceit=("s4", "2000-01-01T01:01:01Z"),
+                    timestamp="2000-01-01T01:01:01Z",
+                ),
+                # same author different version, with older event with old author version
+                gen.binary_event(
+                    eid="e2",
+                    authornv=("unzip", "0.5"),
+                    authorsec=gen.g1_1,
+                    spathl=[("e1", ("me", "1"))],
+                    action=azm.BinaryAction.Mapped,
+                    sourceit=("s4", "2000-01-01T01:01:01Z"),
+                    timestamp="1999-12-30T01:01:01Z",
+                ),
+                # Same author, with older event
+                gen.binary_event(
+                    eid="e2",
+                    authornv=("unzip", "1"),
+                    authorsec=gen.g1_1,
+                    spathl=[("e1", ("me", "1"))],
+                    action=azm.BinaryAction.Mapped,
+                    sourceit=("s4", "2000-01-01T01:01:01Z"),
+                    timestamp="1999-12-30T01:01:01Z",
                 ),
                 # same parent with different plugin
                 gen.binary_event(
@@ -410,10 +432,35 @@ class TestBinaryRead(integration_test.DynamicTestCase):
         self.assertFormatted(ret, ["LOW TLP:CLEAR", "MEDIUM REL:APPLE", "MEDIUM MOD1 REL:APPLE"])
 
     def test_binary_read_authors(self):
+        now = pendulum.datetime(year=2002, month=1, day=1)
+        now_2 = pendulum.datetime(year=2001, month=12, day=30)
+        # New event
         self.write_binary_events(
-            [gen.binary_event(eid="e1", authornv=("a1", "1"), fvl=[("f1", f"v{x}") for x in range(10)])]
+            [
+                # OLD events that should be ignored
+                gen.binary_event(
+                    eid="e1",
+                    authornv=("a1", "0.5"),
+                    fvl=[("f1", f"OLD_FV{x}") for x in range(10)],
+                    timestamp="2020-12-30T12:00:00+00:00",
+                )
+            ],
+            now=now,
+        )
+        # Old event with old plugin (should be discarded)
+        self.write_binary_events(
+            [
+                gen.binary_event(
+                    eid="e1",
+                    authornv=("a1", "1"),
+                    fvl=[("f1", f"v{x}") for x in range(10)],
+                    timestamp="2021-01-01T12:00:00+00:00",
+                )
+            ],
+            now=now_2,
         )
         ret = binary_summary.read(self.writer, "e1").instances
+        print(ret)
         self.assertFormatted(
             ret,
             [
