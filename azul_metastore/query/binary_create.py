@@ -2,16 +2,25 @@
 
 import logging
 import traceback
+from collections import defaultdict
 
 import pendulum
 from azul_bedrock import models_network as azm
+from prometheus_client import Counter
+from pydantic import BaseModel
 
 from azul_metastore.common.query_info import IngestError
-from azul_metastore.common.utils import capture_write_stats
+from azul_metastore.common.utils import capture_write_stats, get_author_from_generic_event
 from azul_metastore.context import Context
 from azul_metastore.encoders import binary2
 from azul_metastore.models import basic_events
 from azul_metastore.query import age_off
+
+azul_ingest_drop_already_aged_off = Counter(
+    "azul_ingest_drop_already_aged_off",
+    "Ingestion events dropped that were already aged off.",
+    ["plugin"],
+)
 
 logger = logging.getLogger(__name__)
 
@@ -39,13 +48,15 @@ def _already_aged_off(event: dict) -> bool:
         if sourced > cutoff:
             return False
 
+    logger.debug("already aged off event was: ", event)
+    azul_ingest_drop_already_aged_off.labels(plugin=get_author_from_generic_event(event)).inc()
     return True
 
 
 @capture_write_stats("binary")
 def create_binary_events(
     priv_ctx: Context, raw_events: list[azm.BinaryEvent], immediate: bool = False
-) -> tuple[list[IngestError], list[azm.BinaryEvent]]:
+) -> tuple[list[IngestError], list[azm.BinaryEvent], dict[str, int]]:
     """Write binary events to metastore.
 
     Returns a list of ingest errors and the raw event for duplicate documents.
@@ -55,14 +66,14 @@ def create_binary_events(
 
 def _create_binary_events(
     priv_ctx: Context, raw_events: list[azm.BinaryEvent], immediate: bool = False
-) -> tuple[list[IngestError], list[azm.BinaryEvent]]:
+) -> tuple[list[IngestError], list[azm.BinaryEvent], dict[str, int]]:
     """Write binary events to metastore.
 
-    Returns a list of ingest errors and the raw event for duplicate documents.
+    Returns a list of ingest errors, raw event for duplicate documents and a list of number of good events per author.
     """
     results = []
     aged_off = 0
-    bad_raw_results = []
+    bad_raw_results: list[IngestError] = []
     duplicate_docs: list[azm.BinaryEvent] = []
 
     # Sort the results based on the timestamps to always get newest first,
@@ -98,11 +109,11 @@ def _create_binary_events(
 
     # No docs to go to opensearch so stop now.
     if not results:
-        return bad_raw_results, duplicate_docs
+        return bad_raw_results, duplicate_docs, dict()
 
     # If all results are filtered return immediately.
     if len(results) == 0:
-        return bad_raw_results, duplicate_docs
+        return bad_raw_results, duplicate_docs, dict()
 
     wrapped = priv_ctx.man.binary2.w.wrap_docs(results)
     # try indexing, and if it fails then ensure that all features are mapped in the template correctly, and retry
@@ -115,7 +126,22 @@ def _create_binary_events(
                 priv_ctx.sd, mapping=priv_ctx.man.binary2.get_mapping_with_features(feature_names)
             )
             doc_errors = priv_ctx.man.binary2.w.index_docs(priv_ctx.sd, wrapped, refresh=immediate)
-    if doc_errors:
-        return bad_raw_results + doc_errors, duplicate_docs
 
-    return bad_raw_results, duplicate_docs
+    author_results: dict[str, int] = defaultdict(int)
+    for r in results:
+        if isinstance(r, BaseModel):
+            author_results[get_author_from_generic_event(r.model_dump())] += 1
+        else:
+            author_results[get_author_from_generic_event(r)] += 1
+    # Subtract bad author events from expected good ones.
+    for brr in doc_errors:
+        if isinstance(brr.doc, BaseModel):
+            author_results[get_author_from_generic_event(brr.doc.model_dump())] -= 1
+        else:
+            author_results[get_author_from_generic_event(brr.doc)] -= 1
+
+    # Unknown events are actually root binary creation events for binary events.
+    author_results["root-binary-creation"] = author_results["unknown-"]
+    del author_results["unknown-"]
+
+    return bad_raw_results + doc_errors, duplicate_docs, author_results

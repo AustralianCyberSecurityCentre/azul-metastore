@@ -82,24 +82,31 @@ def chunker(iterator: Iterable[T], max_items: int = 100) -> Iterable[list[T]]:
         yield ret
 
 
+def get_author_from_generic_event(doc: dict) -> str:
+    """Get an author from an event document (Plugin, Binary or Status)."""
+    return doc.get("author", {}).get("name", "unknown") + "-" + doc.get("author", {}).get("version", "")
+
+
 def capture_write_stats(format: str):
     """Capture stats about event creation."""
 
     def _capture_write_stats(
         func: Callable[
             [Any, list[F]],
-            tuple[list[IngestError], list[F]],
+            tuple[list[IngestError], list[F], dict[str, int]],
         ],
     ):
         def _stats_inner(ctx, docs: list[F], *args, **kwargs) -> tuple[int, int]:
-            bad_docs, duplicate_docs = func(ctx, docs, *args, **kwargs)
+            bad_docs, duplicate_docs, success_author_counts = func(ctx, docs, *args, **kwargs)
 
             if len(bad_docs) > len(docs):
                 logger.info("ingestor - more bad docs than original docs")
-            else:
-                # count all the successful indexed docs.
-                # FUTURE the ingestor splits docs into parts which breaks prom tracking
-                prom_ingest.labels(type=format, status="success", plugin="any").inc(len(docs) - len(bad_docs))
+
+            # count all the successful indexed docs.
+            # FUTURE the ingestor splits docs into parts which breaks prom tracking
+            for plugin_name, plugin_success_count in success_author_counts.items():
+                if plugin_success_count > 0:
+                    prom_ingest.labels(type=format, status="success", plugin=plugin_name).inc(plugin_success_count)
 
             # count all errors
             for err in bad_docs:
