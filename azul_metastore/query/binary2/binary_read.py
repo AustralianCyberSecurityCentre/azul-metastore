@@ -55,6 +55,7 @@ def find_stream_references(ctx: Context, sha256: str) -> tuple[bool, str, azm.Da
                             "DATASTREAMS": {
                                 "top_hits": {
                                     "size": 1,
+                                    "sort": [{"timestamp": {"order": "desc"}}],
                                     "_source": [
                                         "datastreams.label",
                                         "datastreams.sha256",

@@ -29,6 +29,7 @@ def get_dispatcher_datastreams(ctx: context.Context, sha256: str) -> Iterable[tu
                             "DATASTREAMS": {
                                 "top_hits": {
                                     "size": 1,
+                                    "sort": [{"timestamp": {"order": "desc"}}],
                                     "_source": [
                                         "datastreams.label",
                                         "datastreams.sha256",

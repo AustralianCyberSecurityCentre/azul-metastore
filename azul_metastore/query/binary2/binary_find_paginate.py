@@ -170,6 +170,7 @@ def find_all_family_binaries(
                     "HITS": {
                         "top_hits": {
                             "size": 1,
+                            "sort": [{"timestamp": {"order": "desc"}}],
                             "_source": {"includes": binary2.fields_link + binary2.fields_recover_source_binary_node},
                         }
                     },
