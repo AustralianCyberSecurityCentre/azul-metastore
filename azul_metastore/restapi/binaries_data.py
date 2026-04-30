@@ -28,7 +28,6 @@ from fastapi import (
     Request,
     Response,
 )
-from pydantic import BaseModel
 from starlette.responses import StreamingResponse
 from starlette.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
@@ -685,13 +684,6 @@ async def search_hex(
     return search
 
 
-class CommonBinaryStrings(BaseModel):
-    """Binary string return format."""
-
-    strings: list[str]
-    incomplete: bool
-
-
 def find_common_strings(stringsA: set[str], stringsB: set[str]) -> list[str]:
     """Find all common strings between two sets."""
     result = []
@@ -703,7 +695,7 @@ def find_common_strings(stringsA: set[str], stringsB: set[str]) -> list[str]:
 
 @router.get(
     "/v0/binaries/{sha256A}/{sha256B}/strings",
-    response_model=CommonBinaryStrings,
+    response_model=bedr_binaries_data.CommonBinaryStrings,
     response_model_exclude_unset=True,
     responses={
         HTTP_200_OK: {
@@ -735,7 +727,7 @@ async def get_common_strings(
     ),
     take_n_strings: int = Query(5000, gt=0, description="How many strings to return"),
     ctx: context.Context = Depends(qr.ctx),
-) -> CommonBinaryStrings:
+) -> bedr_binaries_data.CommonBinaryStrings:
     """Return strings found in the binary.
 
     Looks for ASCII, UTF-16 and UTF-32 big and little endian strings.
@@ -807,4 +799,4 @@ async def get_common_strings(
 
     qr.set_security_headers(ctx, resp)
 
-    return CommonBinaryStrings(strings=common_strings, incomplete=incomplete_compare)
+    return bedr_binaries_data.CommonBinaryStrings(strings=common_strings, incomplete=incomplete_compare)
