@@ -719,7 +719,7 @@ async def get_common_strings(
     ),
     min_length: int = Query(4, ge=0, description="Minimum length of string (when decoded)."),
     max_length: int = Query(200, ge=0, description="Maximum length of string (when decoded)."),
-    max_bytes_to_read: int = Query(
+    max_bytes_to_read: int | None = Query(
         DEFAULT_MAX_BYTES_TO_READ,
         ge=0,
         description="How many bytes to search for, if this is not set, "
