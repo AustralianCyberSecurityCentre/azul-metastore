@@ -724,7 +724,7 @@ async def get_common_strings(
         description="How many bytes to search for, if this is not set, "
         + "returns 10MB of the file, if it set to larger than the file the whole file will be searched.",
     ),
-    take_n_strings: int = Query(5000, gt=0, description="How many strings to return"),
+    take_n_strings: int = Query(5000, gt=0, description="Stop once at least this many common strings are found."),
     ctx: context.Context = Depends(qr.ctx),
 ) -> bedr_binaries_data.CommonBinaryStrings:
     """Return strings found in the binary.
@@ -760,7 +760,7 @@ async def get_common_strings(
             )
         )
     common_strings: list[str] = list()
-    all_file_content_read = True
+    all_file_content_read = False
 
     while len(common_strings) < take_n_strings:
         all_files_complete = True
@@ -770,13 +770,14 @@ async def get_common_strings(
                 read_content_length,
                 has_more_content,
             ) = await data_strings.get_strings(
-                cur_sha256.content_stream,
-                min_length,
-                max_length,
-                0,
-                None,
-                None,
-                take_n_strings * 2,  # doubled to reduce number of calls to find common strings
+                data_stream=cur_sha256.content_stream,
+                min_length=min_length,
+                max_length=max_length,
+                offset=0,
+                find_string=None,
+                find_regex=None,
+                strings_to_read_before_stopping=take_n_strings
+                * 2,  # doubled to reduce number of calls to find common strings
             )
             # set all the internals
             cur_sha256.content_read += read_content_length
@@ -787,7 +788,7 @@ async def get_common_strings(
         common_strings = find_common_strings(sha256_info[0].strings, sha256_info[1].strings)
         # Exit if all files have no more content
         if all_files_complete:
-            all_file_content_read = False
+            all_file_content_read = True
             break
 
     qr.set_security_headers(ctx, resp)
@@ -802,5 +803,6 @@ async def get_common_strings(
         for f in sha256_info:
             if f.content_read > max_bytes_to_read - 2:
                 incomplete_compare = True
-
+    # Sort for consistency as sets are being used.
+    common_strings.sort()
     return bedr_binaries_data.CommonBinaryStrings(strings=common_strings, incomplete=incomplete_compare)
