@@ -737,6 +737,7 @@ async def get_common_strings(
         """Hold the stream that is being processed and the strings associated with that stream."""
 
         content_stream: AsyncIterable[bytes]
+        content_read: int = 0
         strings: set[str] = field(default_factory=set)
 
     sha256_info: list[Sha256StreamAndStrings] = []
@@ -759,14 +760,14 @@ async def get_common_strings(
             )
         )
     common_strings: list[str] = list()
-    incomplete_compare = True
+    all_file_content_read = True
 
     while len(common_strings) < take_n_strings:
         all_files_complete = True
         for cur_sha256 in sha256_info:
             (
                 strings,
-                _read_content_length,
+                read_content_length,
                 has_more_content,
             ) = await data_strings.get_strings(
                 cur_sha256.content_stream,
@@ -778,6 +779,7 @@ async def get_common_strings(
                 take_n_strings * 2,  # doubled to reduce number of calls to find common strings
             )
             # set all the internals
+            cur_sha256.content_read += read_content_length
             cur_sha256.strings.update(set(x.string for x in strings))
             if has_more_content:
                 all_files_complete = False
@@ -785,9 +787,20 @@ async def get_common_strings(
         common_strings = find_common_strings(sha256_info[0].strings, sha256_info[1].strings)
         # Exit if all files have no more content
         if all_files_complete:
-            incomplete_compare = False
+            all_file_content_read = False
             break
 
     qr.set_security_headers(ctx, resp)
+
+    # All content is read so all strings were found.
+    incomplete_compare = True
+    if all_file_content_read:
+        incomplete_compare = False
+
+    # If the content of a file is longer than what was read not all strings were found.
+    if max_bytes_to_read is not None:
+        for f in sha256_info:
+            if f.content_read > max_bytes_to_read - 2:
+                incomplete_compare = True
 
     return bedr_binaries_data.CommonBinaryStrings(strings=common_strings, incomplete=incomplete_compare)
