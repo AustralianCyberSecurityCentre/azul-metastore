@@ -15,7 +15,6 @@ from azul_bedrock.exceptions_bedrock import (
     BaseError,
     DispatcherApiException,
 )
-from azul_bedrock.models_network import DataLabel
 from azul_bedrock.models_restapi import binaries_data as bedr_binaries_data
 from cart import cart
 from fastapi import (
@@ -734,18 +733,13 @@ async def get_common_strings(
     """
 
     @dataclass
-    class Sha256Info:
-        """Sha256 stream basic info."""
+    class Sha256StreamAndStrings:
+        """Hold the stream that is being processed and the strings associated with that stream."""
 
-        sha256: str
-        source: str
-        label: DataLabel
         content_stream: AsyncIterable[bytes]
         strings: set[str] = field(default_factory=set)
-        has_more: bool = True
-        next_offset: int = 0
 
-    sha256_info: list[Sha256Info] = []
+    sha256_info: list[Sha256StreamAndStrings] = []
     for sha256 in [sha256A, sha256B]:
         # do simple hash lookup to check if user can access binary
         exists, source, label = binary_read.find_stream_references(ctx, sha256)
@@ -756,12 +750,11 @@ async def get_common_strings(
                 internal=ExceptionCodeEnum.MetastoreBinaryStreamNotFound,
                 parameters={"sha256": sha256},
             )
-        async_iterable_content = await ctx.dispatcher.async_get_binary(source, label, sha256, 0, max_bytes_to_read - 1)
+        if max_bytes_to_read is not None:
+            max_bytes_to_read = max_bytes_to_read - 1
+        async_iterable_content = await ctx.dispatcher.async_get_binary(source, label, sha256, 0, max_bytes_to_read)
         sha256_info.append(
-            Sha256Info(
-                sha256=sha256,
-                source=source,
-                label=label,
+            Sha256StreamAndStrings(
                 content_stream=async_iterable_content,
             )
         )
@@ -773,7 +766,7 @@ async def get_common_strings(
         for cur_sha256 in sha256_info:
             (
                 strings,
-                read_content_length,
+                _read_content_length,
                 has_more_content,
             ) = await data_strings.get_strings(
                 cur_sha256.content_stream,
@@ -785,10 +778,8 @@ async def get_common_strings(
                 take_n_strings * 2,  # doubled to reduce number of calls to find common strings
             )
             # set all the internals
-            cur_sha256.has_more = has_more_content
-            cur_sha256.next_offset = cur_sha256.next_offset + read_content_length
             cur_sha256.strings.update(set(x.string for x in strings))
-            if cur_sha256.has_more:
+            if has_more_content:
                 all_files_complete = False
 
         common_strings = find_common_strings(sha256_info[0].strings, sha256_info[1].strings)
