@@ -5,11 +5,16 @@ import itertools
 import logging
 import re
 import time
+from dataclasses import dataclass, field
 from typing import AsyncIterable, Awaitable, Callable, Generator
 
 import pyzipper
 from azul_bedrock.exception_enums import ExceptionCodeEnum
-from azul_bedrock.exceptions_bedrock import ApiException, BaseError, DispatcherApiException
+from azul_bedrock.exceptions_bedrock import (
+    ApiException,
+    BaseError,
+    DispatcherApiException,
+)
 from azul_bedrock.models_restapi import binaries_data as bedr_binaries_data
 from cart import cart
 from fastapi import (
@@ -103,7 +108,11 @@ async def download_binary_encoded(
         # Disable digestors as we don't need them and they are super slow.
         packed_cart_stream = cart.async_pack_iterable(async_iter_content, auto_digests=())
         qr.set_security_headers(ctx, resp)
-        return StreamingResponse(packed_cart_stream, media_type="application/octet-stream", status_code=HTTP_200_OK)
+        return StreamingResponse(
+            packed_cart_stream,
+            media_type="application/octet-stream",
+            status_code=HTTP_200_OK,
+        )
     except (HTTPException, ApiException) as e:
         qr.set_security_headers(ctx, resp, ex=e)
         raise
@@ -252,10 +261,16 @@ async def download_binary_raw(
 )
 def get_hex_view(
     resp: Response,
-    sha256: str = Path(..., pattern="[a-fA-F0-9]{64}", description="SHA256 of entity to get hexview from"),
+    sha256: str = Path(
+        ...,
+        pattern="[a-fA-F0-9]{64}",
+        description="SHA256 of entity to get hexview from",
+    ),
     offset: int = Query(0, ge=0, description="Return hexview from this offset"),
     max_bytes_to_read: int | None = Query(
-        None, ge=0, description="How many bytes to return, this must be set to return a range"
+        None,
+        ge=0,
+        description="How many bytes to return, this must be set to return a range",
     ),
     shortform: bool = Query(
         False,
@@ -318,7 +333,13 @@ def get_hex_view(
         else:
             end_byte = offset + max_bytes_to_read - 1
 
-        rsp = ctx.dispatcher.get_binary(source=source, label=label, sha256=sha256, start_pos=offset, end_pos=end_byte)
+        rsp = ctx.dispatcher.get_binary(
+            source=source,
+            label=label,
+            sha256=sha256,
+            start_pos=offset,
+            end_pos=end_byte,
+        )
 
         data = rsp.content
 
@@ -372,7 +393,8 @@ async def _handle_search_query(
     max_results: int,
     ctx: context.Context,
     provider: Callable[
-        [AsyncIterable[bytes], int], Awaitable[tuple[list[bedr_binaries_data.SearchResult], int, bool]]
+        [AsyncIterable[bytes], int],
+        Awaitable[tuple[list[bedr_binaries_data.SearchResult], int, bool]],
     ],
     is_ai_filtering: bool = False,
 ) -> bedr_binaries_data.BinaryStrings:
@@ -432,7 +454,11 @@ DEFAULT_MAX_BYTES_TO_READ = 10 * 1024 * 1024  # 10MB worth of strings.
 )
 async def get_strings(
     resp: Response,
-    sha256: str = Path(..., pattern="[a-fA-F0-9]{64}", description="SHA256 of entity to get strings from"),
+    sha256: str = Path(
+        ...,
+        pattern="[a-fA-F0-9]{64}",
+        description="SHA256 of entity to get strings from",
+    ),
     min_length: int = Query(4, ge=0, description="Minimum length of string (when decoded)."),
     max_length: int = Query(200, ge=0, description="Maximum length of string (when decoded)."),
     offset: int = Query(0, ge=0, description="Search for strings from offset"),
@@ -447,7 +473,8 @@ async def get_strings(
     regex: str | None = Query(None, description="Regex pattern to search strings with"),
     ctx: context.Context = Depends(qr.ctx),
     file_format: str | None = Query(
-        None, description="File type for AI string filter (required if using the ai filter)."
+        None,
+        description="File type for AI string filter (required if using the ai filter).",
     ),
 ) -> bedr_binaries_data.BinaryStrings:
     """Return strings found in the binary.
@@ -488,7 +515,13 @@ async def get_strings(
         file was reached.
         """
         strings, read_content_length, has_more_content = await data_strings.get_strings(
-            data_stream, min_length, max_length, current_offset, exported_find_filter, exported_regex, take_n_strings
+            data_stream,
+            min_length,
+            max_length,
+            current_offset,
+            exported_find_filter,
+            exported_regex,
+            take_n_strings,
         )
         # Sort list so next n strings are correct
         strings.sort(key=lambda x: x.offset)
@@ -496,7 +529,13 @@ async def get_strings(
 
     try:
         search = await _handle_search_query(
-            sha256, offset, max_bytes_to_read, take_n_strings, ctx, search_handler, is_ai_filtering
+            sha256,
+            offset,
+            max_bytes_to_read,
+            take_n_strings,
+            ctx,
+            search_handler,
+            is_ai_filtering,
         )
     except (HTTPException, ApiException) as e:
         qr.set_security_headers(ctx, resp, ex=e)
@@ -590,10 +629,16 @@ async def get_strings(
 )
 async def search_hex(
     resp: Response,
-    sha256: str = Path(..., pattern="[a-fA-F0-9]{64}", description="SHA256 of entity to get strings from"),
+    sha256: str = Path(
+        ...,
+        pattern="[a-fA-F0-9]{64}",
+        description="SHA256 of entity to get strings from",
+    ),
     offset: int = Query(0, ge=0, description="Search for hits from offset"),
     max_bytes_to_read: int | None = Query(
-        None, ge=0, description="How many bytes to search for, if this is not set, return to EOF"
+        None,
+        ge=0,
+        description="How many bytes to search for, if this is not set, return to EOF",
     ),
     take_n_hits: int = Query(1000, ge=0, description="How many hits to return"),
     filter: str = Query(description="Hex filter to apply to the file"),
@@ -636,3 +681,128 @@ async def search_hex(
 
     qr.set_security_headers(ctx, resp)
     return search
+
+
+def find_common_strings(stringsA: set[str], stringsB: set[str]) -> list[str]:
+    """Find all common strings between two sets."""
+    result = []
+    for s in stringsA:
+        if s in stringsB:
+            result.append(s)
+    return result
+
+
+@router.get(
+    "/v0/binaries/{sha256A}/{sha256B}/strings",
+    response_model=bedr_binaries_data.CommonBinaryStrings,
+    response_model_exclude_unset=True,
+    responses={
+        HTTP_200_OK: {
+            "description": "Strings found in binary",
+            "content": {"application/json": {}},
+        },
+        HTTP_400_BAD_REQUEST: {"model": BaseError, "description": "Unsupported"},
+    },
+)
+async def get_common_strings(
+    resp: Response,
+    sha256A: str = Path(
+        ...,
+        pattern="[a-fA-F0-9]{64}",
+        description="SHA256 A to get common strings for.",
+    ),
+    sha256B: str = Path(
+        ...,
+        pattern="[a-fA-F0-9]{64}",
+        description="SHA256 B to get common strings for.",
+    ),
+    min_length: int = Query(4, ge=0, description="Minimum length of string (when decoded)."),
+    max_length: int = Query(200, ge=0, description="Maximum length of string (when decoded)."),
+    max_bytes_to_read: int | None = Query(
+        DEFAULT_MAX_BYTES_TO_READ,
+        ge=0,
+        description="How many bytes to search for, if this is not set, "
+        + "returns 10MB of the file, if it set to larger than the file the whole file will be searched.",
+    ),
+    take_n_strings: int = Query(5000, gt=0, description="Stop once at least this many common strings are found."),
+    ctx: context.Context = Depends(qr.ctx),
+) -> bedr_binaries_data.CommonBinaryStrings:
+    """Return strings found in the binary.
+
+    Looks for ASCII, UTF-16 and UTF-32 big and little endian strings.
+    """
+
+    @dataclass
+    class Sha256StreamAndStrings:
+        """Hold the stream that is being processed and the strings associated with that stream."""
+
+        content_stream: AsyncIterable[bytes]
+        content_read: int = 0
+        strings: set[str] = field(default_factory=set)
+
+    sha256_info: list[Sha256StreamAndStrings] = []
+    for sha256 in [sha256A, sha256B]:
+        # do simple hash lookup to check if user can access binary
+        exists, source, label = binary_read.find_stream_references(ctx, sha256)
+        if not exists:
+            raise ApiException(
+                status_code=HTTP_404_NOT_FOUND,
+                ref="Item not found",
+                internal=ExceptionCodeEnum.MetastoreBinaryStreamNotFound,
+                parameters={"sha256": sha256},
+            )
+        if max_bytes_to_read is not None:
+            max_bytes_to_read = max_bytes_to_read - 1
+        async_iterable_content = await ctx.dispatcher.async_get_binary(source, label, sha256, 0, max_bytes_to_read)
+        sha256_info.append(
+            Sha256StreamAndStrings(
+                content_stream=async_iterable_content,
+            )
+        )
+    common_strings: list[str] = list()
+    all_file_content_read = False
+
+    while len(common_strings) < take_n_strings:
+        all_files_complete = True
+        for cur_sha256 in sha256_info:
+            (
+                strings,
+                read_content_length,
+                has_more_content,
+            ) = await data_strings.get_strings(
+                data_stream=cur_sha256.content_stream,
+                min_length=min_length,
+                max_length=max_length,
+                offset=0,
+                find_string=None,
+                find_regex=None,
+                strings_to_read_before_stopping=take_n_strings
+                * 2,  # doubled to reduce number of calls to find common strings
+            )
+            # set all the internals
+            cur_sha256.content_read += read_content_length
+            cur_sha256.strings.update(set(x.string for x in strings))
+            if has_more_content:
+                all_files_complete = False
+
+        common_strings = find_common_strings(sha256_info[0].strings, sha256_info[1].strings)
+        # Exit if all files have no more content
+        if all_files_complete:
+            all_file_content_read = True
+            break
+
+    qr.set_security_headers(ctx, resp)
+
+    # All content is read so all strings were found.
+    incomplete_compare = True
+    if all_file_content_read:
+        incomplete_compare = False
+
+    # If the content of a file is longer than what was read not all strings were found.
+    if max_bytes_to_read is not None:
+        for f in sha256_info:
+            if f.content_read > max_bytes_to_read - 2:
+                incomplete_compare = True
+    # Sort for consistency as sets are being used.
+    common_strings.sort()
+    return bedr_binaries_data.CommonBinaryStrings(strings=common_strings, incomplete=incomplete_compare)

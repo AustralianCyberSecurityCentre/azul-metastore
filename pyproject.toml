@@ -24,8 +24,8 @@ classifiers=[
     "Topic :: Software Development :: Libraries",
 ]
 dependencies = [
-    "azul-bedrock>=11.0.30",
-    "azul-security>=0.8.0.0",
+    "azul-bedrock>=11.0.89",
+    "azul-security>=11.0.30",
     "black>=26.1.0",
     "cachetools>=7.0.0",
     "cart>=1.2.3",
@@ -63,7 +63,7 @@ statistics = "azul_metastore.restapi.statistics:router"
 [tool.uv]
 package = true
 exclude-newer = "1 week"
-exclude-newer-package = { azul-bedrock = false, azul-runner = false, azul-security=false, azul-metastore = false, azul-nsrl-lookup-serve=false, azul-nsrl-lookup-server=false, azul-plugin-retrohunt = false }
+exclude-newer-package = { azul-bedrock = false, azul-runner = false, azul-security=false, azul-metastore = false, azul-nsrl-lookup-serve=false, azul-nsrl-lookup-server=false, azul-plugin-retrohunt = false, malpz=false }
 
 [tool.uv.sources]
 azul-bedrock = { index="cache"}
@@ -72,6 +72,7 @@ azul-metastore = { index="cache"}
 azul-security = { index="cache"}
 azul-nsrl-lookup-server = { index="cache"}
 azul-plugin-retrohunt = { index="cache" }
+malpz = { index="cache" }
 
 [project.urls]
 Documentation = "https://australiancybersecuritycentre.github.io/azul/"
