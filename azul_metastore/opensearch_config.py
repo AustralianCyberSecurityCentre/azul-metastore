@@ -125,11 +125,6 @@ def generate_security_resources() -> tuple[list[tuple[str, dict]], list[tuple[st
     role_mappings["azul_read"] = "azul_read"
     role_mappings["s-any"] = "azul_read"
     role_mappings["azul_write"] = "azul_write"
-    role_mappings["azul-fill1"] = "azul_read"
-    role_mappings["azul-fill2"] = "azul_read"
-    role_mappings["azul-fill3"] = "azul_read"
-    role_mappings["azul-fill4"] = "azul_read"
-    role_mappings["azul-fill5"] = "azul_read"
 
     for safe, unsafe in role_mappings.items():
         if safe not in roles:
