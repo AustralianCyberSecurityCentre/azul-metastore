@@ -5,6 +5,7 @@ import logging
 import os
 from typing import AsyncIterable
 
+import pendulum
 from azul_bedrock import exceptions_metastore
 from azul_bedrock import models_network as azm
 from azul_bedrock.exception_enums import ExceptionCodeEnum
@@ -12,6 +13,7 @@ from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
 from azul_bedrock.exceptions_security import SecurityAccessException, SecurityParseException
 from azul_bedrock.models_restapi import binaries_data as bedr_bdata
 from fastapi import UploadFile
+from pydantic import BaseModel
 from starlette.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND,
@@ -389,3 +391,78 @@ async def high_level_submit_binary(
         return_val.append(new_model)
 
     return return_val
+
+
+class DownloadResponse(BaseModel):
+    """Response from a download request."""
+
+    # Sha256 that was requested for download.
+    sha256: str
+    # Security classification associated with the download event.
+    security: str
+
+
+async def submit_download_request(
+    ctx: context.Context,
+    sha256: str,
+    source: str,
+    security: str,
+    user: str,
+    *,
+    references: dict | None = None,
+    submit_settings: dict | None = None,
+) -> DownloadResponse:
+    """Submit a binary download request to dispatcher."""
+    if references is None:
+        references = dict()
+    if submit_settings is None:
+        submit_settings = dict()
+
+    try:
+        ctx.azsec.check_access(ctx.get_user_access().security.labels, security, raise_error=True)
+    except SecurityParseException:
+        raise ApiException(
+            status_code=HTTP_422_UNPROCESSABLE_CONTENT,
+            internal=ExceptionCodeEnum.MetastoreBadBinarySubmissionBadSecurityString,
+            ref="Must provide valid security string.",
+        ) from None
+    except SecurityAccessException as e:
+        raise ApiException(
+            status_code=HTTP_422_UNPROCESSABLE_CONTENT,
+            ref="security greater than user permissions",
+            internal=ExceptionCodeEnum.MetastoreBadBinarySubmissionUserSecurity,
+            parameters={"inner_exception": str(e)},
+        ) from e
+
+    author = azm.Author(category="user", name=user)
+    now = pendulum.now(tz=pendulum.UTC)
+    download_event = azm.DownloadEvent(
+        model_version=azm.CURRENT_MODEL_VERSION,
+        kafka_key="meta-temp",  # temporary id so we can create the object
+        timestamp=now,
+        author=author,
+        entity=azm.DownloadEvent.Entity(
+            hash=sha256,
+        ),
+        source=azm.Source(
+            security=security,
+            name=source,
+            timestamp=now,
+            references=references,
+            path=[],
+            settings=submit_settings,
+        ),
+        action=azm.DownloadAction.Requested,
+    )
+
+    resp = ctx.dispatcher.submit_events(events=[download_event], model=azm.ModelType.Download, include_ok=True)
+
+    if len(resp.ok) == 0:
+        raise ApiException(
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+            ref="Dispatcher rejected the submitted events",
+            internal=ExceptionCodeEnum.MetastoreBinarySubmitDispatcherRejectedEvent,
+            parameters={"response": str(resp)},
+        )
+
+    return DownloadResponse(sha256=sha256, security=security)
