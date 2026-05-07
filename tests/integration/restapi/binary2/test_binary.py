@@ -326,13 +326,13 @@ class TestBinary(integration_test.BaseRestapi):
             ]
         )
         response = self.client.get(
-            "/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/similar"
+            "/v0/binaries/e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/similar/features"
         )
         self.assertEqual(200, response.status_code)
         resp = response.json()
 
         response = self.client.get(
-            "/v0/binaries/E1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/similar"
+            "/v0/binaries/E1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/similar/features"
         )
         self.assertEqual(200, response.status_code)
         resp = response.json()
