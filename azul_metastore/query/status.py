@@ -241,3 +241,70 @@ def create_status(
             author_results[get_author_from_generic_event(brr.doc)] -= 1
 
     return bad_raw_results + doc_errors, duplicate_docs, author_results
+
+
+@capture_write_stats("download")
+def create_download_status(
+    ctx: Context, raw_events: list[azm.DownloadEvent]
+) -> tuple[list[IngestError], list[azm.DownloadEvent], dict[str, int]]:
+    """Save list of statuses from download events to opensearch.
+
+    :param ctx: Context
+    :param raw_results: Results to be saved
+    :return tuple[list[dict], list[dict]]: a tuple with the bad_results and the duplicate results in seperate lists.
+    """
+    results: dict[str, dict] = dict()
+    bad_raw_results: list[IngestError] = []
+    duplicate_docs: list[azm.DownloadEvent] = []
+    # Reverse raw_results so if there are duplicate ids we get the newest event.
+    for raw_event in reversed(raw_events):
+        try:
+            normalised = basic_events.DownloadEvent.normalise(raw_event)
+            encoded = st.Status.encode_download(normalised)
+        except Exception as e:
+            # retain error and process other events
+            bad_raw_results.append(
+                IngestError(
+                    doc=raw_event, error_type=e.__class__.__name__, error_reason=str(e) + "\n" + traceback.format_exc()
+                )
+            )
+            continue
+        key_to_add = encoded["_id"]
+        if key_to_add in results:
+            # Append the raw_event as there is a duplicate.
+            duplicate_docs.append(raw_event)
+            # Check if the existing data is newer than the data to be added
+            # If it is keep the old data and drop the new data.
+            time_existing = pendulum.parse(results[key_to_add]["timestamp"])
+            time_new = pendulum.parse(encoded["timestamp"])
+            if (
+                isinstance(time_existing, pendulum.DateTime)
+                and isinstance(time_new, pendulum.DateTime)
+                and time_existing >= time_new
+            ):
+                logger.debug(
+                    f"There are duplicate document keys when encoding download status events id: '{key_to_add}'"
+                )
+                continue
+        results[key_to_add] = encoded
+    # No models are valid, nothing to send to opensearch.
+    if not results:
+        return bad_raw_results, duplicate_docs, dict()
+
+    doc_errors = ctx.man.status.w.wrap_and_index_docs(ctx.sd, results.values(), raise_on_errors=False)
+
+    author_results: dict[str, int] = defaultdict(int)
+    for r in results.values():
+        if isinstance(r, BaseModel):
+            author_results[get_author_from_generic_event(r.model_dump())] += 1
+        else:
+            author_results[get_author_from_generic_event(r)] += 1
+
+    # Subtract bad author events from expected good ones.
+    for brr in doc_errors:
+        if isinstance(brr.doc, BaseModel):
+            author_results[get_author_from_generic_event(brr.doc.model_dump())] -= 1
+        else:
+            author_results[get_author_from_generic_event(brr.doc)] -= 1
+
+    return bad_raw_results + doc_errors, duplicate_docs, author_results

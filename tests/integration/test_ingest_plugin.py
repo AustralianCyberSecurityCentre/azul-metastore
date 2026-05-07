@@ -1,7 +1,6 @@
 from unittest import mock
 
 from azul_metastore import ingestor
-from azul_metastore.common.manager import Manager
 from azul_metastore.common.wrapper import Wrapper
 from azul_metastore.query import plugin
 from tests.support import gen, integration_test
@@ -158,13 +157,10 @@ class TestIngestor(integration_test.DynamicTestCase):
         with mock.patch.object(
             Wrapper, "wrap_and_index_docs", wraps=ing.ctx.man.plugin.w.wrap_and_index_docs
         ) as plugin_wrapper:
-            with mock.patch.object(Manager, "check_canary") as check_canary:
-                check_canary.return_value = True
-
-                ing.main()
-                self.flush()
-                # Should be called exactly 1 times
-                self.assertEqual(1, plugin_wrapper.call_count)
+            ing.main()
+            self.flush()
+            # Should be called exactly 1 times
+            self.assertEqual(1, plugin_wrapper.call_count)
 
     def test_create_plugin_with_pydantic_failures(self, _get_data, _done):
         tmp = [
@@ -179,13 +175,10 @@ class TestIngestor(integration_test.DynamicTestCase):
         with mock.patch.object(
             Wrapper, "wrap_and_index_docs", wraps=ing.ctx.man.plugin.w.wrap_and_index_docs
         ) as plugin_wrapper:
-            with mock.patch.object(Manager, "check_canary") as check_canary:
-                check_canary.return_value = True
-
-                ing.main()
-                self.flush()
-                # Should be called exactly 0 times because everything should fail during pydantic validation.
-                self.assertEqual(0, plugin_wrapper.call_count)
+            ing.main()
+            self.flush()
+            # Should be called exactly 0 times because everything should fail during pydantic validation.
+            self.assertEqual(0, plugin_wrapper.call_count)
 
     def test_plugin_security_string(self, _get_data, _done):
         tmp = _get_data.return_value = [

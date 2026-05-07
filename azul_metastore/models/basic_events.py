@@ -109,3 +109,20 @@ class StatusEvent(azm.StatusEvent):
         doc.pop("retries", None)
 
         return dumped
+
+
+class DownloadEvent(azm.DownloadEvent):
+    """Download event as recived from dispatcher."""
+
+    @classmethod
+    def normalise(cls, ev: azm.DownloadEvent) -> azm.DownloadEvent:
+        """Cleanup anything dispatcher has in it that it shouldn't."""
+        # convert to dict
+        dumped = jsondict(ev)
+
+        normalise_security(dumped["author"])
+        normalise_security(dumped["source"])
+        for node in dumped["source"]["path"]:
+            normalise_security(node["author"])
+
+        return azm.DownloadEvent.model_validate(dumped)
