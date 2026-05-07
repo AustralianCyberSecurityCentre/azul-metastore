@@ -342,7 +342,7 @@ def get_similar_entropy_binaries(
     return qr.fr(ctx, bedr_binaries.SimilarEntropyMatch(matches=result), resp)
 
 
-@router.get("/v0/binaries/{sha256}/similar", response_model=qr.gr(bedr_binaries.SimilarMatch), **qr.kw)
+@router.get("/v0/binaries/{sha256}/similar/features", response_model=qr.gr(bedr_binaries.SimilarFeatureMatch), **qr.kw)
 def get_similar_feature_binaries(
     resp: Response,
     bt: BackgroundTasks,
@@ -350,7 +350,7 @@ def get_similar_feature_binaries(
     recalculate: bool = False,
     ctx: context.Context = Depends(qr.ctx),
 ):
-    """Return info about similar entities."""
+    """Return info about entities with similar features to the provided sha256."""
     gen = binary_similar.read_similar_from_features(ctx, sha256, recalculate=recalculate)
     data = next(gen)
     bt.add_task(lambda: next(gen))
