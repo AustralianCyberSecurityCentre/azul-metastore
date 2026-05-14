@@ -32,7 +32,7 @@ class TestIngestor(integration_test.DynamicTestCase):
         resp = status._get_opensearch_binary_status(self.writer, sha256="e1")
         self.assertEqual(1, len(resp))
         self.assertEqual("generic_plugin", resp[0].author.name)
-        self.assertEqual(resp[0].entity.status, "dequeued")
+        self.assertEqual(resp[0].entity.status, azm.StatusEnum.DOWNLOAD_REQUESTED.value)
 
         self.assertEqual(1, len(status._get_opensearch_binary_status(self.es1, sha256="e1")))
         self.assertEqual(1, len(status._get_opensearch_binary_status(self.es1, sha256="e2")))
@@ -158,7 +158,7 @@ class TestIngestor(integration_test.DynamicTestCase):
         resp = status._get_opensearch_binary_status(self.writer, sha256="e1")
         self.assertEqual(1, len(resp))
         self.assertEqual("generic_plugin", resp[0].author.name)
-        self.assertEqual(resp[0].entity.status, azm.StatusEnum.DEQUEUED.value)
+        self.assertEqual(resp[0].entity.status, azm.StatusEnum.DOWNLOAD_REQUESTED.value)
 
         self.assertEqual(1, len(status._get_opensearch_binary_status(self.es1, sha256="e1")))
         self.assertEqual(1, len(status._get_opensearch_binary_status(self.es1, sha256="e2")))
