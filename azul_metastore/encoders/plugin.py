@@ -44,10 +44,10 @@ class Plugin(base_encoder.BaseIndexEncoder):
                     },
                     "config": {
                         "properties": {
-                            "dynamic": "false",  # ignore extra properties here
                             # Value that needs to be searchable for filtering plugins based on config.
                             "is_processing_download_events": {"type": "boolean"},
                         },
+                        "dynamic": "false",  # ignore extra properties here
                         "type": "object",
                     },
                     "security": {"type": "keyword"},
