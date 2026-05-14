@@ -178,6 +178,47 @@ def get_binary_status(ctx: Context, sha256: str) -> list[models_restapi.StatusEv
     return statuses
 
 
+def get_binary_status_for_download_plugins(ctx: Context, sha256: str) -> list[models_restapi.StatusEvent]:
+    """Determine current status of specific plugins progress on processing a binary."""
+    sha256 = sha256.lower()
+    map_statuses: dict[str, models_restapi.StatusEvent] = {}
+
+    # read out which plugins should exist in the system
+    download_plugins = plugin.get_download_plugins(ctx)
+    # FUTURE - filter plugins based on the download requests security.
+    # This will correspond to dispatcher filtering download events by security.
+    for row in download_plugins:
+        k = f"{row.name}-{row.version}"
+        # add inactive entries, this means the plugin registered at some point
+        # since dispatcher keeps consumers for 1 day, this are probably not wanted in the final result
+        # i.e. maco deployments that change pretty frequently, we don't want all last months versions reported
+        map_statuses[k] = models_restapi.StatusEvent(
+            timestamp="",
+            entity=models_restapi.StatusEntity(
+                input=models_restapi.StatusInput(
+                    entity=models_restapi.StatusInputEntity(sha256=sha256),
+                ),
+                status="queued",
+                runtime=0,
+            ),
+            completed=0,
+            security=row.security if row.security else "",
+            author=row,
+        )
+
+    # enrich if plugins are currently or have processed the binary
+    processed = _get_opensearch_binary_status(ctx, sha256)
+
+    for row in processed:
+        k = f"{row.author.name}-{row.author.version}"
+        map_statuses[k] = row
+
+    # convert to list
+    statuses = [x for x in map_statuses.values()]
+    statuses.sort(key=lambda x: x.author.name.lower())
+    return statuses
+
+
 @capture_write_stats("status")
 def create_status(
     ctx: Context, raw_events: list[azm.StatusEvent]

@@ -55,7 +55,7 @@ class TestIngestor(integration_test.DynamicTestCase):
     def test_download_duplicate_events(self, _get_data, _done):
         _get_data.return_value = [
             gen.download(hash="e1", action=azm.DownloadAction.Requested, timestamp="2021-01-01T12:00:00+00:00"),
-            gen.download(hash="e1", action=azm.DownloadAction.Failed, timestamp="2021-01-01T12:00:01+00:00"),
+            gen.download(hash="e1", action=azm.DownloadAction.FailedNotFound, timestamp="2021-01-01T12:00:01+00:00"),
             gen.download(hash="e1", action=azm.DownloadAction.Success, timestamp="2021-01-01T12:00:02+00:00"),
         ]
 
@@ -73,7 +73,7 @@ class TestIngestor(integration_test.DynamicTestCase):
         _get_data.return_value = [
             gen.download(hash="e1", action=azm.DownloadAction.Requested, timestamp="2021-01-01T12:00:00+00:00"),
             gen.download(hash="e1", action=azm.DownloadAction.Success, timestamp="2021-01-01T12:00:02+00:00"),
-            gen.download(hash="e1", action=azm.DownloadAction.Failed, timestamp="2021-01-01T12:00:01+00:00"),
+            gen.download(hash="e1", action=azm.DownloadAction.FailedNotFound, timestamp="2021-01-01T12:00:01+00:00"),
         ]
 
         _done.side_effect = [False, True]

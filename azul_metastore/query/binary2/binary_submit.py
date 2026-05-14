@@ -12,8 +12,8 @@ from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
 from azul_bedrock.exceptions_security import SecurityAccessException, SecurityParseException
 from azul_bedrock.models_restapi import binaries_data as bedr_bdata
+from azul_bedrock.models_restapi import binaries_download as bedr_binaries_down
 from fastapi import UploadFile
-from pydantic import BaseModel
 from starlette.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND,
@@ -393,15 +393,6 @@ async def high_level_submit_binary(
     return return_val
 
 
-class DownloadResponse(BaseModel):
-    """Response from a download request."""
-
-    # Sha256 that was requested for download.
-    sha256: str
-    # Security classification associated with the download event.
-    security: str
-
-
 async def submit_download_request(
     ctx: context.Context,
     sha256: str,
@@ -411,7 +402,7 @@ async def submit_download_request(
     *,
     references: dict | None = None,
     submit_settings: dict | None = None,
-) -> DownloadResponse:
+) -> bedr_binaries_down.DownloadResponse:
     """Submit a binary download request to dispatcher."""
     if references is None:
         references = dict()
@@ -465,4 +456,9 @@ async def submit_download_request(
             parameters={"response": str(resp)},
         )
 
-    return DownloadResponse(sha256=sha256, security=security)
+    return bedr_binaries_down.DownloadResponse(
+        sha256=sha256,
+        security=security,
+        status=bedr_binaries_down.convert_download_action_to_status(azm.DownloadAction.Requested),
+        message="Download for sha256 has been requested.",
+    )

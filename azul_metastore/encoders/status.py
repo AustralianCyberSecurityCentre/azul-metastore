@@ -1,6 +1,7 @@
 """Encoder for status data."""
 
 from azul_bedrock import models_network as azm
+from azul_bedrock.models_restapi.binaries_download import convert_download_action_to_status
 
 from azul_metastore import settings
 from azul_metastore.common.utils import azsec
@@ -101,24 +102,24 @@ class Status(base_encoder.BaseIndexEncoder):
 
         return event
 
-    @staticmethod
-    def _convert_download_action_to_status(action: azm.DownloadAction) -> azm.StatusEnum:
-        """Convert a download action to a sensible status."""
-        if action == azm.DownloadAction.Failed:
-            return azm.StatusEnum.OPT_OUT
-        elif action == azm.DownloadAction.Requested:
-            return azm.StatusEnum.DEQUEUED
-        elif action == azm.DownloadAction.Success:
-            return azm.StatusEnum.COMPLETED
-
-        return azm.StatusEnum.ERROR_EXCEPTION
-
     @classmethod
     def encode_download(cls, event: azm.DownloadEvent) -> dict:
         """Encode a download event to the status opensearch layer format.
 
         Does not perform normalisation, that should occur as part of the models/basic_events.py.
         """
+        # Add a message associated with the download status.
+        # FUTURE: could get this through the runner framework and allow plugins to override message.
+        download_message = ""
+        if event.action == azm.DownloadAction.Failed:
+            download_message = "The download request has failed with an error."
+        elif event.action == azm.DownloadAction.FailedNotFound:
+            download_message = "Download was attempted but the requested sha256 was not found."
+        elif event.action == azm.DownloadAction.Requested:
+            download_message = "Download was requested and is pending."
+        elif event.action == azm.DownloadAction.Success:
+            download_message = "Download has successfully found the file and completed."
+
         new_event = {
             "_id": event.kafka_key,
             "_index_extension": cls._categorise(event.timestamp.isoformat()),
@@ -139,9 +140,9 @@ class Status(base_encoder.BaseIndexEncoder):
                 "version": event.author.version,
             },
             "entity": {
-                "status": cls._convert_download_action_to_status(event.action).value,
+                "status": convert_download_action_to_status(event.action).value,
                 "error": "",
-                "message": "",
+                "message": download_message,
                 "runtime": 0,
                 "input": {
                     "entity": {
