@@ -439,7 +439,9 @@ def find_features(ctx: Context, *, filters: list[dict] | None = None) -> list[mo
     return sorted(ret, key=lambda x: x.name)
 
 
-@cachetools.cached(cache=memcache.get_ttl_cache("plugins.full", ttl=120), lock=RLock(), key=lambda x: x.sd.unique())
+@cachetools.cached(
+    cache=memcache.get_ttl_cache("plugins.download_full", ttl=120), lock=RLock(), key=lambda x: x.sd.unique()
+)
 def get_download_plugins(
     ctx: Context,
 ) -> list[PluginAuthor]:
