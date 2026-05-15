@@ -136,3 +136,24 @@ class TestPlugins(integration_test.BaseRestapi):
         response = self.client.get("/v0/plugins/invalid1/versions/1")
         self.assertEqual(404, response.status_code)
         resp = response.json()
+
+    def test_download_plugins_get(self):
+        """Ensure when getting all download plugins the plugins listed are just the download plugins."""
+        self.write_plugin_events([gen.plugin(authornv=("a1", "1"), config={"is_processing_download_events": "true"})])
+        self.write_plugin_events([gen.plugin(authornv=("a2", "1"))])
+        self.write_plugin_events([gen.plugin(authornv=("a3", "1"), config={"is_processing_download_events": "true"})])
+        self.write_plugin_events([gen.plugin(authornv=("a4", "1"))])
+
+        response = self.client.get("v0/plugins/download")
+        self.assertEqual(200, response.status_code)
+        plugin_list = response.json()["data"]
+        print(plugin_list)
+
+        self.assertEqual(len(plugin_list), 2)
+        self.assertEqual(
+            plugin_list,
+            [
+                {"security": "", "category": "", "name": "a1", "version": "1"},
+                {"security": "", "category": "", "name": "a3", "version": "1"},
+            ],
+        )

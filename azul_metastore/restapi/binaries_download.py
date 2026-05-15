@@ -1,6 +1,7 @@
 """Submit or trigger processing for binaries."""
 
 from azul_bedrock import models_restapi
+from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException, BaseError
 from azul_bedrock.models_restapi import binaries_download as bedr_binaries_down
 from fastapi import (
@@ -8,9 +9,11 @@ from fastapi import (
     Depends,
     Form,
     HTTPException,
+    Path,
     Request,
     Response,
 )
+from starlette.status import HTTP_404_NOT_FOUND
 
 from azul_metastore import context
 from azul_metastore.query import status
@@ -59,6 +62,7 @@ async def submit_binary_download_request(
 
         result = await binary_submit.submit_download_request(
             ctx=ctx,
+            priv_ctx=qr.writer,
             sha256=sha256,
             source=source_id,
             security=security,
@@ -73,14 +77,20 @@ async def submit_binary_download_request(
 
 
 @router.get(
-    "/v0/binaries/source/download",
+    "/v0/binaries/source/download/{sha256}",
     response_model=list[models_restapi.StatusEvent],
 )
 async def get_binary_download_request_status(
     # sha256 to attempt to download
-    sha256: str = Form(description="Sha256 of file that download was requested for."),
+    sha256: str = Path(..., pattern="[a-fA-F0-9]{64}", description="Sha256 of file that download was requested for."),
     ctx: context.Context = Depends(qr.ctx),
 ):
     """Get the status per plugin for a download request that was submitted."""
     result = status.get_binary_status_for_download_plugins(ctx, sha256)
+    if len(result) == 0:
+        raise ApiException(
+            status_code=HTTP_404_NOT_FOUND,
+            internal=ExceptionCodeEnum.MetastoreDownloadRequestNotMade,
+            parameters={"sha256": sha256},
+        ) from None
     return result

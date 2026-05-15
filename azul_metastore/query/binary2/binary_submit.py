@@ -30,6 +30,7 @@ from azul_metastore.query.binary2 import (
     binary_submit_dataless,
     binary_submit_manual,
 )
+from azul_metastore.query.status import create_download_status
 
 logger = logging.getLogger(__name__)
 
@@ -395,6 +396,7 @@ async def high_level_submit_binary(
 
 async def submit_download_request(
     ctx: context.Context,
+    priv_ctx: context.Context,
     sha256: str,
     source: str,
     security: str,
@@ -456,9 +458,26 @@ async def submit_download_request(
             parameters={"response": str(resp)},
         )
 
+    # expedite
+    try:
+        # write events immediately
+        create_download_status(
+            priv_ctx,
+            [azm.DownloadEvent(**x) for x in resp.ok],
+            immediate=True,
+        )
+    except Exception as e:
+        raise ApiException(
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+            ref="Unable to submit binary event to metastore immediately",
+            internal=ExceptionCodeEnum.MetastoreUnableToSubmitBinaryEventImmediately,
+            parameters={"inner_exception": str(e)},
+        ) from e
+
     return bedr_binaries_down.DownloadResponse(
-        sha256=sha256,
-        security=security,
-        status=bedr_binaries_down.convert_download_action_to_status(azm.DownloadAction.Requested),
-        message="Download for sha256 has been requested.",
+        sha256=download_event.entity.hash,
+        last_download_security=security,
+        last_download_author_name=download_event.author.name,
+        last_download_timestamp=download_event.timestamp,
+        plugin_statuses=[],
     )

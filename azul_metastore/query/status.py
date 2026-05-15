@@ -209,6 +209,10 @@ def get_binary_status_for_download_plugins(ctx: Context, sha256: str) -> list[mo
     # enrich if plugins are currently or have processed the binary
     processed = _get_opensearch_binary_status(ctx, sha256)
 
+    # If nothing is processed there is no event in Opensearch so there may not even be a request so return nothing.
+    if len(processed) == 0:
+        return []
+
     for row in processed:
         k = f"{row.author.name}-{row.author.version}"
         map_statuses[k] = row
@@ -284,9 +288,19 @@ def create_status(
     return bad_raw_results + doc_errors, duplicate_docs, author_results
 
 
-@capture_write_stats("download")
+@capture_write_stats("binary")
 def create_download_status(
-    ctx: Context, raw_events: list[azm.DownloadEvent]
+    priv_ctx: Context, raw_events: list[azm.DownloadEvent], immediate: bool = False
+) -> tuple[list[IngestError], list[azm.DownloadEvent], dict[str, int]]:
+    """Write binary events to metastore.
+
+    Returns a list of ingest errors and the raw event for duplicate documents.
+    """
+    return _create_download_status(priv_ctx, raw_events, immediate)
+
+
+def _create_download_status(
+    ctx: Context, raw_events: list[azm.DownloadEvent], immediate: bool = False
 ) -> tuple[list[IngestError], list[azm.DownloadEvent], dict[str, int]]:
     """Save list of statuses from download events to opensearch.
 
@@ -332,7 +346,9 @@ def create_download_status(
     if not results:
         return bad_raw_results, duplicate_docs, dict()
 
-    doc_errors = ctx.man.status.w.wrap_and_index_docs(ctx.sd, results.values(), raise_on_errors=False)
+    doc_errors = ctx.man.status.w.wrap_and_index_docs(
+        ctx.sd, results.values(), raise_on_errors=False, refresh=immediate
+    )
 
     author_results: dict[str, int] = defaultdict(int)
     for r in results.values():
