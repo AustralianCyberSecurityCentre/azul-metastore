@@ -725,7 +725,7 @@ class Binary2(base_encoder.BaseIndexEncoder):
         This doesn't need to add historical feature names added previously, as opensearch combines them.
         """
         mp: dict = copy.copy(cls.mapping)
-        featmap: dict = mp["properties"]["features_map"]["properties"]  # type: ignore
+        featmap: dict = mp["properties"]["features_map"]["properties"]
         for feat in features:
             featmap.update({feat: {"type": "keyword"}})
         return mp

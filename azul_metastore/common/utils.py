@@ -84,7 +84,14 @@ def chunker(iterator: Iterable[T], max_items: int = 100) -> Iterable[list[T]]:
 
 def get_author_from_generic_event(doc: dict) -> str:
     """Get an author from an event document (Plugin, Binary or Status)."""
-    return doc.get("author", {}).get("name", "unknown") + "-" + doc.get("author", {}).get("version", "")
+    # Ensure if author or version are explicitly none no error is thrown.
+    author = doc.get("author", {}).get("name", "unknown")
+    if not author:
+        author = ""
+    version = doc.get("author", {}).get("version", "")
+    if not version:
+        version = ""
+    return f"{author}-{version}"
 
 
 def capture_write_stats(format: str):
