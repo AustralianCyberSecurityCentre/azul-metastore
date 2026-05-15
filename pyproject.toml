@@ -52,6 +52,7 @@ azul-metastore = "azul_metastore.entry:cli"
 [project.entry-points."azul_restapi.plugin"]
 binaries_submit = "azul_metastore.restapi.binaries_submit:router"
 binaries_data = "azul_metastore.restapi.binaries_data:router"
+binaries_download = "azul_metastore.restapi.binaries_download:router"
 binaries = "azul_metastore.restapi.binaries:router"
 features = "azul_metastore.restapi.features:router"
 users = "azul_metastore.restapi.me:router"
