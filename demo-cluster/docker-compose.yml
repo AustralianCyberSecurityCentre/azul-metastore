@@ -24,7 +24,7 @@ services:
 
   dashboards:
     # default creds are admin:password
-    image: opensearchproject/opensearch-dashboards:3.6.0@sha256:9fe2cbf1d82c3f66a0860ed140415692ce55de4711ed7877ab738e5da1a357c0
+    image: opensearchproject/opensearch-dashboards:3.6.0@sha256:1ddd64e3a07fd98bc20ccf5174760b51795630a602b81102b37d1e9ee82cb7a9
     environment:
       OPENSEARCH_HOSTS: https://10.53.0.10:9200
       OPENSEARCH_PASSWORD: password
