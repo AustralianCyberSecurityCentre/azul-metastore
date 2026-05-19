@@ -42,7 +42,7 @@ async def submit_binary_download_request(
         embed=True,
     ),
     # source submission
-    source_id: str = Body(default=None, description="Source/grouping to submit the file into", embed=True),
+    source_id: str = Body(description="Source/grouping to submit the file into", embed=True),
     references: dict[str, str] = Body(
         default=dict(),
         description="Reference key value pairs.",
