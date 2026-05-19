@@ -18,7 +18,6 @@ from starlette.status import HTTP_404_NOT_FOUND
 from azul_metastore import context
 from azul_metastore.query import status
 from azul_metastore.query.binary2 import binary_submit
-from azul_metastore.restapi.binaries_submit import SubmissionReferences, SubmissionSettings
 from azul_metastore.restapi.quick import qr
 
 router = APIRouter()
@@ -43,9 +42,17 @@ async def submit_binary_download_request(
         embed=True,
     ),
     # source submission
-    source_id: str = Body(description="Source/grouping to submit the file into", embed=True),
-    references: SubmissionReferences = Depends(SubmissionReferences.as_form),
-    settings: SubmissionSettings = Depends(SubmissionSettings.as_form),
+    source_id: str = Body(default=None, description="Source/grouping to submit the file into", embed=True),
+    references: dict[str, str] = Body(
+        default=dict(),
+        description="Reference key value pairs.",
+        embed=True,
+    ),
+    settings: dict[str, str] = Body(
+        default=dict(),
+        description="Settings key value pairs.",
+        embed=True,
+    ),
     ctx: context.Context = Depends(qr.ctx),
 ):
     """Submit a request to download a file from a remote source.
@@ -68,8 +75,8 @@ async def submit_binary_download_request(
             source=source_id,
             security=security,
             user=user,
-            references=references.references_as_dict,
-            submit_settings=settings.settings_as_dict,
+            references=references,
+            submit_settings=settings,
         )
         return qr.fr(ctx, result, resp)
     except (HTTPException, ApiException) as e:

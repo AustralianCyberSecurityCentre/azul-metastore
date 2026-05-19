@@ -20,13 +20,14 @@ class TestBinaryDownload(integration_test.BaseRestapi):
     @mock.patch("pendulum.now", lambda tz=None: pendulum.parse("2023-10-10T10:10:10Z"))
     def test_simple_download(self):
         """Download event should be generated in dispatcher upon request."""
-        data = [
-            ("sha256", (None, TEST_SHA256)),
-            ("source_id", (None, "samples")),
-            ("references", (None, json.dumps({"apple": "granny smith"}))),
-            ("security", (None, "LOW")),
-        ]
-        response = self.client.post("/v0/binaries/source/download", files=data)
+        request_data = {
+            "sha256": TEST_SHA256,
+            "source_id": "samples",
+            "references": {"apple": "granny smith"},
+            "security": "LOW",
+        }
+
+        response = self.client.post("/v0/binaries/source/download", json=request_data)
         self.assertEqual(response.status_code, 200)
 
         dp_call_args = self.dp_submit_events_mm.call_args_list
@@ -67,13 +68,14 @@ class TestBinaryDownload(integration_test.BaseRestapi):
         self.assertEqual(response.status_code, 404)
 
         # Create a download request (immediately indexed due to expedite set to true)
-        data = [
-            ("sha256", (None, TEST_SHA256)),
-            ("source_id", (None, "samples")),
-            ("references", (None, json.dumps({"apple": "granny smith"}))),
-            ("security", (None, "LOW")),
-        ]
-        response = self.client.post("/v0/binaries/source/download", files=data)
+        request_data = {
+            "sha256": TEST_SHA256,
+            "source_id": "samples",
+            "references": {"apple": "granny smith"},
+            "security": "LOW",
+        }
+
+        response = self.client.post("/v0/binaries/source/download", json=request_data)
 
         response = self.client.get(
             f"/v0/binaries/source/download/{TEST_SHA256}",
