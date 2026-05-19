@@ -26,11 +26,11 @@ router = APIRouter()
 
 @router.post(
     "/v0/binaries/source/download",
-    response_model=bedr_binaries_down.DownloadResponse,
+    response_model=qr.gr(bedr_binaries_down.DownloadResponse),
     responses={
         422: {"model": BaseError, "description": "Invalid file"},
     },
-    response_model_exclude_unset=True,
+    **qr.kw,
 )
 async def submit_binary_download_request(
     request: Request,
@@ -70,17 +70,15 @@ async def submit_binary_download_request(
             references=references.references_as_dict,
             submit_settings=settings.settings_as_dict,
         )
-        return result
+        return qr.fr(ctx, result, resp)
     except (HTTPException, ApiException) as e:
         qr.set_security_headers(ctx, resp, security, ex=e)
         raise
 
 
-@router.get(
-    "/v0/binaries/source/download/{sha256}",
-    response_model=list[models_restapi.StatusEvent],
-)
+@router.get("/v0/binaries/source/download/{sha256}", response_model=qr.gr(list[models_restapi.StatusEvent]), **qr.kw)
 async def get_binary_download_request_status(
+    resp: Response,
     # sha256 to attempt to download
     sha256: str = Path(..., pattern="[a-fA-F0-9]{64}", description="Sha256 of file that download was requested for."),
     ctx: context.Context = Depends(qr.ctx),
@@ -93,4 +91,4 @@ async def get_binary_download_request_status(
             internal=ExceptionCodeEnum.MetastoreDownloadRequestNotMade,
             parameters={"sha256": sha256},
         ) from None
-    return result
+    return qr.fr(ctx, result, resp)
