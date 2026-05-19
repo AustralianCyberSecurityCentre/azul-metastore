@@ -82,44 +82,43 @@ class TestBinaryDownload(integration_test.BaseRestapi):
         print(response.json())
         self.assertEqual(
             response.json(),
-            [
-                {
-                    "timestamp": "",
-                    "author": {"security": "", "category": "", "name": "a1", "version": "1", "stream": None},
-                    "entity": {
-                        "status": "queued",
-                        "error": None,
-                        "message": None,
-                        "runtime": 0.0,
-                        "input": {
-                            "entity": {"sha256": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"}
+            {
+                "data": [
+                    {
+                        "timestamp": "",
+                        "author": {"security": "", "category": "", "name": "a1", "version": "1"},
+                        "entity": {
+                            "status": "queued",
+                            "runtime": 0.0,
+                            "input": {
+                                "entity": {
+                                    "sha256": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+                                }
+                            },
                         },
+                        "completed": 0,
+                        "security": "",
                     },
-                    "completed": 0,
-                    "security": "",
-                },
-                {
-                    "timestamp": "2023-10-10T10:10:10+00:00",
-                    "author": {
+                    {
+                        "timestamp": "2023-10-10T10:10:10+00:00",
+                        "author": {"security": "LOW", "category": "user", "name": "high_all", "version": None},
+                        "entity": {
+                            "status": "download-requested",
+                            "error": "",
+                            "message": "Download was requested and is pending.",
+                            "runtime": 0.0,
+                            "input": {
+                                "entity": {
+                                    "sha256": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+                                }
+                            },
+                        },
+                        "completed": 0,
                         "security": "LOW",
-                        "category": "user",
-                        "name": "high_all",
-                        "version": None,
-                        "stream": None,
                     },
-                    "entity": {
-                        "status": "download-requested",
-                        "error": "",
-                        "message": "Download was requested and is pending.",
-                        "runtime": 0.0,
-                        "input": {
-                            "entity": {"sha256": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"}
-                        },
-                    },
-                    "completed": 0,
-                    "security": "LOW",
-                },
-            ],
+                ],
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
+            },
         )
 
         # Create status events to represent progress of picked up jobs.
@@ -137,48 +136,41 @@ class TestBinaryDownload(integration_test.BaseRestapi):
         print(response.json())
         self.assertEqual(
             response.json(),
-            [
-                {
-                    "timestamp": "2023-10-11T10:10:10+00:00",
-                    "author": {
+            {
+                "data": [
+                    {
+                        "timestamp": "2023-10-11T10:10:10+00:00",
+                        "author": {"security": "LOW TLP:CLEAR", "category": "plugin", "name": "a1", "version": "1"},
+                        "entity": {
+                            "status": "completed",
+                            "runtime": 10.0,
+                            "input": {
+                                "entity": {
+                                    "sha256": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+                                }
+                            },
+                        },
+                        "completed": 1,
                         "security": "LOW TLP:CLEAR",
-                        "category": "plugin",
-                        "name": "a1",
-                        "version": "1",
-                        "stream": None,
                     },
-                    "entity": {
-                        "status": "completed",
-                        "error": None,
-                        "message": None,
-                        "runtime": 10.0,
-                        "input": {
-                            "entity": {"sha256": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"}
+                    {
+                        "timestamp": "2023-10-10T10:10:10+00:00",
+                        "author": {"security": "LOW", "category": "user", "name": "high_all", "version": None},
+                        "entity": {
+                            "status": "download-requested",
+                            "error": "",
+                            "message": "Download was requested and is pending.",
+                            "runtime": 0.0,
+                            "input": {
+                                "entity": {
+                                    "sha256": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+                                }
+                            },
                         },
-                    },
-                    "completed": 1,
-                    "security": "LOW TLP:CLEAR",
-                },
-                {
-                    "timestamp": "2023-10-10T10:10:10+00:00",
-                    "author": {
+                        "completed": 0,
                         "security": "LOW",
-                        "category": "user",
-                        "name": "high_all",
-                        "version": None,
-                        "stream": None,
                     },
-                    "entity": {
-                        "status": "download-requested",
-                        "error": "",
-                        "message": "Download was requested and is pending.",
-                        "runtime": 0.0,
-                        "input": {
-                            "entity": {"sha256": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"}
-                        },
-                    },
-                    "completed": 0,
-                    "security": "LOW",
-                },
-            ],
+                ],
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
+            },
         )

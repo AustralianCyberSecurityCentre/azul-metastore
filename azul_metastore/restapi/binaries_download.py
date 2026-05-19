@@ -6,8 +6,8 @@ from azul_bedrock.exceptions_bedrock import ApiException, BaseError
 from azul_bedrock.models_restapi import binaries_download as bedr_binaries_down
 from fastapi import (
     APIRouter,
+    Body,
     Depends,
-    Form,
     HTTPException,
     Path,
     Request,
@@ -35,14 +35,15 @@ router = APIRouter()
 async def submit_binary_download_request(
     request: Request,
     resp: Response,
-    # sha256 to attempt to download
-    sha256: str = Form(description="Sha256 of file to download from external source."),
-    security: str = Form(
+    # sha256 to Body to download
+    sha256: str = Body(description="Sha256 of file to download from external source.", embed=True),
+    security: str = Body(
         "",
         description="Space separated list of security labels e.g 'OFFICIAL TLP:CLEAR'",
+        embed=True,
     ),
     # source submission
-    source_id: str = Form(description="Source/grouping to submit the file into"),
+    source_id: str = Body(description="Source/grouping to submit the file into", embed=True),
     references: SubmissionReferences = Depends(SubmissionReferences.as_form),
     settings: SubmissionSettings = Depends(SubmissionSettings.as_form),
     ctx: context.Context = Depends(qr.ctx),
