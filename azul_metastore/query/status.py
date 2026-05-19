@@ -215,7 +215,9 @@ def get_binary_status_for_download_plugins(ctx: Context, sha256: str) -> list[mo
 
     for row in processed:
         k = f"{row.author.name}-{row.author.version}"
-        map_statuses[k] = row
+        # Only map download plugin status results and any submitted download requests, not other plugin results.
+        if k in map_statuses.keys() or row.entity.status == azm.StatusEnum.DOWNLOAD_REQUESTED.value:
+            map_statuses[k] = row
 
     # convert to list
     statuses = [x for x in map_statuses.values()]

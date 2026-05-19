@@ -128,7 +128,11 @@ class TestBinaryDownload(integration_test.BaseRestapi):
         now = pendulum.now(tz=UTC)
         now = now.add(days=1)
         self.write_status_events(
-            [gen.status(eid=f"{TEST_SHA256}", authornv=("a1", "1"), ts=now, status=azm.StatusEnum.COMPLETED.value)]
+            [
+                gen.status(eid=f"{TEST_SHA256}", authornv=("a1", "1"), ts=now, status=azm.StatusEnum.COMPLETED.value),
+                # Creat an event from a non-download plugin that should be ignored
+                gen.status(eid=f"{TEST_SHA256}", authornv=("a2", "1"), ts=now, status=azm.StatusEnum.COMPLETED.value),
+            ]
         )
 
         response = self.client.get(
