@@ -100,24 +100,7 @@ class TestBinaryDownload(integration_test.BaseRestapi):
                         },
                         "completed": 0,
                         "security": "",
-                    },
-                    {
-                        "timestamp": "2023-10-10T10:10:10+00:00",
-                        "author": {"security": "LOW", "category": "user", "name": "high_all", "version": None},
-                        "entity": {
-                            "status": "download-requested",
-                            "error": "",
-                            "message": "Download was requested and is pending.",
-                            "runtime": 0.0,
-                            "input": {
-                                "entity": {
-                                    "sha256": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
-                                }
-                            },
-                        },
-                        "completed": 0,
-                        "security": "LOW",
-                    },
+                    }
                 ],
                 "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
             },
@@ -137,6 +120,36 @@ class TestBinaryDownload(integration_test.BaseRestapi):
 
         response = self.client.get(
             f"/v0/binaries/source/download/{TEST_SHA256}",
+        )
+        self.assertEqual(response.status_code, 200)
+        print(response.json())
+        self.assertEqual(
+            response.json(),
+            {
+                "data": [
+                    {
+                        "timestamp": "2023-10-11T10:10:10+00:00",
+                        "author": {"security": "LOW TLP:CLEAR", "category": "plugin", "name": "a1", "version": "1"},
+                        "entity": {
+                            "status": "completed",
+                            "runtime": 10.0,
+                            "input": {
+                                "entity": {
+                                    "sha256": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+                                }
+                            },
+                        },
+                        "completed": 1,
+                        "security": "LOW TLP:CLEAR",
+                    },
+                ],
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
+            },
+        )
+
+        # Include the download request in the response
+        response = self.client.get(
+            f"/v0/binaries/source/download/{TEST_SHA256}?include_download_requests=true",
         )
         self.assertEqual(response.status_code, 200)
         print(response.json())

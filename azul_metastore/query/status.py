@@ -178,7 +178,9 @@ def get_binary_status(ctx: Context, sha256: str) -> list[models_restapi.StatusEv
     return statuses
 
 
-def get_binary_status_for_download_plugins(ctx: Context, sha256: str) -> list[models_restapi.StatusEvent]:
+def get_binary_status_for_download_plugins(
+    ctx: Context, sha256: str, include_download_requests: bool = False
+) -> list[models_restapi.StatusEvent]:
     """Determine current status of specific plugins progress on processing a binary."""
     sha256 = sha256.lower()
     map_statuses: dict[str, models_restapi.StatusEvent] = {}
@@ -215,9 +217,14 @@ def get_binary_status_for_download_plugins(ctx: Context, sha256: str) -> list[mo
 
     for row in processed:
         k = f"{row.author.name}-{row.author.version}"
-        # Only map download plugin status results and any submitted download requests, not other plugin results.
-        if k in map_statuses.keys() or row.entity.status == azm.StatusEnum.DOWNLOAD_REQUESTED.value:
+        # Only map download plugin status results
+        if k in map_statuses.keys():
             map_statuses[k] = row
+
+        # Also map all the download requests.
+        if include_download_requests:
+            if row.entity.status == azm.StatusEnum.DOWNLOAD_REQUESTED.value:
+                map_statuses[k] = row
 
     # convert to list
     statuses = [x for x in map_statuses.values()]

@@ -10,6 +10,7 @@ from fastapi import (
     Depends,
     HTTPException,
     Path,
+    Query,
     Request,
     Response,
 )
@@ -89,10 +90,13 @@ async def get_binary_download_request_status(
     resp: Response,
     # sha256 to attempt to download
     sha256: str = Path(..., pattern="[a-fA-F0-9]{64}", description="Sha256 of file that download was requested for."),
+    include_download_requests: bool = Query(
+        False, description="Include the Download requests with the plugin statuses."
+    ),
     ctx: context.Context = Depends(qr.ctx),
 ):
     """Get the status per plugin for a download request that was submitted."""
-    result = status.get_binary_status_for_download_plugins(ctx, sha256)
+    result = status.get_binary_status_for_download_plugins(ctx, sha256, include_download_requests)
     if len(result) == 0:
         raise ApiException(
             status_code=HTTP_404_NOT_FOUND,
