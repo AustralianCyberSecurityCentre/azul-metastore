@@ -1,7 +1,10 @@
 """Encoder for status data."""
 
 from azul_bedrock import models_network as azm
-from azul_bedrock.models_restapi.binaries_download import convert_download_action_to_status
+from azul_bedrock.models_restapi.binaries_download import (
+    convert_download_action_to_message,
+    convert_download_action_to_status,
+)
 
 from azul_metastore import settings
 from azul_metastore.common.utils import azsec
@@ -108,18 +111,6 @@ class Status(base_encoder.BaseIndexEncoder):
 
         Does not perform normalisation, that should occur as part of the models/basic_events.py.
         """
-        # Add a message associated with the download status.
-        # FUTURE: could get this through the runner framework and allow plugins to override message.
-        download_message = ""
-        if event.action == azm.DownloadAction.Failed:
-            download_message = "The download request has failed with an error."
-        elif event.action == azm.DownloadAction.FailedNotFound:
-            download_message = "Download was attempted but the requested sha256 was not found."
-        elif event.action == azm.DownloadAction.Requested:
-            download_message = "Download was requested and is pending."
-        elif event.action == azm.DownloadAction.Success:
-            download_message = "Download has successfully found the file and completed."
-
         new_event = {
             "_id": event.kafka_key,
             "_index_extension": cls._categorise(event.timestamp.isoformat()),
@@ -142,7 +133,7 @@ class Status(base_encoder.BaseIndexEncoder):
             "entity": {
                 "status": convert_download_action_to_status(event.action).value,
                 "error": "",
-                "message": download_message,
+                "message": convert_download_action_to_message(event.action),
                 "runtime": 0,
                 "input": {
                     "entity": {
