@@ -162,12 +162,32 @@ class TestBinaryRead(integration_test.DynamicTestCase):
         self.assertEqual((False, "", azm.DataLabel.TEST), result)
 
     def test_find_stream_references_dataless_present(self):
-        """Find a stream when there is a dataless event attempting to obscure the datastream."""
+        """Find a stream when there is a dataless event attempting to obscure the datastream.
+
+        # Note data has been designed to account for different sorting mechanisms of opensearch
+        (most hits, alphabetical etc)
+        It also ensures that the source matches the actual stream that is found.
+        As you could have a query that finds the correct event but attributes it to an incorrect source.
+        """
 
         self.write_binary_events(
             [
                 gen.binary_event(
-                    eid="e1", authornv=("a1", "1"), authorsec=gen.g1_1, sourceit=("s1", "2001-01-01T00:00:00Z")
+                    eid="e1", authornv=("a1", "1"), authorsec=gen.g1_1, sourceit=("s3", "2001-01-01T00:00:00Z")
+                ),
+                gen.binary_event(
+                    eid="e1",
+                    authornv=("a2", "1"),
+                    authorsec=gen.g1_1,
+                    sourceit=("s1", "2002-01-01T00:00:00Z"),
+                    datas=[],
+                ),
+                gen.binary_event(
+                    eid="e1",
+                    authornv=("a2", "1"),
+                    authorsec=gen.g1_1,
+                    sourceit=("s4", "2002-01-01T00:00:00Z"),
+                    datas=[],
                 ),
                 gen.binary_event(
                     eid="e1",
@@ -183,10 +203,17 @@ class TestBinaryRead(integration_test.DynamicTestCase):
                     sourceit=("s2", "2000-01-01T00:00:00Z"),
                     datas=[],
                 ),
+                gen.binary_event(
+                    eid="e1",
+                    authornv=("a1", "1"),
+                    authorsec=gen.g1_1,
+                    sourceit=("s2", "2004-01-01T00:00:00Z"),
+                    datas=[],
+                ),
             ]
         )
         result = binary_read.find_stream_references(self.writer, "e1")
-        self.assertEqual((True, "s1", "content"), result)
+        self.assertEqual((True, "s3", "content"), result)
 
     def test_binary_count(self):
         self.write_binary_events(
