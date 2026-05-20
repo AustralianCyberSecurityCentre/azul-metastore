@@ -161,6 +161,33 @@ class TestBinaryRead(integration_test.DynamicTestCase):
         result = binary_read.find_stream_references(self.writer, "E10")
         self.assertEqual((False, "", azm.DataLabel.TEST), result)
 
+    def test_find_stream_references_dataless_present(self):
+        """Find a stream when there is a dataless event attempting to obscure the datastream."""
+
+        self.write_binary_events(
+            [
+                gen.binary_event(
+                    eid="e1", authornv=("a1", "1"), authorsec=gen.g1_1, sourceit=("s1", "2001-01-01T00:00:00Z")
+                ),
+                gen.binary_event(
+                    eid="e1",
+                    authornv=("a2", "1"),
+                    authorsec=gen.g1_1,
+                    sourceit=("s2", "2002-01-01T00:00:00Z"),
+                    datas=[],
+                ),
+                gen.binary_event(
+                    eid="e1",
+                    authornv=("a3", "1"),
+                    authorsec=gen.g1_1,
+                    sourceit=("s2", "2000-01-01T00:00:00Z"),
+                    datas=[],
+                ),
+            ]
+        )
+        result = binary_read.find_stream_references(self.writer, "e1")
+        self.assertEqual((True, "s1", "content"), result)
+
     def test_binary_count(self):
         self.write_binary_events(
             [

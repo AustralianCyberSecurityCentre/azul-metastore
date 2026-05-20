@@ -1,5 +1,6 @@
 """Queries for reading various information about binaries that doesn't fit elsewhere."""
 
+from azul_bedrock import exceptions_bedrock
 from azul_bedrock import models_network as azm
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import BaseAzulException
@@ -48,7 +49,6 @@ def find_stream_references(ctx: Context, sha256: str) -> tuple[bool, str, azm.Da
             "CHILDREN": {
                 "children": {"type": "metadata"},
                 "aggs": {
-                    "SOURCES": {"terms": {"field": "source.name"}},
                     "DATASTREAMS": {
                         "terms": {"field": "uniq_data"},
                         "aggs": {
@@ -57,6 +57,7 @@ def find_stream_references(ctx: Context, sha256: str) -> tuple[bool, str, azm.Da
                                     "size": 1,
                                     "sort": [{"timestamp": {"order": "desc"}}],
                                     "_source": [
+                                        "source.name",
                                         "datastreams.label",
                                         "datastreams.sha256",
                                     ],
@@ -70,23 +71,27 @@ def find_stream_references(ctx: Context, sha256: str) -> tuple[bool, str, azm.Da
     }
     resp = ctx.man.binary2.w.complex_search(ctx.sd, body=body)
     aggs = resp["aggregations"]["CHILDREN"]
-
-    if not aggs["SOURCES"]["buckets"]:
+    if not aggs["DATASTREAMS"]["buckets"]:
         return (False, "", azm.DataLabel.TEST)
-
-    source = aggs["SOURCES"]["buckets"][0]["key"]
-    label: azm.DataLabel | None = None
     for candidate in aggs["DATASTREAMS"]["buckets"]:
-        doc = candidate["DATASTREAMS"]["hits"]["hits"][0]["_source"]["datastreams"]
-        for stream in doc:
-            if stream["sha256"] == sha256:
-                try:
-                    label = azm.DataLabel(stream["label"])
-                except ValueError:
-                    raise  # TODO raise appropriate error.
-    if label is None:
-        return (False, "", azm.DataLabel.TEST)
-    return (True, source, label)
+        for label_doc in candidate["DATASTREAMS"]["hits"]["hits"]:
+            doc = label_doc["_source"]["datastreams"]
+            source = label_doc["_source"]["source"]["name"]
+            for stream in doc:
+                if stream["sha256"] == sha256:
+                    try:
+                        # once label is found exit immediately
+                        label = azm.DataLabel(stream["label"])
+                        return (True, source, label)
+
+                    except ValueError:
+                        attempted_label = str(stream.get("label", ""))
+                        raise exceptions_bedrock.AzulValueError(
+                            internal=ExceptionCodeEnum.MetastoreInvalidDataLabel,
+                            parameters={"label": attempted_label},
+                        ) from None
+
+    return (False, "", azm.DataLabel.TEST)
 
 
 def find_stream_metadata(ctx: Context, sha256: str, stream_hash: str) -> tuple[str | None, azm.Datastream | None]:

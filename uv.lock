@@ -8,7 +8,7 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-05-13T01:30:11.602470305Z"
+exclude-newer = "2026-05-13T02:50:20.128559753Z"
 exclude-newer-span = "P1W"
 
 [options.exclude-newer-package]
@@ -54,7 +54,7 @@ wheels = [
 
 [[package]]
 name = "azul-bedrock"
-version = "11.0.103.dev2+g105f3a0c4"
+version = "11.0.103.dev3+gd2915310a"
 source = { registry = "https://devpi.acsc.internal/azul/stable/" }
 dependencies = [
     { name = "babel" },
@@ -72,7 +72,7 @@ dependencies = [
     { name = "yara-python" },
 ]
 wheels = [
-    { url = "https://devpi.acsc.internal/azul/stable/+f/641/b52062aa69430/azul_bedrock-11.0.103.dev2+g105f3a0c4-py3-none-any.whl", hash = "sha256:641b52062aa69430edf3cb3868d5548089c21eefdbe06696f06a7a7eeba3f3e3" },
+    { url = "https://devpi.acsc.internal/azul/stable/+f/280/fc447693c5d8e/azul_bedrock-11.0.103.dev3+gd2915310a-py3-none-any.whl", hash = "sha256:280fc447693c5d8e15f0bb20981221a215082f3ea78df6655413e633c0c2a173" },
 ]
 
 [package.optional-dependencies]
@@ -129,7 +129,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "azul-bedrock", specifier = ">=11.0.103.dev2", index = "https://devpi.acsc.internal/azul/stable/" },
+    { name = "azul-bedrock", specifier = ">=11.0.103.dev3", index = "https://devpi.acsc.internal/azul/stable/" },
     { name = "azul-security", specifier = ">=11.0.30", index = "https://devpi.acsc.internal/azul/stable/" },
     { name = "black", specifier = ">=26.1.0" },
     { name = "cachetools", specifier = ">=7.0.0" },
