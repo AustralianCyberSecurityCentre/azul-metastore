@@ -297,7 +297,7 @@ def create_status(
     return bad_raw_results + doc_errors, duplicate_docs, author_results
 
 
-@capture_write_stats("binary")
+@capture_write_stats("download")
 def create_download_status(
     priv_ctx: Context, raw_events: list[azm.DownloadEvent], immediate: bool = False
 ) -> tuple[list[IngestError], list[azm.DownloadEvent], dict[str, int]]:
