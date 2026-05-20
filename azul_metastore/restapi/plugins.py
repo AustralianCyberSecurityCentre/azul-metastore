@@ -3,6 +3,7 @@
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException
 from azul_bedrock.models_restapi import plugins as bedr_plugins
+from azul_bedrock.models_restapi.basic import Author as PluginAuthor
 from fastapi import APIRouter, Depends, Response
 
 from azul_metastore import context
@@ -59,4 +60,14 @@ def get_plugin(resp: Response, name: str, version: str, ctx: context.Context = D
     if not data["plugin"]:
         qr.set_security_headers(ctx, resp)
         raise ApiException(status_code=404, internal=ExceptionCodeEnum.MetastorePluginNotInAzul)
+    return qr.fr(ctx, data, resp)
+
+
+@router.get("/v0/plugins/download", response_model=qr.gr(list[PluginAuthor]), **qr.kw)
+def get_download_plugins(resp: Response, ctx: context.Context = Depends(qr.ctx)):
+    """Find all plugins that are able to download files."""
+    data = plugin.get_download_plugins(ctx)
+    if not data:
+        qr.set_security_headers(ctx, resp)
+        raise ApiException(status_code=404, internal=ExceptionCodeEnum.MetastoreNoDownloadPluginsInAzul)
     return qr.fr(ctx, data, resp)

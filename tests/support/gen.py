@@ -495,6 +495,67 @@ def status(
     return ret
 
 
+def download(
+    patch=None,
+    *,
+    hash="e1",
+    timestamp: str = "2000-01-01T01:01:01Z",
+    action: azm.DownloadAction = azm.DownloadAction.Requested,
+    author_patch: dict | None = None,
+    source_patch: dict | None = None,
+    authorsec=None,
+    model=True,
+) -> dict | azm.DownloadEvent:
+    if not patch:
+        patch = {}
+
+    if author_patch is not None:
+        _patch({"author": author_patch}, patch)
+    if source_patch is not None:
+        _patch({"source": source_patch}, patch)
+    if authorsec is not None:
+        _patch({"author": {"security": authorsec}}, patch)
+
+    ret = _patch(
+        patch,
+        dict(
+            model_version=azm.CURRENT_MODEL_VERSION,
+            kafka_key="test-meta-tmp",
+            timestamp=timestamp,
+            author=dict(
+                category="plugin",
+                name="generic_plugin",
+                version="1",
+                security=g1_1,
+            ),
+            action=action.value,
+            source=dict(
+                name="generic_source",
+                timestamp=timestamp,
+                references={"ref1": "val1", "ref2": "val2"},
+                security=g1_1,
+                path=[],
+            ),
+            entity=dict(
+                hash=hash,
+                direct_url=None,
+                direct_expiry=None,
+                pcap=False,
+                category=None,
+                category_quota=None,
+                metadata={},
+            ),
+        ),
+    )
+
+    # check valid
+    ret = azm.DownloadEvent(**ret)
+    ret.kafka_key = generate_event_id(download=ret)
+    if not model:
+        ret = basic_events.jsondict(ret)
+    return ret
+
+
 def manual_insert(patch=None, *, authornv=None, dp: bool = True):
     if not patch:
         patch = {}
@@ -591,6 +652,7 @@ def generate_event_id(
     status: azm.StatusEvent = None,
     insert: azm.InsertEvent = None,
     binary: azm.BinaryEvent = None,
+    download: azm.DownloadEvent = None,
 ) -> str:
     """Calculate and return a document id for the event.
 
@@ -605,6 +667,8 @@ def generate_event_id(
         return f"meta.{status.entity.input.dequeued}.{status.author.name}"
     elif insert:
         return f"meta.{insert.entity.parent_sha256}.{insert.entity.child.sha256}.{insert.entity.child_history.author.name}"
+    elif download:
+        return f"meta.{download.entity.hash}.{download.author.name}"
     elif binary:
         s += binary.source.name + "."
         s += binary.source.security + "."

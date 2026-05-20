@@ -14,6 +14,7 @@ import cachetools
 import pendulum
 from azul_bedrock import models_network as azm
 from azul_bedrock import models_restapi
+from azul_bedrock.models_restapi.basic import Author as PluginAuthor
 from pydantic import BaseModel
 
 from azul_metastore.common import memcache
@@ -436,3 +437,34 @@ def find_features(ctx: Context, *, filters: list[dict] | None = None) -> list[mo
     ret = [models_restapi.Feature(**x) for x in ret.values()]
 
     return sorted(ret, key=lambda x: x.name)
+
+
+@cachetools.cached(
+    cache=memcache.get_ttl_cache("plugins.download_full", ttl=120), lock=RLock(), key=lambda x: x.sd.unique()
+)
+def get_download_plugins(
+    ctx: Context,
+) -> list[PluginAuthor]:
+    """Return the name and version of all download plugins."""
+    body = {
+        "query": {"bool": {"filter": [{"term": {"entity.config.is_processing_download_events": "true"}}]}},
+        "size": 1000,
+        "_source": ["entity.name", "entity.version"],
+        # Fetch the latest document for each plugin by timestamp
+        "collapse": {"field": "entity.name"},
+        "sort": [{"timestamp": {"order": "desc"}}, {"entity.name": {"order": "asc"}}],
+        "from": 0,
+    }
+    plugin_res = ctx.man.plugin.w.search(ctx.sd, body=body)
+    # load and decode json config strings into raw values
+    download_plugins: list[PluginAuthor] = []
+    for plugin in plugin_res["hits"]["hits"]:
+        download_plugins.append(
+            PluginAuthor(
+                name=plugin["_source"]["entity"]["name"],
+                version=plugin["_source"]["entity"].get("version", ""),
+                security=plugin["_source"]["entity"].get("security", ""),
+                category=plugin["_source"]["entity"].get("category", ""),
+            )
+        )
+    return download_plugins

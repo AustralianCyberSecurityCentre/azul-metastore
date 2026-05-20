@@ -24,7 +24,7 @@ classifiers=[
     "Topic :: Software Development :: Libraries",
 ]
 dependencies = [
-    "azul-bedrock>=11.0.89",
+    "azul-bedrock>=11.0.104",
     "azul-security>=11.0.30",
     "black>=26.1.0",
     "cachetools>=7.0.0",
@@ -52,6 +52,7 @@ azul-metastore = "azul_metastore.entry:cli"
 [project.entry-points."azul_restapi.plugin"]
 binaries_submit = "azul_metastore.restapi.binaries_submit:router"
 binaries_data = "azul_metastore.restapi.binaries_data:router"
+binaries_download = "azul_metastore.restapi.binaries_download:router"
 binaries = "azul_metastore.restapi.binaries:router"
 features = "azul_metastore.restapi.features:router"
 users = "azul_metastore.restapi.me:router"

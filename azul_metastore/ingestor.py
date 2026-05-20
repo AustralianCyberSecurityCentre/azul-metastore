@@ -202,3 +202,22 @@ class StatusIngestor(BaseIngestor):
     def set_data(self, docs: list[azm.StatusEvent]) -> None:
         """Write docs continually, logging errors."""
         status.create_status(self.ctx, docs)
+
+
+class DownloadIngestor(BaseIngestor):
+    """Download status events requests accepted/incomplete."""
+
+    model = "download"
+
+    def _get_data(self):
+        # read historic events so that changing the opensearch prefix will reload all events from kafka
+        # do not want to overlap live and historic as that would 2x load on opensearch
+        return self.dispatcher.get_download_events(
+            count=self.max_count,
+            deadline=30,
+            require_historic=True,
+        )
+
+    def set_data(self, docs: list[azm.DownloadEvent]) -> None:
+        """Write docs continually, logging errors."""
+        status.create_download_status(self.ctx, docs)

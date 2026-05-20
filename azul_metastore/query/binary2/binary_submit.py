@@ -5,12 +5,14 @@ import logging
 import os
 from typing import AsyncIterable
 
+import pendulum
 from azul_bedrock import exceptions_metastore
 from azul_bedrock import models_network as azm
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
 from azul_bedrock.exceptions_security import SecurityAccessException, SecurityParseException
 from azul_bedrock.models_restapi import binaries_data as bedr_bdata
+from azul_bedrock.models_restapi import binaries_download as bedr_binaries_down
 from fastapi import UploadFile
 from starlette.status import (
     HTTP_400_BAD_REQUEST,
@@ -28,6 +30,7 @@ from azul_metastore.query.binary2 import (
     binary_submit_dataless,
     binary_submit_manual,
 )
+from azul_metastore.query.status import create_download_status
 
 logger = logging.getLogger(__name__)
 
@@ -389,3 +392,92 @@ async def high_level_submit_binary(
         return_val.append(new_model)
 
     return return_val
+
+
+async def submit_download_request(
+    ctx: context.Context,
+    priv_ctx: context.Context,
+    sha256: str,
+    source: str,
+    security: str,
+    user: str,
+    *,
+    references: dict | None = None,
+    submit_settings: dict | None = None,
+) -> bedr_binaries_down.DownloadResponse:
+    """Submit a binary download request to dispatcher."""
+    if references is None:
+        references = dict()
+    if submit_settings is None:
+        submit_settings = dict()
+
+    try:
+        ctx.azsec.check_access(ctx.get_user_access().security.labels, security, raise_error=True)
+    except SecurityParseException:
+        raise ApiException(
+            status_code=HTTP_422_UNPROCESSABLE_CONTENT,
+            internal=ExceptionCodeEnum.MetastoreBadBinarySubmissionBadSecurityString,
+            ref="Must provide valid security string.",
+        ) from None
+    except SecurityAccessException as e:
+        raise ApiException(
+            status_code=HTTP_422_UNPROCESSABLE_CONTENT,
+            ref="security greater than user permissions",
+            internal=ExceptionCodeEnum.MetastoreBadBinarySubmissionUserSecurity,
+            parameters={"inner_exception": str(e)},
+        ) from e
+
+    author = azm.Author(category="user", name=user)
+    now = pendulum.now(tz=pendulum.UTC)
+    download_event = azm.DownloadEvent(
+        model_version=azm.CURRENT_MODEL_VERSION,
+        kafka_key="meta-temp",  # temporary id so we can create the object
+        timestamp=now,
+        author=author,
+        entity=azm.DownloadEvent.Entity(
+            hash=sha256,
+        ),
+        source=azm.Source(
+            security=security,
+            name=source,
+            timestamp=now,
+            references=references,
+            path=[],
+            settings=submit_settings,
+        ),
+        action=azm.DownloadAction.Requested,
+    )
+
+    resp = ctx.dispatcher.submit_events(events=[download_event], model=azm.ModelType.Download, include_ok=True)
+
+    if len(resp.ok) == 0:
+        raise ApiException(
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+            ref="Dispatcher rejected the submitted events",
+            internal=ExceptionCodeEnum.MetastoreBinarySubmitDispatcherRejectedEvent,
+            parameters={"response": str(resp)},
+        )
+
+    # expedite
+    try:
+        # write events immediately
+        create_download_status(
+            priv_ctx,
+            [azm.DownloadEvent(**x) for x in resp.ok],
+            immediate=True,
+        )
+    except Exception as e:
+        raise ApiException(
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+            ref="Unable to submit binary event to metastore immediately",
+            internal=ExceptionCodeEnum.MetastoreUnableToSubmitBinaryEventImmediately,
+            parameters={"inner_exception": str(e)},
+        ) from e
+
+    return bedr_binaries_down.DownloadResponse(
+        sha256=download_event.entity.hash,
+        last_download_security=security,
+        last_download_author_name=download_event.author.name,
+        last_download_timestamp=download_event.timestamp,
+        plugin_statuses=[],
+    )

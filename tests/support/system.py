@@ -51,6 +51,7 @@ def get_app():
     from azul_metastore.restapi import (
         binaries,
         binaries_data,
+        binaries_download,
         binaries_submit,
         features,
         me,
@@ -70,6 +71,7 @@ def get_app():
     )
     app.include_router(binaries_submit.router)
     app.include_router(binaries_data.router)
+    app.include_router(binaries_download.router)
     app.include_router(binaries.router)
     app.include_router(features.router)
     app.include_router(me.router)

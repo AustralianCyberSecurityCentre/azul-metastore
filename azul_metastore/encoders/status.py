@@ -1,5 +1,11 @@
 """Encoder for status data."""
 
+from azul_bedrock import models_network as azm
+from azul_bedrock.models_restapi.binaries_download import (
+    convert_download_action_to_message,
+    convert_download_action_to_status,
+)
+
 from azul_metastore import settings
 from azul_metastore.common.utils import azsec
 from azul_metastore.encoders.base_encoder import uid
@@ -64,7 +70,7 @@ class Status(base_encoder.BaseIndexEncoder):
         """
         # since status events must pass through the dispatcher, we never generate an id
         event["_id"] = event.pop("kafka_key")
-        event["_index_extension"] = cls._categorise(event)
+        event["_index_extension"] = cls._categorise(event["timestamp"])
 
         event["security"] = azsec().string_combine(
             [
@@ -100,6 +106,49 @@ class Status(base_encoder.BaseIndexEncoder):
         return event
 
     @classmethod
+    def encode_download(cls, event: azm.DownloadEvent) -> dict:
+        """Encode a download event to the status opensearch layer format.
+
+        Does not perform normalisation, that should occur as part of the models/basic_events.py.
+        """
+        new_event = {
+            "_id": event.kafka_key,
+            "_index_extension": cls._categorise(event.timestamp.isoformat()),
+            "security": azsec().string_combine(
+                [
+                    event.author.security if event.author.security else "",
+                    # note - source info is dropped so this can't be recomputed
+                    event.source.security if event.source.security else "",
+                    *(x.author.security if x.author.security else "" for x in event.source.path),
+                ]
+            ),
+            "timestamp": event.timestamp.isoformat(),
+            "model_version": event.model_version,
+            "author": {
+                "security": event.author.security,
+                "category": event.author.category,
+                "name": event.author.name,
+                "version": event.author.version,
+            },
+            "entity": {
+                "status": convert_download_action_to_status(event.action).value,
+                "error": "",
+                "message": convert_download_action_to_message(event.action),
+                "runtime": 0,
+                "input": {
+                    "entity": {
+                        "sha256": event.entity.hash,
+                    },
+                },
+            },
+            "encoded": {
+                "author": uid(event.author.name, event.author.category, event.author.version),
+            },
+        }
+        cls._encode_security(new_event)
+        return new_event
+
+    @classmethod
     def decode(cls, event: dict):
         """Decode to comms layer format."""
         cls._decode_security(event)
@@ -107,10 +156,9 @@ class Status(base_encoder.BaseIndexEncoder):
         return event
 
     @classmethod
-    def _categorise(cls, doc: dict) -> str:
+    def _categorise(cls, timestamp: str) -> str:
         """Return index extension for current doc."""
         s = settings.get()
-        timestamp = doc["timestamp"]
         fmt = base_encoder.partition_format(timestamp, s.status_partition_unit)
         ret = ["", fmt]
         return ".".join(ret)

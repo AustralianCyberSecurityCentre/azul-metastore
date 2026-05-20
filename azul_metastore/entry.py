@@ -74,6 +74,15 @@ def ingest_status():
     ing.main()
 
 
+@cli.command()
+def ingest_download():
+    """Ingest status events from dispatcher."""
+    start_prometheus_server()
+    ctx = context.get_writer_context()
+    ing = ingestor.DownloadIngestor(ctx)
+    ing.main()
+
+
 class AuthOptions(IntEnum):
     """Authentication options for logging to Opensearch and creating roles."""
 
