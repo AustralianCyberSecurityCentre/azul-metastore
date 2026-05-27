@@ -108,8 +108,12 @@ class Context(BaseContext):
         """Return user access as reported by opensearch."""
         return _get_user_access(self.sd, self.azsec)
 
-    def get_user_current_security(self) -> str:
-        """Return security string for current users access."""
+    def get_user_current_security_for_display(self) -> str:
+        """Return security string for current users access, don't use this in Opensearch docs."""
+        return self.get_user_access().security.max_access_display
+
+    def get_user_current_security_normalised(self) -> str:
+        """Return the normalised security string for current users access."""
         return self.get_user_access().security.max_access
 
     def get_user_security_unique(self) -> str:

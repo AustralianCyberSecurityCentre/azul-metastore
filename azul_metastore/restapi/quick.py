@@ -90,7 +90,7 @@ class QuickRefs:
     ):
         """Configures security headers for the response for this request."""
         if security_label is None:
-            security_label = ctx.get_user_current_security()
+            security_label = ctx.get_user_current_security_for_display()
         # Raised HTTPResponses might not encode a regular response. Do this ourselves:
         if ex is not None:
             new_headers: dict = dict()
@@ -117,7 +117,7 @@ class QuickRefs:
             meta.queries = ctx.sd.captured_es_queries
 
         # get current security context for the query
-        meta.security = ctx.get_user_current_security()
+        meta.security = ctx.get_user_current_security_for_display()
         meta.sec_filter = ctx.sd.security_filter
         # ensure response has a http header with accurate security info
         cls.set_security_headers(ctx, response, meta.security)

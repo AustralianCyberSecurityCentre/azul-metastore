@@ -102,7 +102,7 @@ class TestBinaryDownload(integration_test.BaseRestapi):
                         "security": "",
                     }
                 ],
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLEO", "sec_filter": None},
             },
         )
 
@@ -143,7 +143,7 @@ class TestBinaryDownload(integration_test.BaseRestapi):
                         "security": "LOW TLP:CLEAR",
                     },
                 ],
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLEO", "sec_filter": None},
             },
         )
 
@@ -190,6 +190,6 @@ class TestBinaryDownload(integration_test.BaseRestapi):
                         "security": "LOW",
                     },
                 ],
-                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR", "sec_filter": None},
+                "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLEO", "sec_filter": None},
             },
         )

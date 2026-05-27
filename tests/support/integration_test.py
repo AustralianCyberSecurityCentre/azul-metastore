@@ -82,6 +82,8 @@ class DynamicTestCase(basic_test.BasicTest):
                 },
                 "releasability": {
                     "title": "Releasability",
+                    "origin": "REL:APPLE",
+                    "origin_alt_name": "APPLEO",
                     "options": [
                         {"name": "REL:APPLE"},
                         {"name": "REL:BEE"},

@@ -13,7 +13,7 @@ def mock_user_security(self):
     return "LOW"
 
 
-@mock.patch.object(Context, "get_user_current_security", mock_user_security)
+@mock.patch.object(Context, "get_user_current_security_for_display", mock_user_security)
 class TestBinary(integration_test.BaseRestapi):
     def test_status_find(self):
         self.write_status_events([gen.status(eid="e1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")])
