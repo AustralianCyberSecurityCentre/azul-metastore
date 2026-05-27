@@ -138,15 +138,7 @@ def create_feature_value_tag(
     ctx: context.Context = Depends(qr.ctx),
 ):
     """Attach a tag to a specific feature value."""
-    try:
-        security = ctx.azsec.string_normalise(security)
-    except exceptions_security.SecurityException:
-        raise ApiException(
-            status_code=HTTP_422_UNPROCESSABLE_CONTENT,
-            ref=f"security was not valid ({security})",
-            internal=ExceptionCodeEnum.MetastoreContextBadSecurity,
-            parameters={"security": security},
-        ) from None
+    security = ctx.validate_user_security(security)
 
     tag_dict = dict(
         security=security,

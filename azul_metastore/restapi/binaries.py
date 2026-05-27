@@ -415,6 +415,7 @@ def create_tag_on_binary(
     ctx: context.Context = Depends(qr.ctx),
 ):
     """Attach a tag to an entity."""
+    security = ctx.validate_user_security(security)
     try:
         ctx.azsec.check_access(ctx.get_user_access().security.labels, security, raise_error=True)
     except SecurityParseException:

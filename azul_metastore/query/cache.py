@@ -29,7 +29,7 @@ def store_generic(ctx: context.Context, category: str, unique: str, version: str
     if not timestamp:
         timestamp = pendulum.now(tz=pendulum.UTC).to_iso8601_string()
     doc = {
-        "security": ctx.get_user_current_security(),
+        "security": ctx.get_user_current_security_normalised(),
         "timestamp": timestamp,
         "type": category,
         "unique": unique,
@@ -87,7 +87,7 @@ def store_counts(ctx: context.Context, category: str, uniq: str, counts: dict[st
         "timestamp": pendulum.now(tz=pendulum.UTC).to_iso8601_string(),
         "type": category,
         "user_security": user_security,
-        "security": ctx.get_user_current_security(),
+        "security": ctx.get_user_current_security_normalised(),
     }
     docs = [{**base, "unique": x, "count": y} for x, y in uniqued.items()]
     # cache counts for future use
