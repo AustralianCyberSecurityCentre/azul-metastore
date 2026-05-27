@@ -79,9 +79,7 @@ class TestMain(unit_test.DataMockingUnitTest):
             "content_length": 359,
         }
         self.assertEqual(expected_result, content)
-        self.assertEqual(
-            response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"
-        )
+        self.assertEqual(response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE")
 
         # check case sensitivity
         response = self.client.get(

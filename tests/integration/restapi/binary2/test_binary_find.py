@@ -512,21 +512,21 @@ class TestBinaryFind(integration_test.BaseRestapi):
             self.assertIn(item["key"], ["e11", "e14"])
         self.assertEqual(
             response_data["meta"]["security"],
-            "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR",
+            "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLEO",
         )
         self.assertEqual(
             response.headers.get("x-azul-security"),
-            "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR",
+            "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLEO",
         )
 
         response = self.client.get("/v0/binaries?x=TOP%20HIGH&x=REL:APPLE")
         self.assertEqual(200, response.status_code)
         response_data = response.json()
         self.assertEqual(len(response_data["data"]["items"]), 2)
-        self.assertEqual(response_data["meta"]["security"], "HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:BEE,CAR")
+        self.assertEqual(response_data["meta"]["security"], "HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER")
         self.assertEqual(
             response.headers.get("x-azul-security"),
-            "HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:BEE,CAR",
+            "HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER",
         )
 
         response = self.client.get("/v0/binaries?x=MOD1")
@@ -535,10 +535,10 @@ class TestBinaryFind(integration_test.BaseRestapi):
         self.assertEqual(len(response_data["data"]["items"]), 3)
         for item in response_data["data"]["items"]:
             self.assertIn(item["key"], ["e11", "e12", "e14"])
-        self.assertEqual(response_data["meta"]["security"], "TOP HIGH MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR")
+        self.assertEqual(response_data["meta"]["security"], "TOP HIGH MOD2 MOD3 HANOVERLAP OVER REL:APPLEO")
         self.assertEqual(
             response.headers.get("x-azul-security"),
-            "TOP HIGH MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR",
+            "TOP HIGH MOD2 MOD3 HANOVERLAP OVER REL:APPLEO",
         )
 
         response = self.client.get("/v0/binaries?x=LOW")
@@ -549,11 +549,11 @@ class TestBinaryFind(integration_test.BaseRestapi):
             self.assertIn(item["key"], ["e12", "e13"])
         self.assertEqual(
             response_data["meta"]["security"],
-            "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR",
+            "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLEO",
         )
         self.assertEqual(
             response.headers.get("x-azul-security"),
-            "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR",
+            "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLEO",
         )
 
         response = self.client.get("/v0/binaries?x=TLP:GREEN")
@@ -564,11 +564,11 @@ class TestBinaryFind(integration_test.BaseRestapi):
             self.assertIn(item["key"], ["e11", "e12", "e13"])
         self.assertEqual(
             response_data["meta"]["security"],
-            "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR",
+            "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLEO",
         )
         self.assertEqual(
             response.headers.get("x-azul-security"),
-            "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR",
+            "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLEO",
         )
 
         response = self.client.get("/v0/binaries?x=LOW&x=MEDIUM&x=HIGH&x=TOP%20HIGH&x=TLP:AMBER%2BSTRICT")

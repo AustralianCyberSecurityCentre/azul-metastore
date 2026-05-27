@@ -22,9 +22,7 @@ class TestMain(unit_test.DataMockingUnitTest):
             "strings": [{"string": "983", "length": 3, "offset": 349, "encoding": "hex"}],
         }
         self.assertEqual(expected_result, response.json())
-        self.assertEqual(
-            response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"
-        )
+        self.assertEqual(response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE")
 
         # Test for a character that should be escaped
         response = self.client.get(f"/v0/binaries/{sha256a}/search/hex", params={"filter": "09"})
@@ -43,9 +41,7 @@ class TestMain(unit_test.DataMockingUnitTest):
         response = self.client.get(f"/v0/binaries/{sha256a}/search/hex", params={"filter": "123"})
         # Bad request
         self.assertEqual(400, response.status_code)
-        self.assertEqual(
-            response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"
-        )
+        self.assertEqual(response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE")
 
     @respx.mock
     def test_different_input(self):

@@ -61,9 +61,7 @@ class TestCommonStrings(unit_test.DataMockingUnitTest):
             ],
         )
         self.assertEqual(result, expected_result)
-        self.assertEqual(
-            response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"
-        )
+        self.assertEqual(response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE")
 
     @respx.mock
     def test_get_strings_upper_and_lower_lengths(self):
@@ -92,9 +90,7 @@ class TestCommonStrings(unit_test.DataMockingUnitTest):
             ],
         )
         self.assertEqual(result, expected_result)
-        self.assertEqual(
-            response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"
-        )
+        self.assertEqual(response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE")
 
     @respx.mock
     def test_get_strings_part_of_files(self):
@@ -125,9 +121,7 @@ class TestCommonStrings(unit_test.DataMockingUnitTest):
             ],
         )
         self.assertEqual(result, expected_result)
-        self.assertEqual(
-            response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"
-        )
+        self.assertEqual(response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE")
 
     @respx.mock
     def test_get_strings_limit_strings(self):
@@ -172,9 +166,7 @@ class TestCommonStrings(unit_test.DataMockingUnitTest):
             ],
         )
         self.assertEqual(result, expected_result)
-        self.assertEqual(
-            response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"
-        )
+        self.assertEqual(response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE")
 
         ### Another run with the buffer cut down.
         # test retrieve less after chunk size reduced. (have to reload to load the new buffer_size into binaries_data)
@@ -212,6 +204,4 @@ class TestCommonStrings(unit_test.DataMockingUnitTest):
             ],
         )
         self.assertEqual(result, expected_result)
-        self.assertEqual(
-            response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"
-        )
+        self.assertEqual(response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE")

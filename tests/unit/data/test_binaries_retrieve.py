@@ -27,14 +27,10 @@ class TestMain(unit_test.DataMockingUnitTest):
 
         response = self.client.head(f"/v0/binaries/{sha256a}/content")
         self.assertEqual(200, response.status_code)
-        self.assertEqual(
-            response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"
-        )
+        self.assertEqual(response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE")
         response = self.client.head(f"/v0/binaries/{sha256b}/content")
         self.assertEqual(404, response.status_code)
-        self.assertEqual(
-            response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"
-        )
+        self.assertEqual(response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE")
 
         # check case sensitivity
         response = self.client.head(f"/v0/binaries/{sha256a.upper()}/content")

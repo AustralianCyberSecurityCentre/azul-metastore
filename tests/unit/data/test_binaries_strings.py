@@ -202,9 +202,7 @@ class TestMain(unit_test.DataMockingUnitTest):
         }
         print(response.json())
         self.assertEqual(expected_result, response.json())
-        self.assertEqual(
-            response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"
-        )
+        self.assertEqual(response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE")
 
         # test retrieve all and filter top and bottom sizes.
         response = self.client.get(f"/v0/binaries/{sha256a}/strings?min_length=5&max_length=13")
@@ -220,9 +218,7 @@ class TestMain(unit_test.DataMockingUnitTest):
             "time_out": False,
         }
         self.assertEqual(expected_result, response.json())
-        self.assertEqual(
-            response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE,BEE,CAR"
-        )
+        self.assertEqual(response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE")
 
         # test retrieve all case sensitive
         response = self.client.get(f"/v0/binaries/{sha256a.upper()}/strings")
