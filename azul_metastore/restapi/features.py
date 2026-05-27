@@ -1,7 +1,7 @@
 """Routes for feature data queries."""
 
 import pendulum
-from azul_bedrock import exceptions_metastore, exceptions_security
+from azul_bedrock import exceptions_metastore
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException
 from azul_bedrock.models_restapi import features as bedr_features
