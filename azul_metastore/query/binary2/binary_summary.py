@@ -4,7 +4,7 @@ import copy
 import logging
 
 from azul_bedrock import models_restapi
-from azul_bedrock.models_restapi.binaries import BinaryMetadataDetail as Detail
+from azul_bedrock.models_restapi import BinaryMetadataDetail as Detail
 
 from azul_metastore import context, settings
 from azul_metastore.common import utils

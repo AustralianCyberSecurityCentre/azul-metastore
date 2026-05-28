@@ -9,8 +9,8 @@ from azul_bedrock import models_network as azm
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException
 from azul_bedrock.exceptions_security import SecurityAccessException, SecurityParseException
+from azul_bedrock.models_restapi import AutocompleteContext
 from azul_bedrock.models_restapi import binaries as bedr_binaries
-from azul_bedrock.models_restapi.binaries_auto_complete import AutocompleteContext
 from fastapi import (
     APIRouter,
     BackgroundTasks,

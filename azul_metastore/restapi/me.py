@@ -1,6 +1,6 @@
 """User based API routes."""
 
-from azul_bedrock.models_restapi.basic import UserAccess
+from azul_bedrock.models_restapi import UserAccess
 from fastapi import APIRouter, Depends, Response
 
 from azul_metastore import context

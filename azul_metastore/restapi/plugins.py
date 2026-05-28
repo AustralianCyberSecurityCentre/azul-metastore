@@ -2,8 +2,8 @@
 
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException
+from azul_bedrock.models_restapi import Author as PluginAuthor
 from azul_bedrock.models_restapi import plugins as bedr_plugins
-from azul_bedrock.models_restapi.basic import Author as PluginAuthor
 from fastapi import APIRouter, Depends, Response
 
 from azul_metastore import context

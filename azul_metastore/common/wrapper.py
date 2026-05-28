@@ -12,7 +12,7 @@ from azul_bedrock import exceptions_security
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
 from azul_bedrock.exceptions_metastore import InitFailure
-from azul_bedrock.models_restapi.basic import QueryInfo
+from azul_bedrock.models_restapi import QueryInfo
 from opensearchpy import helpers
 
 from azul_metastore.common import search_data, utils
