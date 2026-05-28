@@ -9,7 +9,7 @@ from azul_bedrock.datastore import get_user_account
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException
 from azul_bedrock.exceptions_security import SecurityException
-from azul_bedrock.models_restapi.basic import UserAccess, UserSecurity
+from azul_bedrock.models_restapi import UserAccess, UserSecurity
 from azul_security import admin
 from azul_security import security as sec
 from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT

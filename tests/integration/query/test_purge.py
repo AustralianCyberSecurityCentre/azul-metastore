@@ -1,5 +1,5 @@
 from azul_bedrock import models_network as azm
-from azul_bedrock.models_restapi.purge import PurgeResults, PurgeSimulation
+from azul_bedrock.models_restapi import PurgeResults, PurgeSimulation
 
 from azul_metastore.query import purge as qpurge
 from tests.support import gen, integration_test

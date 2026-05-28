@@ -7,8 +7,8 @@ from typing import Optional
 from azul_bedrock import exceptions_metastore
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException
+from azul_bedrock.models_restapi import AutocompleteContext
 from azul_bedrock.models_restapi import binaries as bedr_binaries
-from azul_bedrock.models_restapi.binaries_auto_complete import AutocompleteContext
 from lark import UnexpectedInput
 
 from azul_metastore.common import search_query

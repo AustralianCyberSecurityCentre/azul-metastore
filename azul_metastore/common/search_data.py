@@ -7,7 +7,7 @@ import opensearchpy
 from azul_bedrock.datastore import Credentials
 from azul_bedrock.datastore import credentials_to_access as bed_credentials_to_access
 from azul_bedrock.datastore import credentials_to_es as bed_credentials_to_es
-from azul_bedrock.models_restapi.basic import QueryInfo
+from azul_bedrock.models_restapi import QueryInfo
 
 from azul_metastore import settings
 from azul_metastore.common import memcache
