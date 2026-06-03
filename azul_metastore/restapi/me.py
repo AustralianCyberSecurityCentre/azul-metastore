@@ -10,7 +10,7 @@ router = APIRouter()
 
 
 @router.get("/v0/users/me/opensearch", response_model=UserAccess)
-async def read_users_me(resp: Response, ctx: context.Context = Depends(qr.ctx)):
+async def read_users_me(resp: Response, ctx: context.Context = Depends(qr.ctx_no_security_filtering)):
     """Return Opensearch access for current user."""
     qr.set_security_headers(ctx, resp)
     return ctx.get_user_access()
