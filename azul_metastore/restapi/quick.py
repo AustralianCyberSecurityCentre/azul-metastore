@@ -161,9 +161,9 @@ class QuickRefs:
 
         return ctx
 
-    def ctx_no_security_filtering(self, request: Request, response: Response):
-        """Query opensearch but garuntee no security filtering."""
-        self.ctx(request, response, [], [], False)
+    def ctx_no_security_filtering(self, request: Request, response: Response) -> context.Context:
+        """Query opensearch but guarantee no security filtering."""
+        return self.ctx(request, response, [], [], False)
 
     def ctx_without_queries(
         self,
