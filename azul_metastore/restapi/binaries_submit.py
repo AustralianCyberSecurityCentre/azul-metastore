@@ -21,12 +21,13 @@ from fastapi import (
     UploadFile,
 )
 from pydantic import AfterValidator, BaseModel, computed_field, model_validator
-from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT
+from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT, HTTP_423_LOCKED
 
 from azul_metastore import context
 from azul_metastore.common.utils import to_utc
 from azul_metastore.query.binary2 import binary_expedite, binary_submit
 from azul_metastore.restapi.quick import qr
+from azul_metastore.settings import get as get_metastore_settings
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -239,6 +240,9 @@ async def submit_binary_to_source(
         TAR (extract=true)
         ZIP (extract=true)
     """
+    if get_metastore_settings().readonly_mode:
+        raise ApiException(status_code=HTTP_423_LOCKED, internal=ExceptionCodeEnum.MetastoreReadOnlyMode)
+
     # Validate user supplied label
     security = ctx.validate_user_security(commonMeta.security)
 
@@ -314,6 +318,9 @@ async def submit_binary_to_source_dataless(
 
     Can be used to add things like new alt streams or a new source for a binary.
     """
+    if get_metastore_settings().readonly_mode:
+        raise ApiException(status_code=HTTP_423_LOCKED, internal=ExceptionCodeEnum.MetastoreReadOnlyMode)
+
     # Validate user supplied label
     security = ctx.validate_user_security(commonMeta.security)
 
@@ -383,6 +390,9 @@ async def submit_child_binary_to_source(
     ctx: context.Context = Depends(qr.ctx),
 ):
     """Submit a child binary to a parent binary for analysis."""
+    if get_metastore_settings().readonly_mode:
+        raise ApiException(status_code=HTTP_423_LOCKED, internal=ExceptionCodeEnum.MetastoreReadOnlyMode)
+
     # Validate user supplied label
     security = ctx.validate_user_security(commonMeta.security)
 
@@ -445,6 +455,9 @@ async def submit_child_binary_to_source_dataless(
 
     Typically used to create a relationship between two existing binaries where there was none before.
     """
+    if get_metastore_settings().readonly_mode:
+        raise ApiException(status_code=HTTP_423_LOCKED, internal=ExceptionCodeEnum.MetastoreReadOnlyMode)
+
     # Validate user supplied label
     security = ctx.validate_user_security(commonMeta.security)
 
@@ -488,6 +501,9 @@ async def expedite_processing(
     # This doesn't tell the user about the existence of a given file, so it is
     # safe to return the default security label for the system (even if the given
     # file is not that security label)
+    if get_metastore_settings().readonly_mode:
+        raise ApiException(status_code=HTTP_423_LOCKED, internal=ExceptionCodeEnum.MetastoreReadOnlyMode)
+
     security = ctx.azsec.get_default_security()
     try:
         qr.set_security_headers(ctx, resp, security)

@@ -1,3 +1,4 @@
+from azul_bedrock.exception_enums import ExceptionCodeEnum
 import copy
 import hashlib
 import io
@@ -12,6 +13,7 @@ from azul_bedrock import models_network as azm
 
 from azul_metastore.context import Context
 from azul_metastore.query.binary2 import binary_submit
+from azul_metastore.settings import get as get_metastore_settings
 from tests.support import gen, unit_test
 
 from . import helpers
@@ -346,6 +348,23 @@ class TestSubmitToSource(unit_test.DataMockingUnitTest):
         )
         self.assertEqual(response.headers.get("x-azul-security"), "LOW")
 
+    async def test_readonly_mode_blocks_upload(self):
+        # upload normal
+        data = [
+            ("filename", (None, "test.exe")),
+            ("source_id", (None, "user")),
+            ("timestamp", (None, "2020-06-02 11:47:03.2Z")),
+            ("references", (None, json.dumps({"apple": "banana"}))),
+            ("security", (None, "low TLP:CLEAR TLP:GREEN TLP:AMBER")),
+        ]
+        get_metastore_settings().readonly_mode = True
+
+        response = self.client.post("/v0/binaries/source", files=data + [("binary", ("file.exe", b"hello"))])
+        self.assertEqual(423, response.status_code)
+        j = json.loads(response.text)
+        print(j["detail"]["internal"])
+        self.assertEqual(j["detail"]["internal"], ExceptionCodeEnum.MetastoreReadOnlyMode.value)
+
 
 # ----------------------------------------------------------------------------------------- Submit Source Dataless
 @mock.patch("azul_bedrock.dispatcher.DispatcherAPI", unit_test.FakeDispatcherAPI)
@@ -444,6 +463,25 @@ class TestSubmitSourceDataless(unit_test.DataMockingUnitTest):
         )
         self.assertEqual(404, response.status_code)
 
+    async def test_readonly_mode_blocks_upload(self):
+        # Set server to readonly mode
+        get_metastore_settings().readonly_mode = True
+        response = self.client.post(
+            "/v0/binaries/source/dataless",
+            files=[
+                ("filename", (None, "test.exe")),
+                ("source_id", (None, "user")),
+                ("timestamp", (None, "2020-06-02 11:47:03.2Z")),
+                ("references", (None, json.dumps({"apple": "banana"}))),
+                ("security", (None, "low TLP:CLEAR TLP:GREEN TLP:AMBER")),
+                ("sha256", (None, self.data256)),
+            ],
+        )
+        self.assertEqual(423, response.status_code)
+        j = json.loads(response.text)
+        print(j["detail"]["internal"])
+        self.assertEqual(j["detail"]["internal"], ExceptionCodeEnum.MetastoreReadOnlyMode.value)
+
 
 # ----------------------------------------------------------------------------------------- Submit Child
 @mock.patch("azul_bedrock.dispatcher.DispatcherAPI", unit_test.FakeDispatcherAPI)
@@ -502,6 +540,21 @@ class TestSubmitChild(unit_test.DataMockingUnitTest):
             "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
             j[0]["sha256"],
         )
+
+    async def test_readonly_mode_blocks_upload(self):
+        # Set server to readonly mode
+        get_metastore_settings().readonly_mode = True
+        data = [
+            ("filename", (None, "test.exe")),
+            ("parent_sha256", (None, hashlib.sha256(b"hello").hexdigest())),
+            ("timestamp", (None, "2020-06-02 11:47:03.2Z")),
+            ("security", (None, "low TLP:CLEAR TLP:GREEN TLP:AMBER")),
+        ]
+        response = self.client.post("/v0/binaries/child", files=data + [("binary", ("file.exe", b"hello"))])
+        self.assertEqual(423, response.status_code)
+        j = json.loads(response.text)
+        print(j["detail"]["internal"])
+        self.assertEqual(j["detail"]["internal"], ExceptionCodeEnum.MetastoreReadOnlyMode.value)
 
 
 # ----------------------------------------------------------------------------------------- Submit Child Dataless
@@ -615,3 +668,20 @@ class TestSubmitChildDataless(unit_test.DataMockingUnitTest):
         # User doesn't have TLP:AMBER+STRICT so can't upload the file and gets denied based on their permissions.
         response = self.client.post("/v0/binaries/child/dataless", files=data)
         self.assertEqual(422, response.status_code)
+
+    async def test_readonly_mode_blocks_upload(self):
+        # Set server to readonly mode
+        get_metastore_settings().readonly_mode = True
+        data = [
+            ("sha256", (None, "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824")),
+            ("filename", (None, "test.exe")),
+            ("parent_sha256", (None, self.parent_sha256)),
+            ("timestamp", (None, "2020-06-02 11:47:03.2Z")),
+            ("security", (None, "low TLP:CLEAR TLP:GREEN TLP:AMBER")),
+        ]
+
+        response = self.client.post("/v0/binaries/child/dataless", files=data)
+        self.assertEqual(423, response.status_code)
+        j = json.loads(response.text)
+        print(j["detail"]["internal"])
+        self.assertEqual(j["detail"]["internal"], ExceptionCodeEnum.MetastoreReadOnlyMode.value)

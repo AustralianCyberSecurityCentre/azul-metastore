@@ -183,6 +183,9 @@ class Metastore(BaseSettings):
     # cache that prevents duplicate opensearch doc creation
     binary2_cache_count: int = 1_000_000  # number of ids to cache, approx 64 bytes per id
 
+    # Change the restapi into readonly mode where uploads are no longer allowed.
+    readonly_mode: bool = False
+
     def log_to_loki(
         self,
         username: str,
@@ -212,7 +215,7 @@ class Metastore(BaseSettings):
 
 
 @cachetools.cached(cache=memcache.get_lru_cache("settings"))
-def get():
+def get() -> Metastore:
     """Return a cached copy of metastore settings."""
     return Metastore()
 

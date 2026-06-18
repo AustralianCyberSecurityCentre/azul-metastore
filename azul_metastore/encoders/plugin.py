@@ -1,8 +1,7 @@
 """Encoder for plugin data."""
 
 from azul_metastore.common.utils import azsec, to_utc
-
-from . import base_encoder
+from azul_metastore.encoders import base_encoder
 
 
 class Plugin(base_encoder.BaseIndexEncoder):

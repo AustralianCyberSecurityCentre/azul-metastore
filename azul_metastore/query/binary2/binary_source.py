@@ -9,8 +9,7 @@ from azul_bedrock.models_restapi import sources as bedr_sources
 
 from azul_metastore import settings
 from azul_metastore.context import Context
-
-from .. import cache
+from azul_metastore.query import cache
 
 
 def read_source_references(
