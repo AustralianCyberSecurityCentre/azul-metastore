@@ -11,6 +11,7 @@ from azul_bedrock import models_network as azm
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
 from azul_bedrock.exceptions_security import SecurityAccessException, SecurityParseException
+from azul_bedrock.models_network import DataLabel
 from azul_bedrock.models_restapi import binaries_data as bedr_bdata
 from azul_bedrock.models_restapi import binaries_download as bedr_binaries_down
 from fastapi import UploadFile
@@ -77,7 +78,7 @@ async def _submit_binary_data_with_sources(
 
 
 async def _process_augmented_streams(
-    ctx: context.Context, sources_to_submit: list[str], augstreams: list[tuple[str, UploadFile]] | None
+    ctx: context.Context, sources_to_submit: list[str], augstreams: list[tuple[DataLabel, UploadFile]] | None
 ) -> list[azm.Datastream]:
     """Process all the aug streams as a single async task."""
     aug_tasks: dict[str, asyncio.Task[azm.Datastream]] = {}
@@ -226,7 +227,7 @@ async def high_level_submit_binary(
     extract: bool = False,
     password: str = "",
     user: str = "",
-    augstreams: list[tuple[str, UploadFile]] | None = None,
+    augstreams: list[tuple[DataLabel, UploadFile]] | None = None,
     expedite: bool = False,
 ) -> list[bedr_bdata.BinaryData]:
     """Submit a binary to Azul."""

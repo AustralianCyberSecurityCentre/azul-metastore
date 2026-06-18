@@ -10,10 +10,8 @@ from azul_bedrock.exception_enums import ExceptionCodeEnum
 caches = {}
 
 
-def get_ttl_cache(name: str, **overrides) -> cachetools.TTLCache:
+def get_ttl_cache(name: str, maxsize: int = 100, ttl: int = 60) -> cachetools.TTLCache:
     """Return a new ttl cache."""
-    kwargs = dict(maxsize=100, ttl=60)
-    kwargs.update(overrides or {})
     _id = f"ttl-{name}"
     if _id in caches:
         raise exceptions_metastore.CacheAlreadyExistsException(
@@ -21,14 +19,12 @@ def get_ttl_cache(name: str, **overrides) -> cachetools.TTLCache:
             internal=ExceptionCodeEnum.MetastoreMemcacheTTLCacheAlreadyCreated,
             parameters={"cache_id": _id},
         )
-    caches[_id] = cachetools.TTLCache(**kwargs)
+    caches[_id] = cachetools.TTLCache(maxsize=maxsize, ttl=ttl)
     return caches[_id]
 
 
-def get_lru_cache(name: str, **overrides) -> cachetools.LRUCache:
+def get_lru_cache(name: str, maxsize: int = 100) -> cachetools.LRUCache:
     """Return a new lru cache."""
-    kwargs = dict(maxsize=100)
-    kwargs.update(overrides or {})
     _id = f"lru-{name}"
     if _id in caches:
         raise exceptions_metastore.CacheAlreadyExistsException(
@@ -36,7 +32,7 @@ def get_lru_cache(name: str, **overrides) -> cachetools.LRUCache:
             internal=ExceptionCodeEnum.MetastoreMemcacheLRUCacheAlreadyCreated,
             parameters={"cache_id": _id},
         )
-    caches[_id] = cachetools.LRUCache(**kwargs)
+    caches[_id] = cachetools.LRUCache(maxsize=maxsize)
     return caches[_id]
 
 

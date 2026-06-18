@@ -322,9 +322,7 @@ def find_feature_values(
             body["aggs"]["COMPOSITE"]["composite"]["after"] = json_loaded_after
         else:
             # first request so count expected number of records
-            body["aggs"]["TOTAL"]: dict = {
-                "cardinality": {"field": f"features_map.{feature}", "precision_threshold": 1000}
-            }
+            body["aggs"]["TOTAL"] = {"cardinality": {"field": f"features_map.{feature}", "precision_threshold": 1000}}  # ty:ignore[invalid-assignment]
 
         resp = ctx.man.binary2.w.search(ctx.sd, body=body)
 

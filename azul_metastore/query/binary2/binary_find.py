@@ -87,8 +87,8 @@ def _summarise_hashes(
         sha256 = bsha256["key"]
         summaries = []
         for bsource in bsha256["SOURCE"]["buckets"]:
-            hit = bsource["SUMMARY"]["hits"]["hits"][0]
-            src = hit["_source"]
+            hit: dict = bsource["SUMMARY"]["hits"]["hits"][0]
+            src: dict = hit["_source"]
             summaries.append(
                 {
                     "file_format": src.get("file_format"),
@@ -139,13 +139,13 @@ def _summarise_hashes(
             "tlsh": _any(x["tlsh"] for x in summaries),
             "magic": _any(x["magic"] for x in summaries),
             "mime": _any(x["mime"] for x in summaries),
-            "filenames": _all(x for x in itertools.chain.from_iterable([x["filenames"] for x in summaries])),
-            "sources": [x["sources"] for x in summaries if x["sources"]["name"]],
+            "filenames": _all(x for x in itertools.chain.from_iterable([x["filenames"] for x in summaries])),  # ty:ignore[invalid-argument-type]
+            "sources": [x["sources"] for x in summaries if x["sources"]["name"]],  # ty:ignore[not-subscriptable]
         }
 
         # sort sources by id and timestamp
         srcmap = {}
-        for src in ret["sources"]:
+        for src in ret["sources"]:  # ty:ignore[invalid-assignment]
             srcmap[src["name"] + src["timestamp"]] = src
         ret["sources"] = sorted(srcmap.values(), key=lambda x: (x["name"], x["timestamp"]))
 
@@ -268,7 +268,7 @@ def find_binaries(
         sort == bedr_binaries.FindBinariesSortEnum.source_timestamp
         or sort == bedr_binaries.FindBinariesSortEnum.timestamp
     ):
-        body["query"]["bool"]["must"]: dict = {
+        body["query"]["bool"]["must"] = {
             "has_child": {
                 "type": "metadata",
                 "query": {
@@ -283,7 +283,7 @@ def find_binaries(
                 },
                 "score_mode": "max",
             }
-        }
+        }  # ty:ignore[invalid-assignment]
 
     # filters that should also be used to highlight results (added at end of query building)
     qf_highlight = []
