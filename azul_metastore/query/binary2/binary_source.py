@@ -9,8 +9,7 @@ from azul_bedrock.models_restapi import sources as bedr_sources
 
 from azul_metastore import settings
 from azul_metastore.context import Context
-
-from .. import cache
+from azul_metastore.query import cache
 
 
 def read_source_references(
@@ -45,14 +44,14 @@ def read_source_references(
     }
 
     if term:
-        body["query"]["bool"]["should"]: list = [
+        body["query"]["bool"]["should"] = [
             {
                 "regexp": {
                     "source.encoded_references.value": {"value": f".*{re.escape(term)}.*", "case_insensitive": True}
                 }
             }
-        ]
-        body["query"]["bool"]["minimum_should_match"]: int = 1
+        ]  # ty:ignore[invalid-assignment]
+        body["query"]["bool"]["minimum_should_match"] = 1  # ty:ignore[invalid-assignment]
 
     resp = ctx.man.binary2.w.search(ctx.sd, body=body)
 

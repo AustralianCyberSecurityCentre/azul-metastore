@@ -10,8 +10,7 @@ from azul_metastore import context, settings
 from azul_metastore.common import utils
 from azul_metastore.encoders import binary2 as rc
 from azul_metastore.query import annotation, plugin
-
-from . import binary_related
+from azul_metastore.query.binary2 import binary_related
 
 logger = logging.getLogger(__name__)
 

@@ -8,9 +8,8 @@ from azul_bedrock.models_restapi.binaries_download import (
 
 from azul_metastore import settings
 from azul_metastore.common.utils import azsec
+from azul_metastore.encoders import base_encoder
 from azul_metastore.encoders.base_encoder import uid
-
-from . import base_encoder
 
 
 class Status(base_encoder.BaseIndexEncoder):

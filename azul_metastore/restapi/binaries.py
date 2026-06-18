@@ -88,7 +88,7 @@ def find_binaries(
     if data.items_count == 0 and term:
         # Check if grammar was appropriate
         model_valid_keys = binary_event.get_opensearch_binary_mapping(qr.writer)
-        invalid_keys = validate_term_query(term, model_valid_keys)
+        invalid_keys = validate_term_query(term, list(model_valid_keys.keys()))
         if len(invalid_keys) > 0:
             opt_s = "s" if len(invalid_keys) > 1 else ""
             invalid_keys_string = ", ".join(invalid_keys)
@@ -133,7 +133,7 @@ def find_all_binaries(
     if (data.total is None or data.total == 0) and len(data.items) == 0 and term:
         # Check if grammar was appropriate
         model_valid_keys = binary_event.get_opensearch_binary_mapping(qr.writer)
-        invalid_keys = validate_term_query(term, model_valid_keys)
+        invalid_keys = validate_term_query(term, list(model_valid_keys.keys()))
         if len(invalid_keys) > 0:
             opt_s = "s" if len(invalid_keys) > 1 else ""
             invalid_keys_string = ", ".join(invalid_keys)

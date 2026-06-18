@@ -133,7 +133,7 @@ class BaseIndexControl:
             }
 
         # count number of exclusives
-        d["encoded_security"]["num_exclusive"]: int = len(d["encoded_security"][EXCLUSIVE])
+        d["encoded_security"]["num_exclusive"] = len(d["encoded_security"][EXCLUSIVE])  # ty:ignore[invalid-assignment]
 
     @classmethod
     def _decode_security(cls, d: dict) -> None:

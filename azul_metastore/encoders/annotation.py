@@ -8,8 +8,7 @@ from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_metastore import InvalidAnnotation
 
 from azul_metastore.common.utils import md5, to_utc
-
-from . import base_encoder
+from azul_metastore.encoders import base_encoder
 
 safe_tag = re.compile(r"[a-z0-9\-]*$")
 

@@ -24,6 +24,7 @@ from azul_metastore import context
 from azul_metastore.query import cache
 from azul_metastore.query.binary2 import binary_read
 from azul_metastore.restapi.quick import qr
+from azul_metastore.settings import get as get_metastore_settings
 
 logger = logging.getLogger(__name__)
 
@@ -131,3 +132,9 @@ def get_statistics(resp: Response, background_tasks: BackgroundTasks, ctx: conte
         # no other thread will enter the mutex until a result has been obtained
 
     return qr.fr(ctx, statistics_container.data, resp)
+
+
+@router.get("/v0/readonly")
+def is_server_readonly() -> bool:
+    """Read a summary of various global attributes about this instance of Azul."""
+    return get_metastore_settings().readonly_mode

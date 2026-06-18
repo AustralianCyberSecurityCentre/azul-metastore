@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 from azul_metastore.common.utils import md5, to_utc
-
-from . import base_encoder
+from azul_metastore.encoders import base_encoder
 
 
 class Cache(base_encoder.BaseIndexEncoder):

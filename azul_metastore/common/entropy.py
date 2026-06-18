@@ -20,7 +20,7 @@ MAX_ENTROPY_VALUE = 8.0
 MIN_ENTROPY_VALUE = 0.0
 
 
-def _interpolate_entropy(entropy_values: list[float]) -> np.ndarray | None:
+def _interpolate_entropy(entropy_values: list[float]) -> np.ndarray[tuple, np.dtype[np.float64]] | None:
     """Use interpolation to ensure there are exactly 40 values for entropy."""
     # Don't attempt interpolation unless there are at least enough entropy to fill up the vector (40 - note is roughly a 10kB file)
     if len(entropy_values) < ENTROPY_VECTOR_DIMENSION:
@@ -83,20 +83,20 @@ def _get_int_conversion_table() -> dict[float, list[int]]:
     return result
 
 
-def _convert_float_0_8_to_binary(entropy_values: np.ndarray) -> list[np.int8]:
+def _convert_float_0_8_to_binary(entropy_values: np.ndarray[tuple, np.dtype[np.float64]]) -> list[int]:
     """Convert an entropy array with values 0->8 to a byte array that is useful for binary comparison.
 
     (values in array range from -128 to 127, but the focus of conversion is on the bit vaules)
     This method allows for hamming bit comparisons in opensearch nearest neighbour searches.
     """
-    result = []
+    result: list[int] = []
     for v in entropy_values:
         bin_values = _get_int_conversion_table()[_round_to_precision(v)]
         result = result + bin_values
     return result
 
 
-def convert_entropy_to_opensearch_entropy(entropy_values: list[float]) -> list[np.int8] | None:
+def convert_entropy_to_opensearch_entropy(entropy_values: list[float]) -> list[int] | None:
     """Convert an entropy list of floats into a byte array that can be indexed or searched for in Opensearch.
 
     This method converts entropy into a list of int8 values in the range -128 to 127.

@@ -24,8 +24,7 @@ from azul_metastore.common.entropy import TOTAL_ENTROPY_BITS, convert_entropy_to
 from azul_metastore.common.tlsh import encode_tlsh_into_vector
 from azul_metastore.common.utils import azsec, md5, to_utc
 from azul_metastore.encoders import base_encoder, template_feature, template_node
-
-from .base_encoder import uid
+from azul_metastore.encoders.base_encoder import uid
 
 logger = logging.getLogger(__name__)
 
