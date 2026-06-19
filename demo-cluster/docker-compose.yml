@@ -1,7 +1,7 @@
 services:
   opensearch:
     # This should only be used to run the opensearch integration tests for the project and for local development.
-    image: opensearchproject/opensearch:3.6.0@sha256:b5dd1512af2a99748c942cfbbd7f32162623336b210667d0fc6333c6321f171d
+    image: opensearchproject/opensearch:3.7.0@sha256:123e6591a47b1d54686890551bdb35739c85193ecded381219fc9e059e18128f
     environment:
       - discovery.type=single-node
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
@@ -24,7 +24,7 @@ services:
 
   dashboards:
     # default creds are admin:password
-    image: opensearchproject/opensearch-dashboards:3.6.0@sha256:1ddd64e3a07fd98bc20ccf5174760b51795630a602b81102b37d1e9ee82cb7a9
+    image: opensearchproject/opensearch-dashboards:3.7.0@sha256:ad707f8c85abe5164b10a3277ebc3e7ff2a7034f72898ae0be7371133770151d
     environment:
       OPENSEARCH_HOSTS: https://10.53.0.10:9200
       OPENSEARCH_PASSWORD: password
