@@ -7,7 +7,7 @@ from tests.support import unit_test
 from azul_metastore.settings import get as get_metastore_settings
 
 
-class TestQuickRefs(unit_test.BaseUnitTestCase):
+class TestStatistics(unit_test.BaseUnitTestCase):
     async def test_server_readonly(self):
         """Basic check to verify the server returns when it's in a readonly state and when it's not."""
         get_metastore_settings().readonly_mode = True

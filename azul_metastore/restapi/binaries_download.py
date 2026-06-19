@@ -14,12 +14,13 @@ from fastapi import (
     Request,
     Response,
 )
-from starlette.status import HTTP_404_NOT_FOUND
+from starlette.status import HTTP_404_NOT_FOUND, HTTP_423_LOCKED
 
 from azul_metastore import context
 from azul_metastore.query import status
 from azul_metastore.query.binary2 import binary_submit
 from azul_metastore.restapi.quick import qr
+from azul_metastore.settings import get as get_metastore_settings
 
 router = APIRouter()
 
@@ -61,6 +62,9 @@ async def submit_binary_download_request(
     NOTE - this source will be at the classification of the system.
     Ensure you don't submit sha256's that are classified at a higher classification.
     """
+    if get_metastore_settings().readonly_mode:
+        raise ApiException(status_code=HTTP_423_LOCKED, internal=ExceptionCodeEnum.MetastoreReadOnlyMode)
+
     # Validate user supplied label
     security = ctx.validate_user_security(security)
 
