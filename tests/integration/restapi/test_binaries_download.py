@@ -6,7 +6,7 @@ import pendulum
 
 from azul_metastore.query import annotation
 from tests.support import gen, integration_test
-
+from azul_bedrock.exception_enums import ExceptionCodeEnum
 
 import cart
 from azul_bedrock import models_network as azm
