@@ -6,12 +6,13 @@ import pendulum
 
 from azul_metastore.query import annotation
 from tests.support import gen, integration_test
-
+from azul_bedrock.exception_enums import ExceptionCodeEnum
 
 import cart
 from azul_bedrock import models_network as azm
 
 from tests.support import gen, integration_test
+from azul_metastore.settings import get as get_metastore_settings
 
 TEST_SHA256 = "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
 
@@ -193,3 +194,18 @@ class TestBinaryDownload(integration_test.BaseRestapi):
                 "meta": {"security": "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLEO", "sec_filter": None},
             },
         )
+
+    async def test_simple_download(self):
+        """Download event should fail when readonly mode is set."""
+        get_metastore_settings().readonly_mode = True
+        request_data = {
+            "sha256": TEST_SHA256,
+            "source_id": "samples",
+            "references": {"apple": "granny smith"},
+            "security": "LOW",
+        }
+        response = self.client.post("/v0/binaries/source/download", json=request_data)
+        self.assertEqual(423, response.status_code)
+        j = json.loads(response.text)
+        print(j["detail"]["internal"])
+        self.assertEqual(j["detail"]["internal"], ExceptionCodeEnum.MetastoreReadOnlyMode.value)
