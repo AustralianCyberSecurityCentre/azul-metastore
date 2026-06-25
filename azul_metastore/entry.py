@@ -2,7 +2,6 @@
 
 import logging
 import os
-import time
 import traceback
 from enum import IntEnum
 
