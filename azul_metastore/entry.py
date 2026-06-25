@@ -192,12 +192,6 @@ def age_off(loop):
     while True:
         # find old documents and delete
         _age_off.do_age_off()
-        if not loop:
-            break
-
-        logger.info("wait for an hour")
-        # wait for an hour
-        time.sleep(60 * 60)
 
 
 cli.add_command(entry_purge.cli)
