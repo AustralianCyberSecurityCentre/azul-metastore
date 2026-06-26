@@ -28,15 +28,22 @@ class TestMain(unit_test.DataMockingUnitTest):
         response = self.client.head(f"/v0/binaries/{sha256a}/content")
         self.assertEqual(200, response.status_code)
         self.assertEqual(response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE")
-        response = self.client.head(f"/v0/binaries/{sha256b}/content")
-        self.assertEqual(404, response.status_code)
-        self.assertEqual(response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE")
+        with mock.patch(
+            "azul_metastore.query.binary2.binary_read.find_stream_references",
+            lambda *args: (False, "", "label"),
+        ):
+            response = self.client.head(f"/v0/binaries/{sha256b}/content")
+            self.assertEqual(404, response.status_code)
 
         # check case sensitivity
         response = self.client.head(f"/v0/binaries/{sha256a.upper()}/content")
         self.assertEqual(200, response.status_code)
-        response = self.client.head(f"/v0/binaries/{sha256b.upper()}/content")
-        self.assertEqual(404, response.status_code)
+        with mock.patch(
+            "azul_metastore.query.binary2.binary_read.find_stream_references",
+            lambda *args: (False, "", "label"),
+        ):
+            response = self.client.head(f"/v0/binaries/{sha256b.upper()}/content")
+            self.assertEqual(404, response.status_code)
 
     @respx.mock
     def test_get_binaries_sha256_content(self):
@@ -63,7 +70,6 @@ class TestMain(unit_test.DataMockingUnitTest):
         self.assertEqual(404, response.status_code)
 
     @respx.mock
-    # @mock.patch('azul_metastore.find_stream_references', lambda *args: True)
     @mock.patch("azul_metastore.query.binary2.binary_read.find_stream_metadata")
     def test_get_binaries_sha256_content_stream(self, fs):
         content = b"hello"
