@@ -55,6 +55,10 @@ def _find_stream_references(ctx: Context, sha256: str) -> list[tuple[str, azm.Da
     body: dict[
         str, int | dict[str, dict[str, list[dict[str, dict[str, str]]]]] | list[dict[str, dict[str, str]]] | list[str]
     ] = {
+        # Size 10 was chosen to account for cases where a stream may have aged off and have multiple sources.
+        # In theory size 1 should be enough but if a binary aged off in the dispatcher S3 store and hadn't aged-off in
+        # opensearch, this size allows for other source/labels to be search for an older sourcing event that still has
+        # the file.
         "size": 10,
         "query": {"bool": {"filter": [{"term": {"datastreams.sha256": sha256}}]}},
         "sort": [{"timestamp": {"order": "desc"}}],
