@@ -54,7 +54,7 @@ async def check_has_binary(
 ):
     """Check if a binary exists."""
     # check user can access binary (enforce security)
-    exists, source, label = binary_read.find_stream_references(ctx, sha256)
+    exists, source, label = binary_read.verify_stream_exists(ctx, sha256)
     if not exists:
         raise ApiException(
             status_code=HTTP_404_NOT_FOUND,
@@ -83,7 +83,7 @@ async def download_binary_encoded(
 ):
     """Download a binary file and cart it."""
     # check user can access binary (enforce security)
-    exists, source, label = binary_read.find_stream_references(ctx, sha256)
+    exists, source, label = binary_read.verify_stream_exists(ctx, sha256)
 
     try:
         if not exists:
@@ -133,7 +133,7 @@ async def download_binaries(
                     internal=ExceptionCodeEnum.MetastoreInvalidSha256Provided,
                     parameters={"sha256": sha256},
                 )
-            exists, source, label = binary_read.find_stream_references(ctx, sha256)
+            exists, source, label = binary_read.verify_stream_exists(ctx, sha256)
             if exists:
                 to_download.append((source, label, sha256))
 
@@ -305,7 +305,7 @@ def get_hex_view(
             )
 
     # do simple hash lookup to check if user can access binary
-    exists, source, label = binary_read.find_stream_references(ctx, sha256)
+    exists, source, label = binary_read.verify_stream_exists(ctx, sha256)
 
     try:
         if not exists:
@@ -389,7 +389,7 @@ async def _handle_search_query(
 ) -> bedr_binaries_data.BinaryStrings:
     """Generic handler that searches for content in a file with a given search engine."""
     # do simple hash lookup to check if user can access binary
-    exists, source, label = binary_read.find_stream_references(ctx, sha256)
+    exists, source, label = binary_read.verify_stream_exists(ctx, sha256)
     if not exists:
         raise ApiException(
             status_code=HTTP_404_NOT_FOUND,
@@ -732,7 +732,7 @@ async def get_common_strings(
     sha256_info: list[Sha256StreamAndStrings] = []
     for sha256 in [sha256A, sha256B]:
         # do simple hash lookup to check if user can access binary
-        exists, source, label = binary_read.find_stream_references(ctx, sha256)
+        exists, source, label = binary_read.verify_stream_exists(ctx, sha256)
         if not exists:
             raise ApiException(
                 status_code=HTTP_404_NOT_FOUND,

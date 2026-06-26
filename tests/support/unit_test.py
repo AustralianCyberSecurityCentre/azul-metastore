@@ -133,7 +133,7 @@ class DataMockingUnitTest(BaseUnitTestCase):
         # FUTURE make dp mocks easier to understand and put in base class
         cls.patches = [
             mock.patch(
-                "azul_metastore.query.binary2.binary_read.find_stream_references",
+                "azul_metastore.query.binary2.binary_read.verify_stream_exists",
                 lambda *args: (True, "source", "label"),
             ),
             mock.patch("azul_metastore.context.get_writer_context", lambda *args: mock_get_writer_context),

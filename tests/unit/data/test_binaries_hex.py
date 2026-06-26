@@ -302,7 +302,7 @@ class TestMain(unit_test.DataMockingUnitTest):
         self.assertEqual(content, expected_result)
 
     @respx.mock
-    @mock.patch("azul_metastore.query.binary2.binary_read.find_stream_references")
+    @mock.patch("azul_metastore.query.binary2.binary_read.verify_stream_exists")
     def test_get_hex_fail(self, cce):
         sha256a = "1d4ce380c90339830b7915137b34cd77c627ad498c773f9b4a12a3c876bfe024"
         respx.get(re.compile(rf"{self.end}/api/v3/stream/source/label/.+")).mock(side_effect=mock_load_binary)

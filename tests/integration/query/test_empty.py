@@ -16,7 +16,7 @@ from azul_bedrock import models_network as azm
 
 class TestEmpty(integration_test.DynamicTestCase):
     def test_binary_read(self):
-        self.assertEqual((False, "", azm.DataLabel.TEST), binary_read.find_stream_references(self.writer, "e1"))
+        self.assertEqual((False, "", azm.DataLabel.TEST), binary_read.verify_stream_exists(self.writer, "e1"))
         self.assertFalse(binary_read.check_binaries(self.writer, ["e1"])[0]["exists"])
         self.assertFalse(binary_find.find_binaries(self.writer, hashes=["e1"], count_binaries=True).items_count, 0)
         self.assertFalse(self.read_binary_events("e1"))

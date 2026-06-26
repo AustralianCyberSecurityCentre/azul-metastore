@@ -26,14 +26,16 @@ def get_total_binary_count(ctx: Context) -> int:
     return aggs["entities"]["value"]
 
 
-def find_stream_references(ctx: Context, sha256: str, is_check_in_dispatcher=True) -> tuple[bool, str, azm.DataLabel]:
+def verify_stream_exists(
+    ctx: Context, sha256: str, is_check_stream_in_dispatcher=True
+) -> tuple[bool, str, azm.DataLabel]:
     """Return (True, exemplar source_id, exemplar label) if we have bytes backing the given sha256."""
     results = _find_stream_references(ctx, sha256)
     if len(results) == 0:
         return False, "", azm.DataLabel.TEST
 
     # Verify the binary is also in dispatcher and if not check the next label
-    if is_check_in_dispatcher:
+    if is_check_stream_in_dispatcher:
         for r in results:
             # Ignore case where dispatcher doesn't find the binary via the label and check the next label.
             with contextlib.suppress(ApiException):
@@ -45,11 +47,11 @@ def find_stream_references(ctx: Context, sha256: str, is_check_in_dispatcher=Tru
 
 
 def _find_stream_references(ctx: Context, sha256: str) -> list[tuple[str, azm.DataLabel]]:
-    """Return (True, exemplar source_id, exemplar label) if we have bytes backing the given sha256."""
+    """Return a list of unique sources and labels associated with a sha256."""
     if not sha256:
         raise BaseAzulException(internal=ExceptionCodeEnum.MetastoreSha256NotProvidedForFindingStreamRefs)
     sha256 = sha256.lower()
-    # as augmented events have no associated submission we need to perform a parent-child query
+    # Search any metadata to find the datastream source/label references
     body: dict[
         str, int | dict[str, dict[str, list[dict[str, dict[str, str]]]]] | list[dict[str, dict[str, str]]] | list[str]
     ] = {

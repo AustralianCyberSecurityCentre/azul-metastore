@@ -145,7 +145,7 @@ class TestBinaryRead(integration_test.DynamicTestCase):
         self.assertEqual(2, len(results))
         self.assertSetEqual({"a1", "a2"}, {x["author"]["name"] for x in results})
 
-    def test_find_stream_references(self):
+    def test_verify_stream_exists(self):
         self.write_binary_events(
             [
                 gen.binary_event(
@@ -154,20 +154,20 @@ class TestBinaryRead(integration_test.DynamicTestCase):
             ]
         )
         # Ignoring dispatcher check because it's not mocked here
-        result = binary_read.find_stream_references(self.writer, "e1", is_check_in_dispatcher=False)
+        result = binary_read.verify_stream_exists(self.writer, "e1", is_check_stream_in_dispatcher=False)
         self.assertEqual((True, "s1", "content"), result)
-        result = binary_read.find_stream_references(self.writer, "e10", is_check_in_dispatcher=False)
+        result = binary_read.verify_stream_exists(self.writer, "e10", is_check_stream_in_dispatcher=False)
         self.assertEqual((False, "", azm.DataLabel.TEST), result)
 
-        result = binary_read.find_stream_references(self.writer, "E1", is_check_in_dispatcher=False)
+        result = binary_read.verify_stream_exists(self.writer, "E1", is_check_stream_in_dispatcher=False)
         self.assertEqual((True, "s1", "content"), result)
-        result = binary_read.find_stream_references(self.writer, "E10", is_check_in_dispatcher=False)
+        result = binary_read.verify_stream_exists(self.writer, "E10", is_check_stream_in_dispatcher=False)
         self.assertEqual((False, "", azm.DataLabel.TEST), result)
 
     def test_find_stream_exists_with_dispatcher_checks(self):
         """Verify that when checking if a binary is present in dispatcher or not a label is passed over as appropriate.
 
-        This verifies that find_stream_references will confirm the source/label/sha256 is actually in dispatcher as
+        This verifies that verify_stream_exists will confirm the source/label/sha256 is actually in dispatcher as
         well as opensearch and will search multiple references if necessary.
         """
         self.write_binary_events(
@@ -178,7 +178,7 @@ class TestBinaryRead(integration_test.DynamicTestCase):
             ]
         )
         # Will fail because the dispatcher check will fail because it isn't mocked
-        result = binary_read.find_stream_references(self.writer, "e1", is_check_in_dispatcher=True)
+        result = binary_read.verify_stream_exists(self.writer, "e1", is_check_stream_in_dispatcher=True)
         self.assertEqual((False, "", DataLabel.TEST), result)
 
         # Succeeds because dispatcher returns True when asked to test if the binary is present.
@@ -186,10 +186,10 @@ class TestBinaryRead(integration_test.DynamicTestCase):
             return True
 
         with mock.patch.object(self.writer.dispatcher, "has_binary", wraps=return_true) as has_binary_wrapper:
-            result = binary_read.find_stream_references(self.writer, "e1", is_check_in_dispatcher=True)
+            result = binary_read.verify_stream_exists(self.writer, "e1", is_check_stream_in_dispatcher=True)
             self.assertEqual((True, "s1", "content"), result)
 
-    def test_find_stream_references_dataless_present(self):
+    def test_verify_stream_exists_dataless_present(self):
         """Find a stream when there is a dataless event attempting to obscure the datastream.
 
         # Note data has been designed to account for different sorting mechanisms of opensearch
@@ -240,7 +240,7 @@ class TestBinaryRead(integration_test.DynamicTestCase):
                 ),
             ]
         )
-        result = binary_read.find_stream_references(self.writer, "e1", is_check_in_dispatcher=False)
+        result = binary_read.verify_stream_exists(self.writer, "e1", is_check_stream_in_dispatcher=False)
         self.assertEqual((True, "s3", "content"), result)
 
     def test_binary_count(self):
