@@ -1,8 +1,10 @@
+from azul_bedrock.exceptions_bedrock import ApiException
 from azul_bedrock.models_network import DataLabel
 from azul_metastore.query.binary2 import binary_read
 from tests.support import gen, integration_test
 from azul_bedrock import models_network as azm
 from unittest import mock
+from azul_bedrock.exception_enums import ExceptionCodeEnum
 
 
 class TestBinaryRead(integration_test.DynamicTestCase):
@@ -182,10 +184,27 @@ class TestBinaryRead(integration_test.DynamicTestCase):
         self.assertEqual((False, "", DataLabel.TEST), result)
 
         # Succeeds because dispatcher returns True when asked to test if the binary is present.
-        def return_true(*args, **kwargs):
-            return True
+        def return_nothing(*args, **kwargs):
+            return None
 
-        with mock.patch.object(self.writer.dispatcher, "has_binary", wraps=return_true) as has_binary_wrapper:
+        with mock.patch.object(self.writer.dispatcher, "has_binary", wraps=return_nothing) as has_binary_wrapper:
+            result = binary_read.verify_stream_exists(self.writer, "e1", is_check_stream_in_dispatcher=True)
+            self.assertEqual((True, "s1", "content"), result)
+
+        # Succeeds because dispatcher returns True when asked to test if the binary is present.
+        iteration = 0
+
+        def raise_exception(*args, **kwargs):
+            nonlocal iteration
+            iteration += 1
+            if iteration <= 1:
+                raise ApiException(status_code=404, internal=ExceptionCodeEnum.MetastoreSourceNoReferences)
+            else:
+                return
+
+        with mock.patch.object(self.writer.dispatcher, "has_binary", wraps=raise_exception) as has_binary_wrapper:
+            result = binary_read.verify_stream_exists(self.writer, "e1", is_check_stream_in_dispatcher=True)
+            self.assertEqual((False, "", DataLabel.TEST), result)
             result = binary_read.verify_stream_exists(self.writer, "e1", is_check_stream_in_dispatcher=True)
             self.assertEqual((True, "s1", "content"), result)
 
