@@ -30,7 +30,7 @@ class TestMain(unit_test.DataMockingUnitTest):
         self.assertEqual(response.headers.get("x-azul-security"), "TOP HIGH MOD1 MOD2 MOD3 HANOVERLAP OVER REL:APPLE")
         with mock.patch(
             "azul_metastore.query.binary2.binary_read.verify_stream_exists",
-            lambda *args: (False, "", "label"),
+            lambda *args, **kwargs: (False, "", "label"),
         ):
             response = self.client.head(f"/v0/binaries/{sha256b}/content")
             self.assertEqual(404, response.status_code)
@@ -40,7 +40,7 @@ class TestMain(unit_test.DataMockingUnitTest):
         self.assertEqual(200, response.status_code)
         with mock.patch(
             "azul_metastore.query.binary2.binary_read.verify_stream_exists",
-            lambda *args: (False, "", "label"),
+            lambda *args, **kwargs: (False, "", "label"),
         ):
             response = self.client.head(f"/v0/binaries/{sha256b.upper()}/content")
             self.assertEqual(404, response.status_code)

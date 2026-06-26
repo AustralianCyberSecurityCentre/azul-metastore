@@ -134,7 +134,7 @@ class DataMockingUnitTest(BaseUnitTestCase):
         cls.patches = [
             mock.patch(
                 "azul_metastore.query.binary2.binary_read.verify_stream_exists",
-                lambda *args: (True, "source", "label"),
+                lambda *args, **kwargs: (True, "source", "label"),
             ),
             mock.patch("azul_metastore.context.get_writer_context", lambda *args: mock_get_writer_context),
             mock.patch("azul_metastore.query.binary_create.create_binary_events", lambda *args, **kwargs: True),
