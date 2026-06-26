@@ -39,8 +39,8 @@ def verify_stream_exists(
         for r in results:
             # Ignore case where dispatcher doesn't find the binary via the label and check the next label.
             with contextlib.suppress(ApiException):
-                if ctx.dispatcher.has_binary(source=r[0], label=r[1], sha256=sha256):
-                    return True, r[0], r[1]
+                ctx.dispatcher.has_binary(source=r[0], label=r[1], sha256=sha256)
+                return True, r[0], r[1]
         return False, "", azm.DataLabel.TEST
 
     return True, results[0][0], results[0][1]
