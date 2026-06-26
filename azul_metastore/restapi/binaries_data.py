@@ -55,25 +55,14 @@ async def check_has_binary(
     """Check if a binary exists."""
     # check user can access binary (enforce security)
     exists, source, label = binary_read.find_stream_references(ctx, sha256)
-
-    # Set headers as we are preparing to respond but after all requests have
-    # been made (to ensure the context captures everything)
-    try:
-        if not exists:
-            raise ApiException(
-                status_code=HTTP_404_NOT_FOUND,
-                ref="Item not found",
-                internal=ExceptionCodeEnum.MetastoreBinaryNotFound,
-                parameters={"sha256": sha256},
-            )
-
-        # check dispatcher still has binary
-        ctx.dispatcher.has_binary(source, label, sha256)
-    except (HTTPException, ApiException) as e:
-        qr.set_security_headers(ctx, resp, ex=e)
-        raise
-
-    qr.set_security_headers(ctx, resp)
+    if not exists:
+        raise ApiException(
+            status_code=HTTP_404_NOT_FOUND,
+            ref="Item not found",
+            internal=ExceptionCodeEnum.MetastoreBinaryNotFound,
+            parameters={"sha256": sha256},
+        )
+    qr.set_security_headers(ctx, response=resp)
 
 
 @router.get(
