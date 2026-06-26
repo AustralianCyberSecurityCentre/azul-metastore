@@ -1,9 +1,11 @@
 """Queries for reading various information about binaries that doesn't fit elsewhere."""
 
+import contextlib
+
 from azul_bedrock import exceptions_bedrock
 from azul_bedrock import models_network as azm
 from azul_bedrock.exception_enums import ExceptionCodeEnum
-from azul_bedrock.exceptions_bedrock import BaseAzulException
+from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
 from azul_bedrock.models_restapi import binaries as bedr_binaries
 
 from azul_metastore.context import Context
@@ -24,74 +26,69 @@ def get_total_binary_count(ctx: Context) -> int:
     return aggs["entities"]["value"]
 
 
-def find_stream_references(ctx: Context, sha256: str) -> tuple[bool, str, azm.DataLabel]:
+def verify_stream_exists(
+    ctx: Context, sha256: str, is_check_stream_in_dispatcher=True
+) -> tuple[bool, str, azm.DataLabel]:
     """Return (True, exemplar source_id, exemplar label) if we have bytes backing the given sha256."""
+    results = _find_stream_references(ctx, sha256)
+    if len(results) == 0:
+        return False, "", azm.DataLabel.TEST
+
+    # Verify the binary is also in dispatcher and if not check the next label
+    if is_check_stream_in_dispatcher:
+        for r in results:
+            # Ignore case where dispatcher doesn't find the binary via the label and check the next label.
+            with contextlib.suppress(ApiException):
+                ctx.dispatcher.has_binary(source=r[0], label=r[1], sha256=sha256)
+                return True, r[0], r[1]
+        return False, "", azm.DataLabel.TEST
+
+    return True, results[0][0], results[0][1]
+
+
+def _find_stream_references(ctx: Context, sha256: str) -> list[tuple[str, azm.DataLabel]]:
+    """Return a list of unique sources and labels associated with a sha256."""
     if not sha256:
         raise BaseAzulException(internal=ExceptionCodeEnum.MetastoreSha256NotProvidedForFindingStreamRefs)
     sha256 = sha256.lower()
-    # as augmented events have no associated submission we need to perform a parent-child query
-    body = {
-        "terminate_after": 1,
-        "size": 0,
-        "query": {
-            "bool": {
-                "filter": [
-                    {
-                        "has_child": {
-                            "type": "metadata",
-                            "query": {"term": {"datastreams.sha256": sha256}},
-                        }
-                    }
-                ]
-            }
-        },
-        "aggs": {
-            "CHILDREN": {
-                "children": {"type": "metadata"},
-                "aggs": {
-                    "DATASTREAMS": {
-                        "terms": {"field": "uniq_data"},
-                        "aggs": {
-                            "DATASTREAMS": {
-                                "top_hits": {
-                                    "size": 1,
-                                    "sort": [{"timestamp": {"order": "desc"}}],
-                                    "_source": [
-                                        "source.name",
-                                        "datastreams.label",
-                                        "datastreams.sha256",
-                                    ],
-                                }
-                            }
-                        },
-                    },
-                },
-            }
-        },
+    # Search any metadata to find the datastream source/label references
+    body: dict[
+        str, int | dict[str, dict[str, list[dict[str, dict[str, str]]]]] | list[dict[str, dict[str, str]]] | list[str]
+    ] = {
+        # Size 10 was chosen to account for cases where a stream may have aged off and have multiple sources.
+        # In theory size 1 should be enough but if a binary aged off in the dispatcher S3 store and hadn't aged-off in
+        # opensearch, this size allows for other source/labels to be search for an older sourcing event that still has
+        # the file.
+        "size": 10,
+        "query": {"bool": {"filter": [{"term": {"datastreams.sha256": sha256}}]}},
+        "sort": [{"timestamp": {"order": "desc"}}],
+        "_source": ["source.name", "datastreams.label", "datastreams.sha256"],
     }
     resp = ctx.man.binary2.w.complex_search(ctx.sd, body=body)
-    aggs = resp["aggregations"]["CHILDREN"]
-    if not aggs["DATASTREAMS"]["buckets"]:
-        return (False, "", azm.DataLabel.TEST)
-    for candidate in aggs["DATASTREAMS"]["buckets"]:
-        for label_doc in candidate["DATASTREAMS"]["hits"]["hits"]:
-            doc = label_doc["_source"]["datastreams"]
-            source = label_doc["_source"]["source"]["name"]
-            for stream in doc:
-                if stream["sha256"] == sha256:
-                    try:
-                        # once label is found exit immediately
-                        label = azm.DataLabel(stream["label"])
-                        return (True, source, label)
+    hits = resp.get("hits", {}).get("hits", [])
 
-                    except ValueError:
-                        attempted_label = str(stream.get("label", ""))
-                        raise exceptions_bedrock.AzulValueError(
-                            internal=ExceptionCodeEnum.MetastoreInvalidDataLabel,
-                            parameters={"label": attempted_label},
-                        ) from None
+    results: set[tuple[str, azm.DataLabel]] = set()
+    if len(hits) == 0:
+        return []
+    for h in hits:
+        h_source: dict = h.get("_source")
 
-    return (False, "", azm.DataLabel.TEST)
+        source_name: str = h_source.get("source", {}).get("name", "")
+
+        for cur_stream in h_source.get("datastreams", []):
+            try:
+                stream_sha256: str = cur_stream.get("sha256", "")
+                if stream_sha256 == sha256:
+                    label = azm.DataLabel(cur_stream["label"])
+                    results.add((source_name, label))
+            except ValueError:
+                attempted_label = str(cur_stream.get("label", ""))
+                raise exceptions_bedrock.AzulValueError(
+                    internal=ExceptionCodeEnum.MetastoreInvalidDataLabel,
+                    parameters={"label": attempted_label},
+                ) from None
+
+    return list(results)
 
 
 def find_stream_metadata(ctx: Context, sha256: str, stream_hash: str) -> tuple[str | None, azm.Datastream | None]:

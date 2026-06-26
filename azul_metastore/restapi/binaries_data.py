@@ -54,26 +54,15 @@ async def check_has_binary(
 ):
     """Check if a binary exists."""
     # check user can access binary (enforce security)
-    exists, source, label = binary_read.find_stream_references(ctx, sha256)
-
-    # Set headers as we are preparing to respond but after all requests have
-    # been made (to ensure the context captures everything)
-    try:
-        if not exists:
-            raise ApiException(
-                status_code=HTTP_404_NOT_FOUND,
-                ref="Item not found",
-                internal=ExceptionCodeEnum.MetastoreBinaryNotFound,
-                parameters={"sha256": sha256},
-            )
-
-        # check dispatcher still has binary
-        ctx.dispatcher.has_binary(source, label, sha256)
-    except (HTTPException, ApiException) as e:
-        qr.set_security_headers(ctx, resp, ex=e)
-        raise
-
-    qr.set_security_headers(ctx, resp)
+    exists, source, label = binary_read.verify_stream_exists(ctx, sha256)
+    if not exists:
+        raise ApiException(
+            status_code=HTTP_404_NOT_FOUND,
+            ref="Item not found",
+            internal=ExceptionCodeEnum.MetastoreBinaryNotFound,
+            parameters={"sha256": sha256},
+        )
+    qr.set_security_headers(ctx, response=resp)
 
 
 @router.get(
@@ -94,7 +83,7 @@ async def download_binary_encoded(
 ):
     """Download a binary file and cart it."""
     # check user can access binary (enforce security)
-    exists, source, label = binary_read.find_stream_references(ctx, sha256)
+    exists, source, label = binary_read.verify_stream_exists(ctx, sha256)
 
     try:
         if not exists:
@@ -144,7 +133,7 @@ async def download_binaries(
                     internal=ExceptionCodeEnum.MetastoreInvalidSha256Provided,
                     parameters={"sha256": sha256},
                 )
-            exists, source, label = binary_read.find_stream_references(ctx, sha256)
+            exists, source, label = binary_read.verify_stream_exists(ctx, sha256)
             if exists:
                 to_download.append((source, label, sha256))
 
@@ -316,7 +305,7 @@ def get_hex_view(
             )
 
     # do simple hash lookup to check if user can access binary
-    exists, source, label = binary_read.find_stream_references(ctx, sha256)
+    exists, source, label = binary_read.verify_stream_exists(ctx, sha256)
 
     try:
         if not exists:
@@ -400,7 +389,7 @@ async def _handle_search_query(
 ) -> bedr_binaries_data.BinaryStrings:
     """Generic handler that searches for content in a file with a given search engine."""
     # do simple hash lookup to check if user can access binary
-    exists, source, label = binary_read.find_stream_references(ctx, sha256)
+    exists, source, label = binary_read.verify_stream_exists(ctx, sha256)
     if not exists:
         raise ApiException(
             status_code=HTTP_404_NOT_FOUND,
@@ -743,7 +732,7 @@ async def get_common_strings(
     sha256_info: list[Sha256StreamAndStrings] = []
     for sha256 in [sha256A, sha256B]:
         # do simple hash lookup to check if user can access binary
-        exists, source, label = binary_read.find_stream_references(ctx, sha256)
+        exists, source, label = binary_read.verify_stream_exists(ctx, sha256)
         if not exists:
             raise ApiException(
                 status_code=HTTP_404_NOT_FOUND,

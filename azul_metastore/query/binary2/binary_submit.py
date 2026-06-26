@@ -275,7 +275,11 @@ async def high_level_submit_binary(
             internal=ExceptionCodeEnum.MetastoreBadBinarySubmissionNoSha256Provided,
         )
 
-    if parent_sha256 and not binary_read.find_stream_references(ctx, parent_sha256)[0]:
+    # Not checking that parent stream exists as the only check that matters is that the stream was present in Azul.
+    if (
+        parent_sha256
+        and not binary_read.verify_stream_exists(ctx, parent_sha256, is_check_stream_in_dispatcher=False)[0]
+    ):
         raise ApiException(
             status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             ref="Parent Id (sha256) must already exist",

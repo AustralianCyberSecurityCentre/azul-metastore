@@ -356,7 +356,7 @@ class CommonTestCases(unit_test.DataMockingUnitTest):
         )
 
     @mock.patch(
-        "azul_metastore.query.binary2.binary_read.find_stream_references", lambda *args: (False, None, None)
+        "azul_metastore.query.binary2.binary_read.verify_stream_exists", lambda *args, **kwargs: (False, None, None)
     )  # parent_sha256 doesn't exist
     @mock.patch("azul_bedrock.dispatcher.DispatcherAPI.submit_events")
     async def test_high_level_submit_binary_invalid_submissions(self, se: mock.MagicMock):
@@ -462,7 +462,7 @@ class CommonTestCases(unit_test.DataMockingUnitTest):
         )
 
     @mock.patch(
-        "azul_metastore.query.binary2.binary_read.find_stream_references", lambda *args: (False, None, None)
+        "azul_metastore.query.binary2.binary_read.verify_stream_exists", lambda *args, **kwargs: (False, None, None)
     )  # dispatcher returns with an ok length of zero because no events were published.
     @mock.patch("azul_bedrock.dispatcher.DispatcherAPI.submit_events")
     async def test_high_level_submit_dispatcher_empty_ok_response(self, se: mock.MagicMock):
