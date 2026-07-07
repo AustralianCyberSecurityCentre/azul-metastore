@@ -22,7 +22,7 @@ from fastapi import (
 )
 from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT
 
-from azul_metastore import context, settings
+from azul_metastore import context
 from azul_metastore.common.search_query import validate_term_query
 from azul_metastore.encoders.annotation import InvalidAnnotation
 from azul_metastore.query import annotation, status
