@@ -144,11 +144,6 @@ map_common = {
     "uniq_data": {"eager_global_ordinals": True, "type": "keyword"},
 }
 
-# FUTURE - remove with disable_entropy_similarity
-s = settings.get()
-if s.disable_entropy_similarity:
-    del map_common["entropy_vector"]
-
 map_link = {
     "track_link": {"type": "keyword"},
     "parent_track_author": {"type": "keyword"},
@@ -402,9 +397,7 @@ class Binary2(base_encoder.BaseIndexEncoder):
 
         # encoded entropy if it's available in info
         entropy = encoded_event.get("info", {}).get("entropy")
-        # FUTURE remove with disable_entropy_similarity
-        s = settings.get()
-        if not s.disable_entropy_similarity and entropy:
+        if entropy:
             entropy_blocks = entropy.get("blocks", [])
             entropy_converted = convert_entropy_to_opensearch_entropy(entropy_blocks)
             encoded_event["entropy_vector"] = entropy_converted
@@ -671,10 +664,6 @@ class Binary2(base_encoder.BaseIndexEncoder):
             "features",
             "info",
         ]
-        # FUTURE remove with disable_entropy_similarity
-        s = settings.get()
-        if s.disable_entropy_similarity:
-            entity_props.remove("entropy_vector")
         event["entity"] = {}
         for k in entity_props:
             if k in event:

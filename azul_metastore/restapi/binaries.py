@@ -329,13 +329,6 @@ def get_similar_entropy_binaries(
     ctx: context.Context = Depends(qr.ctx),
 ):
     """Search for binaries with similar entropy to the entropy provided."""
-    # FUTURE - remove with disable_entropy_similarity
-    s = settings.get()
-    if s.disable_entropy_similarity:
-        raise ApiException(
-            status_code=410,
-            internal=ExceptionCodeEnum.MetastoreApiDisabled,
-        )
     result = binary_similar.read_similar_from_entropy(
         ctx, original_sha256=sha256, entropy=entropy, max_matches=max_matches
     )
