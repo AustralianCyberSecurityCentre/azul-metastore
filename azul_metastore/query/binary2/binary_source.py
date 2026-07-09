@@ -16,8 +16,13 @@ def read_source_references(
     ctx: Context,
     source: str,
     term: Optional[str] = None,
-) -> list[bedr_sources.ReferenceSet]:
+    grouped: bool = False,
+) -> list[bedr_sources.ReferenceSet | bedr_sources.ReferenceSetGrouped]:
     """Return source reference information for the source."""
+    field_key = "track_source_references"
+    if grouped:
+        field_key = "track_source_references_grouped"
+
     body: dict = {
         "query": {
             "bool": {
@@ -26,7 +31,7 @@ def read_source_references(
         },
         "aggs": {
             "datas": {
-                "terms": {"field": "track_source_references", "size": 100, "order": {"newest": "desc"}},
+                "terms": {"field": field_key, "size": 100, "order": {"newest": "desc"}},
                 "aggs": {
                     "newest": {"max": {"field": "source.timestamp"}},
                     "num_entities": {"cardinality": {"field": "sha256"}},
@@ -61,15 +66,26 @@ def read_source_references(
     for bucket in aggs["datas"]["buckets"]:
         approx = bucket["doc_count"] >= 100
         hit = bucket["values"]["hits"]["hits"][0]["_source"]
-        ret.append(
-            bedr_sources.ReferenceSet(
-                track_source_references=bucket["key"],
-                timestamp=bucket["newest"]["value_as_string"],
-                num_entities=bucket["num_entities"]["value"],
-                num_entities_min=approx,
-                values=hit.get("source", {}).get("references", {}),
+        if grouped:
+            ret.append(
+                bedr_sources.ReferenceSetGrouped(
+                    track_source_references_grouped=bucket["key"],
+                    timestamp=bucket["newest"]["value_as_string"],
+                    num_entities=bucket["num_entities"]["value"],
+                    num_entities_min=approx,
+                    values=hit.get("source", {}).get("references", {}),
+                )
             )
-        )
+        else:
+            ret.append(
+                bedr_sources.ReferenceSet(
+                    track_source_references=bucket["key"],
+                    timestamp=bucket["newest"]["value_as_string"],
+                    num_entities=bucket["num_entities"]["value"],
+                    num_entities_min=approx,
+                    values=hit.get("source", {}).get("references", {}),
+                )
+            )
 
     return ret
 

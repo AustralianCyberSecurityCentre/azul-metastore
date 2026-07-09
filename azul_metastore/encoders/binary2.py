@@ -6,6 +6,7 @@ This involves converting structures to opensearch compatible dictionaries.
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import logging
 import re
@@ -155,6 +156,7 @@ fields_link = [x for x in map_link.keys()]
 map_submission = {
     "depth": {"type": "integer"},
     "track_source_references": {"type": "keyword"},
+    "track_source_references_grouped": {"type": "keyword"},
     "source": {
         "properties": {
             "security": {"type": "keyword"},
@@ -280,11 +282,32 @@ class Binary2(base_encoder.BaseIndexEncoder):
             # Because there should be a sourced event + the plugin that produced the augmented event.
             if depth < 0:
                 depth = 0
+
+        meta_settings = settings.get()
+
+        # Create tracking for grouped references
+        source_ref = event.get("source", {})
+        source_name: str = source_ref["name"]
+        references: dict = source_ref.get("references", {})
+        grouped_refs = ""
+        # Group all the priority references and then hash the result
+        for ref_key in sorted(references):
+            if ref_key in meta_settings.source_priority_references[source_name]:
+                grouped_refs += f"{ref_key}.{references[ref_key]}."
+
+        # Group by priority fields unless there is none and then default to track_source_references.
+        if len(grouped_refs) == 0:
+            tracking_source_references_grouped = event["track_source_references"]
+        else:
+            grouped_refs_digest = hashlib.md5(grouped_refs.encode()).hexdigest()  # noqa: S324
+            tracking_source_references_grouped = f"{source_name}.{grouped_refs_digest}"
+
         ret: dict = {
             "_id": unique_submission,
             "depth": depth,
             "source": copy.deepcopy(event["source"]),
             "track_source_references": event["track_source_references"],
+            "track_source_references_grouped": tracking_source_references_grouped,
         }
         ret["source"].pop("path")
         return ret
@@ -326,8 +349,8 @@ class Binary2(base_encoder.BaseIndexEncoder):
         encoded_event = event["entity"]
 
         # Get necessary keys to ensure if they are missing they fail early
-        event_source = event["source"]
-        event_author = event["author"]
+        event_source: dict = event["source"]
+        event_author: dict = event["author"]
         event_source_path = event_source["path"]
 
         # security of a result document is the combination of source, author and link security
@@ -681,6 +704,7 @@ class Binary2(base_encoder.BaseIndexEncoder):
             "uniq_features",
             "uniq_info",
             "uniq_data",
+            "track_source_references_grouped",
         ]
         for k in list(event.keys()):
             if k in root_props:

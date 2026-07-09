@@ -82,6 +82,65 @@ class TestSources(integration_test.BaseRestapi):
         resp = response.json()
         self.assertEqual(1, len(resp["data"]["items"]))
 
+    def test_source_references_grouped_read(self):
+        # generated_bin = gen.binary_event(
+        #     sourceit=("s1", "2000-01-01T00:00:00Z"), sourcerefs={"ref1": "a", "ref2": "commonfield"}
+        # )
+        # print(generated_bin.model_dump_json(indent=1))
+        # self.assertTrue(False)
+        self.write_binary_events(
+            [
+                gen.binary_event(
+                    eid="a", sourceit=("s1", "2000-01-01T00:00:00Z"), sourcerefs={"ref1": "a", "ref2": "commonfield"}
+                ),
+                gen.binary_event(
+                    eid="b", sourceit=("s1", "2000-01-02T00:00:00Z"), sourcerefs={"ref1": "abc", "ref2": "commonfield"}
+                ),
+                gen.binary_event(
+                    eid="c", sourceit=("s1", "2000-01-03T00:00:00Z"), sourcerefs={"ref1": "abcd", "ref2": "rarefield1"}
+                ),
+                gen.binary_event(
+                    eid="d",
+                    sourceit=("s1", "2000-01-04T00:00:00Z"),
+                    sourcerefs={"ref1": "apple banana", "ref2": "rarefield2"},
+                ),
+                # Missing ref 2
+                gen.binary_event(eid="e", sourceit=("s1", "2000-01-04T00:00:00Z"), sourcerefs={"ref1": "banana"}),
+            ]
+        )
+        response = self.client.get("/v0/sources/s1/references/grouped")
+        self.assertEqual(200, response.status_code)
+        resp = response.json()
+        # should be some reference values
+        # Detects all entries (but 1 and 2 are grouped)
+        self.assertEqual(4, len(resp["data"]["items"]))
+        self.assertLess(0, len(resp["data"]["items"][0]["values"]))
+
+        # gets 1 and 2 together
+        response = self.client.get("/v0/sources/s1/references/grouped?term=commonfield")
+        self.assertEqual(200, response.status_code)
+        resp = response.json()
+        self.assertEqual(1, len(resp["data"]["items"]))
+        # Verify 1 and 2 have been grouped together by the ref2 reference parameter
+        self.assertEqual(2, resp["data"]["items"][0]["num_entities"])
+
+        # Detects 1,2,3
+        response = self.client.get("/v0/sources/s1/references/grouped?term=abc")
+        self.assertEqual(200, response.status_code)
+        resp = response.json()
+        self.assertEqual(2, len(resp["data"]["items"]))
+
+        # detects last 2 entries
+        response = self.client.get("/v0/sources/s1/references/grouped?term=banana")
+        self.assertEqual(200, response.status_code)
+        resp = response.json()
+        self.assertEqual(2, len(resp["data"]["items"]))
+
+        response = self.client.get("/v0/sources/s1/references/grouped?term=apple")
+        self.assertEqual(200, response.status_code)
+        resp = response.json()
+        self.assertEqual(1, len(resp["data"]["items"]))
+
     def test_source_submissions_read(self):
         self.write_binary_events(
             [
