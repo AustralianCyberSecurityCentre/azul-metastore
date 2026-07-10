@@ -72,6 +72,21 @@ def source_refs_read(
     return qr.fr(ctx, {"items": rows}, resp)
 
 
+@router.get("/v0/sources/{source}/references/grouped", response_model=qr.gr(bedr_sources.GroupedReferences), **qr.kw)
+def source_grouped_refs(
+    resp: Response,
+    source: str,
+    ctx: context.Context = Depends(qr.ctx),
+    term: str = Query(""),
+):
+    """Read source reference details only including the priority reference fields."""
+    rows = binary_source.read_source_references(ctx, source, term=term, grouped=True)
+    if not rows:
+        qr.set_security_headers(ctx, resp)
+        raise ApiException(status_code=HTTP_404_NOT_FOUND, internal=ExceptionCodeEnum.MetastoreSourceNoReferences)
+    return qr.fr(ctx, {"items": rows}, resp)
+
+
 @router.get("/v0/sources/{source}/submissions", response_model=qr.gr(bedr_sources.References), **qr.kw)
 def source_submissions_read(
     resp: Response,

@@ -60,18 +60,6 @@ class TestSearchEntity(integration_test.DynamicTestCase):
         self.assertFormatted(
             ev,
             {
-                "binary_info": {"name": "metadata", "parent": "e1"},
-                "security": "LOW TLP:CLEAR",
-                "encoded_security": {
-                    "exclusive": ["s-low"],
-                    "inclusive": ["s-any"],
-                    "markings": ["s-tlp-clear"],
-                    "num_exclusive": 1,
-                },
-                "timestamp": "2021-01-01T12:00:00Z",
-                "action": "mapped",
-                "author": {"category": "plugin", "name": "a1", "version": "1", "security": "LOW TLP:CLEAR"},
-                "track_author": "plugin.a1.1",
                 "sha256": "e1",
                 "sha512": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e1",
                 "sha1": "00000000000000000000000000000000000000e1",
@@ -131,32 +119,12 @@ class TestSearchEntity(integration_test.DynamicTestCase):
                     -128,
                     -128,
                 ],
-                "features_map": {"generic_feature": ["generic_value"]},
                 "sha256_author_action": "e1.plugin.a1.mapped",
-                "uniq_features": "e1.plugin.a1.mapped.5215d5851701bb31fb24e7ecf9e1048f",
+                "features_map": {"generic_feature": ["generic_value"]},
                 "num_feature_names": 1,
                 "num_feature_values": 1,
-                "depth": 0,
-                "source": {
-                    "name": "generic_source",
-                    "timestamp": "2021-01-01T11:00:00Z",
-                    "security": "LOW TLP:CLEAR",
-                    "references": {"ref1": "val1", "ref2": "val2"},
-                    "encoded_references": [
-                        {"key": "ref1", "value": "val1", "key_value": "ref1.val1"},
-                        {"key": "ref2", "value": "val2", "key_value": "ref2.val2"},
-                    ],
-                },
-                "track_source_references": "generic_source.dd6e233ae7a843de99f9b43c349069e4",
-            },
-        )
-        ev = [x for x in self.read_binary_events("e10", raw=True) if "sha256" in x][0]
-        ev.pop("_index")
-        ev.pop("_id")
-        self.assertFormatted(
-            ev,
-            {
-                "binary_info": {"name": "metadata", "parent": "e10"},
+                "uniq_features": "e1.plugin.a1.mapped.5215d5851701bb31fb24e7ecf9e1048f",
+                "binary_info": {"name": "metadata", "parent": "e1"},
                 "security": "LOW TLP:CLEAR",
                 "encoded_security": {
                     "exclusive": ["s-low"],
@@ -168,6 +136,27 @@ class TestSearchEntity(integration_test.DynamicTestCase):
                 "action": "mapped",
                 "author": {"category": "plugin", "name": "a1", "version": "1", "security": "LOW TLP:CLEAR"},
                 "track_author": "plugin.a1.1",
+                "depth": 0,
+                "source": {
+                    "security": "LOW TLP:CLEAR",
+                    "name": "generic_source",
+                    "timestamp": "2021-01-01T11:00:00Z",
+                    "references": {"ref1": "val1", "ref2": "val2"},
+                    "encoded_references": [
+                        {"key": "ref1", "value": "val1", "key_value": "ref1.val1"},
+                        {"key": "ref2", "value": "val2", "key_value": "ref2.val2"},
+                    ],
+                },
+                "track_source_references": "generic_source.dd6e233ae7a843de99f9b43c349069e4",
+                "track_source_references_grouped": "generic_source.dd6e233ae7a843de99f9b43c349069e4",
+            },
+        )
+        ev = [x for x in self.read_binary_events("e10", raw=True) if "sha256" in x][0]
+        ev.pop("_index")
+        ev.pop("_id")
+        self.assertFormatted(
+            ev,
+            {
                 "sha256": "e10",
                 "sha512": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e10",
                 "sha1": "0000000000000000000000000000000000000e10",
@@ -227,16 +216,28 @@ class TestSearchEntity(integration_test.DynamicTestCase):
                     -128,
                     -128,
                 ],
-                "features_map": {"generic_feature": ["generic_value"]},
                 "sha256_author_action": "e10.plugin.a1.mapped",
-                "uniq_features": "e10.plugin.a1.mapped.5215d5851701bb31fb24e7ecf9e1048f",
+                "features_map": {"generic_feature": ["generic_value"]},
                 "num_feature_names": 1,
                 "num_feature_values": 1,
+                "uniq_features": "e10.plugin.a1.mapped.5215d5851701bb31fb24e7ecf9e1048f",
+                "binary_info": {"name": "metadata", "parent": "e10"},
+                "security": "LOW TLP:CLEAR",
+                "encoded_security": {
+                    "exclusive": ["s-low"],
+                    "inclusive": ["s-any"],
+                    "markings": ["s-tlp-clear"],
+                    "num_exclusive": 1,
+                },
+                "timestamp": "2021-01-01T12:00:00Z",
+                "action": "mapped",
+                "author": {"category": "plugin", "name": "a1", "version": "1", "security": "LOW TLP:CLEAR"},
+                "track_author": "plugin.a1.1",
                 "depth": 1,
                 "source": {
+                    "security": "LOW TLP:CLEAR",
                     "name": "generic_source",
                     "timestamp": "2021-01-01T11:00:00Z",
-                    "security": "LOW TLP:CLEAR",
                     "references": {"ref1": "val1", "ref2": "val2"},
                     "encoded_references": [
                         {"key": "ref1", "value": "val1", "key_value": "ref1.val1"},
@@ -244,6 +245,7 @@ class TestSearchEntity(integration_test.DynamicTestCase):
                     ],
                 },
                 "track_source_references": "generic_source.dd6e233ae7a843de99f9b43c349069e4",
+                "track_source_references_grouped": "generic_source.dd6e233ae7a843de99f9b43c349069e4",
                 "track_link": "e1.e10.plugin.a1.1",
                 "parent": {
                     "sha256": "e1",

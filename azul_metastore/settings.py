@@ -140,6 +140,18 @@ class Metastore(BaseSettings):
 
     sources: dict[str, models_settings.Source] = {}
 
+    @computed_field
+    @cached_property
+    def source_priority_references(self) -> dict[str, list[str]]:
+        """Returns a dictionary with key source name and value of the priority reference fields for the source."""
+        result: dict[str, list[str]] = {}
+        for source_name, src_values in self.sources.items():
+            result[source_name] = []
+            for ref in src_values.references:
+                if ref.priority:
+                    result[source_name].append(ref.name)
+        return result
+
     # Opensearch status config override
     status_index_config: IndexSettings = IndexSettings()
     # status retention

@@ -15,6 +15,7 @@ from azul_metastore.encoders import binary2 as rc2
 from azul_metastore.query import annotation, binary_create, plugin, status
 from tests.support import auth, basic_test, gen, system
 from azul_bedrock.datastore import Credentials, CredentialFormat
+from azul_bedrock import exceptions_metastore, models_settings
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -107,7 +108,22 @@ class DynamicTestCase(basic_test.BasicTest):
         os.environ["metastore_statuses_expire_events_after"] = "14 days"
         os.environ["metastore_sources"] = json.dumps(
             {
-                "s1": {},
+                "s1": models_settings.Source(
+                    references=[
+                        models_settings.Source.SourceReference(
+                            name="ref1",
+                            required=False,
+                            description="test field for priority group tests",
+                            priority=False,
+                        ),
+                        models_settings.Source.SourceReference(
+                            name="ref2",
+                            required=False,
+                            description="test field for priority group tests",
+                            priority=True,
+                        ),
+                    ]
+                ).model_dump(),
                 "s2": {},
                 "s3": {},
                 "s4": {},
