@@ -375,11 +375,17 @@ def read_similar_from_entropy(
         # %1 removes whole numbers added because opensearch adds a 1 as part of the score boosting provided by DSL.
         # This does lose some precision but is insignificant
         score = hit["_score"]
-        if score != 1.0:
-            # If the score isn't exactly one perform modulus 1, it it is 1 it's an exact match.
-            score = score % 1
-        # Total number of bits that differ between the two vectors d=(1/x) - 1
-        different_bits = (1 / score) - 1
+        # If the score isn't exactly one perform modulus 1, it it is 1 it's an exact match.
+        score = score % 1
+        # If the score is a whole number 1,2,3... (which can happen, the files match 100%)
+        if hit["_score"] > 0 and score == 0:
+            score = 1
+        if score == 0:
+            # If score is still 0 there is a 0% percentage match and this achieve that result.
+            different_bits = TOTAL_ENTROPY_BITS
+        else:
+            # Total number of bits that differ between the two vectors d=(1/x) - 1
+            different_bits = (1 / score) - 1
         # Calculate percentage similar
         percentage_score = 100 * ((TOTAL_ENTROPY_BITS - different_bits) / TOTAL_ENTROPY_BITS)
         # Skip elements if they don't meet minimum similarity.
