@@ -262,7 +262,7 @@ class Purger:
         self,
         *,
         track_source_references: str,
-        timestamp: str | None,
+        timestamp: str,
         purge: bool,
     ) -> bedr_purge.PurgeSimulation | bedr_purge.PurgeResults:
         """Purge binary events associated with a binary submission to a source."""
@@ -281,9 +281,6 @@ class Purger:
         )
         ret = None
         # delete binary2 submission docs
-        optional_filters = []
-        if timestamp:
-            optional_filters.append({"term": {"source.timestamp": timestamp}})
         body = {
             "size": 0,
             "track_total_hits": True,
@@ -291,7 +288,7 @@ class Purger:
             "query": {
                 "bool": {
                     "filter": [
-                        *optional_filters,
+                        {"term": {"source.timestamp": timestamp}},
                         {"term": {"track_source_references": track_source_references}},
                     ]
                 }

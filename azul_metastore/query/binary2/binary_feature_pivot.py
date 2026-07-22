@@ -70,10 +70,10 @@ def find_common_features_from_features(
         "aggs": all_aggregations,
         "size": 0,
     }
-    aggregration_result = ctx.man.binary2.w.search(ctx.sd, agg_body)
+    aggregation_result = ctx.man.binary2.w.search(ctx.sd, agg_body)
 
     fpnwvc: list[bedr_features.FeaturePivotNameWithValueCount] = []
-    for feature_name, model in aggregration_result.get("aggregations", {}).items():
+    for feature_name, model in aggregation_result.get("aggregations", {}).items():
         current_feat_value_count: list[bedr_features.FeaturePivotValueCount] = list()
         for bucket_values in model.get("buckets"):
             found_value = bucket_values.get("key")

@@ -80,7 +80,7 @@ def read_similar_from_tlsh(ctx: Context, tlsh: str, maxCount: int) -> list[dict]
 
         # knn call in wrapper inserts security as filter, but this affects the score by adding whole numbers
         # modulus removes these whole numbers so we get a useable percentage score
-        # multipy by 100 to get a nice percentage
+        # multiply by 100 to get a nice percentage
         # round to 2 decimal places because score can subtly vary
         score = round((hit["_score"] % 1) * 100, 2)
 
@@ -104,13 +104,13 @@ def read_similar_from_ssdeep(ctx: Context, fuzzy_hash: str, maxCount: int) -> li
 
     chunk and dchunk are the second and third parts of the hash, each split into ngrams 7 characters long.
 
-    The opensearch query retreives entities which have the same blocksize give or take a multiple of 2,
+    The opensearch query retrieves entities which have the same blocksize give or take a multiple of 2,
     and have at least 1 ngram matching.
 
     These hashes are then passed to the fuzzyhash library to rank similarity on a 0-100 scale.
 
     A maximum of maxCount*2 entities will be fetched from Opensearch to account for any differences in ordering
-    between the Opensearch results and the ssdeep comparision scoring, however only maxCount matches are returned.
+    between the Opensearch results and the ssdeep comparison scoring, however only maxCount matches are returned.
 
     A list of sha256 hashes and corresponding similarity score is returned, ordered by score descending.
     """
@@ -285,7 +285,7 @@ def read_similar_from_features(ctx: Context, sha256: str, *, recalculate: bool =
             # calculate number of matching feature values to target
             collision = len(set_fval.intersection(set((x["name"], x["value"]) for x in doc["features"])))
 
-            # create new match for entity if it doesnt exist
+            # create new match for entity if it doesn't exist
             map_entity.setdefault(
                 doc["sha256"],
                 dict(
