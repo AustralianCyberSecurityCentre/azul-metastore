@@ -195,3 +195,4 @@ exclude = ["tests"]
 
 [tool.ty.rules]
 unused-ignore-comment = "ignore"
+unused-type-ignore-comment = "ignore"

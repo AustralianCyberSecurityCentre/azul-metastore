@@ -59,11 +59,11 @@ def find_common_features_from_features(
 
     # Aggregations for all the features that exist in Azul with the provided binaries.
     all_aggregations = {}
-    feature_descriptions = dict()
+    feature_descriptions: dict[str, str] = dict()
     for feat in azul_known_features:
         all_aggregations[feat.name] = {"terms": {"field": f"features_map.{feat.name}", "min_doc_count": 2}}
         if feat.descriptions:
-            feature_descriptions[feat.name] = feat.descriptions[0].desc
+            feature_descriptions[feat.name] = feat.descriptions[0].desc if feat.descriptions[0].desc else ""
 
     agg_body = {
         "query": {"bool": {"filter": [{"terms": {"sha256": matching_sha256s}}]}},
