@@ -85,13 +85,13 @@ class TestPurge(integration_test.DynamicTestCase):
         # simulate
         ret = self.purger.purge_submission(
             track_source_references=track_source_references,
-            timestamp="2000-01-01T01:01:01Z",
+            timestamp="2000-01-03T01:01:01Z",
             purge=False,
         )
         self.assertFormatted(
             ret,
             PurgeSimulation(
-                events=2,
+                events=1,
             ),
         )
 
