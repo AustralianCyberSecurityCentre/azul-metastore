@@ -59,21 +59,21 @@ def find_common_features_from_features(
 
     # Aggregations for all the features that exist in Azul with the provided binaries.
     all_aggregations = {}
-    feature_descriptions = dict()
+    feature_descriptions: dict[str, str] = dict()
     for feat in azul_known_features:
         all_aggregations[feat.name] = {"terms": {"field": f"features_map.{feat.name}", "min_doc_count": 2}}
         if feat.descriptions:
-            feature_descriptions[feat.name] = feat.descriptions[0].desc
+            feature_descriptions[feat.name] = feat.descriptions[0].desc if feat.descriptions[0].desc else ""
 
     agg_body = {
         "query": {"bool": {"filter": [{"terms": {"sha256": matching_sha256s}}]}},
         "aggs": all_aggregations,
         "size": 0,
     }
-    aggregration_result = ctx.man.binary2.w.search(ctx.sd, agg_body)
+    aggregation_result = ctx.man.binary2.w.search(ctx.sd, agg_body)
 
     fpnwvc: list[bedr_features.FeaturePivotNameWithValueCount] = []
-    for feature_name, model in aggregration_result.get("aggregations", {}).items():
+    for feature_name, model in aggregation_result.get("aggregations", {}).items():
         current_feat_value_count: list[bedr_features.FeaturePivotValueCount] = list()
         for bucket_values in model.get("buckets"):
             found_value = bucket_values.get("key")

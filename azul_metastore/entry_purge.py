@@ -4,7 +4,11 @@ import logging
 
 import black
 import click
+import pendulum
+from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_bedrock.exceptions_bedrock import BaseAzulException
 from azul_bedrock.models_restapi import purge as bedr_purge
+from pendulum.exceptions import ParserError
 
 from azul_metastore.query import purge as qpurge
 
@@ -24,11 +28,21 @@ def cli():
 
 @cli.command()
 @click.argument("track_source_references")
-@click.option("--timestamp", default=None, help="Submission timestamp.")
+@click.option("--timestamp", help="Submission timestamp.")
 @click.option("--purge", is_flag=True, default=False, help="Purge data instead of simulating.")
-def submission(track_source_references: str, timestamp: str | None, purge: bool):
+def submission(track_source_references: str, timestamp: str, purge: bool):
     """Purge binary events associated with a binary submission to a source."""
     purger = qpurge.Purger()
+
+    try:
+        pendulum.parse(timestamp)
+    except ParserError as e:
+        raise BaseAzulException(
+            ref=f"The timestamp provided '{timestamp}' has an invalid format.",
+            internal=ExceptionCodeEnum.MetastoreInvalidTimestampForPurge,
+            parameters={"timestamp": timestamp},
+        ) from e
+
     ret = purger.purge_submission(
         track_source_references=track_source_references,
         timestamp=timestamp,
