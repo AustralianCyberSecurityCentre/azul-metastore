@@ -15,6 +15,7 @@ from azul_metastore.context import Context
 from azul_metastore.query.binary2 import binary_submit
 from azul_metastore.settings import get as get_metastore_settings
 from tests.support import gen, unit_test
+import pendulum
 
 from . import helpers
 
@@ -52,6 +53,39 @@ class TestSubmitToSource(unit_test.DataMockingUnitTest):
         filename = [x.value for x in features if x.name == "filename"][0]
         self.assertEqual("test.exe", filename)
         self.assertEqual(response.headers.get("x-azul-security"), "LOW TLP:AMBER")
+
+    @mock.patch("azul_bedrock.dispatcher.DispatcherAPI.submit_events")
+    async def test_future_date(self, se: mock.MagicMock):
+        """Upload with a time in the future and ensure the time is forced down to now rather than a future time."""
+        # Get a time 60 hours in the future
+        test_timestamp = pendulum.now().add(hours=60)
+        data = [
+            ("filename", (None, "test.exe")),
+            ("source_id", (None, "user")),
+            ("timestamp", (None, test_timestamp.isoformat())),
+            ("references", (None, json.dumps({"apple": "banana"}))),
+            ("security", (None, "low TLP:CLEAR TLP:GREEN TLP:AMBER")),
+        ]
+        se.return_value = models_api.ResponsePostEvent(
+            total_ok=1, total_failures=0, failures=[], ok=[gen.binary_event(model=False)]
+        )
+
+        response = self.client.post("/v0/binaries/source", files=data + [("binary", ("file.exe", b"hello"))])
+        self.assertEqual(200, response.status_code)
+        j = json.loads(response.text)
+        self.assertEqual(1, len(j))
+        self.assertEqual(
+            "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+            j[0]["sha256"],
+        )
+        # check correct filename
+        event: azm.BinaryEvent = se.call_args[0][0][0]
+        features = event.entity.features
+        filename = [x.value for x in features if x.name == "filename"][0]
+        self.assertEqual("test.exe", filename)
+        self.assertEqual(response.headers.get("x-azul-security"), "LOW TLP:AMBER")
+        current_time= pendulum.now().add(minutes=5)
+        self.assertLess(event.timestamp, current_time)
 
     @mock.patch("azul_bedrock.dispatcher.DispatcherAPI.submit_events")
     async def test_no_filename(self, se: mock.MagicMock):

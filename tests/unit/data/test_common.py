@@ -18,6 +18,7 @@ from azul_metastore.common import data_common, data_strings, utils
 from azul_metastore.context import Context
 from azul_metastore.query.binary2 import binary_submit
 from tests.support import basic_test, gen, unit_test
+import pendulum
 
 from . import helpers
 
@@ -503,7 +504,12 @@ class CommonTestCases(unit_test.DataMockingUnitTest):
         self.assertEqual("relative", data_common.basename("Cool/Stuff\\relative"))
 
     def test_to_utc(self):
-        self.assertEqual("2021-08-12T15:23:11Z", utils.to_utc("2021-08-12T16:23:11+01:00"))
+        self.assertEqual("2021-08-12T15:23:11Z", utils.to_utc_no_future("2021-08-12T16:23:11+01:00"))
+        
+    def test_to_utc_no_future(self):
+        self.assertEqual("2021-08-12T15:23:11Z", utils.to_utc_no_future("2021-08-12T16:23:11+01:00"))
+        with mock.patch("pendulum.now", lambda tz=None: pendulum.parse("2023-10-10T10:10:10Z")) as p:
+            self.assertEqual("2023-10-10T10:10:10Z", utils.to_utc_no_future("9999-01-02T11:12:10Z"))
 
     @staticmethod
     async def make_string_iterable(value: bytes):

@@ -69,6 +69,17 @@ def to_utc(x: str) -> str:
     """Convert a iso 8601 string to equivalent in UTC."""
     return pendulum.parse(x).in_timezone(pendulum.UTC).to_iso8601_string()  # type: ignore
 
+def to_utc_no_future(x: str) -> str:
+    """Convert a iso 8601 string to equivalent in UTC, not allowing a future time."""
+    initial_time = pendulum.parse(x)
+    if isinstance(initial_time, pendulum.DateTime):
+        # initial_time = pendulum.from_format("2023-10-05 14:30:00", x)
+        if initial_time > pendulum.now():
+            initial_time = pendulum.now()
+        return initial_time.in_timezone(pendulum.UTC).to_iso8601_string()
+    
+    raise Exception(f"Invalid datetime format for date '{x}'")
+
 
 def chunker(iterator: Iterable[T], max_items: int = 100) -> Iterable[list[T]]:
     """Return items from iterator in chunks of 100."""
