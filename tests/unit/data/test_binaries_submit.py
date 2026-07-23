@@ -84,7 +84,7 @@ class TestSubmitToSource(unit_test.DataMockingUnitTest):
         filename = [x.value for x in features if x.name == "filename"][0]
         self.assertEqual("test.exe", filename)
         self.assertEqual(response.headers.get("x-azul-security"), "LOW TLP:AMBER")
-        current_time= pendulum.now().add(minutes=5)
+        current_time = pendulum.now().add(minutes=5)
         self.assertLess(event.timestamp, current_time)
 
     @mock.patch("azul_bedrock.dispatcher.DispatcherAPI.submit_events")

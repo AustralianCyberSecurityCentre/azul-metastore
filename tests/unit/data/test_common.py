@@ -505,7 +505,7 @@ class CommonTestCases(unit_test.DataMockingUnitTest):
 
     def test_to_utc(self):
         self.assertEqual("2021-08-12T15:23:11Z", utils.to_utc_no_future("2021-08-12T16:23:11+01:00"))
-        
+
     def test_to_utc_no_future(self):
         self.assertEqual("2021-08-12T15:23:11Z", utils.to_utc_no_future("2021-08-12T16:23:11+01:00"))
         with mock.patch("pendulum.now", lambda tz=None: pendulum.parse("2023-10-10T10:10:10Z")) as p:
