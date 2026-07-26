@@ -24,7 +24,7 @@ from pydantic import AfterValidator, BaseModel, computed_field, model_validator
 from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT, HTTP_423_LOCKED
 
 from azul_metastore import context
-from azul_metastore.common.utils import to_utc
+from azul_metastore.common.utils import to_utc_no_future
 from azul_metastore.query.binary2 import binary_expedite, binary_submit
 from azul_metastore.restapi.quick import qr
 from azul_metastore.settings import get as get_metastore_settings
@@ -41,7 +41,7 @@ logging.basicConfig(
 def _to_utc_except(timestamp: str):
     """Convert timestamp to UTC and raise api exception if not valid."""
     try:
-        return to_utc(timestamp)
+        return to_utc_no_future(timestamp)
     except Exception as e:
         raise ApiException(
             status_code=HTTP_422_UNPROCESSABLE_CONTENT,
