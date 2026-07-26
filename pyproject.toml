@@ -107,6 +107,7 @@ dev = [
     "httpx>=0.28.1",
     "pyjwt>=2.11.0",
     "pytest>=9.0.2",
+    "pytest-benchmark>=5.2.3",
     "respx>=0.22.0",
     # pinned to avoid issues installing 3.4, which fails on debian.
     "ruff>=0.15.8",
