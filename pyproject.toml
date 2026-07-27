@@ -172,6 +172,7 @@ select = [
 ignore = ["B008","C901","D104","D107","E203"]
 exclude = [
     "tests/*",
+    "benchmark/*",
 ]
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
@@ -192,7 +193,7 @@ docstring-code-format = false
 docstring-code-line-length = "dynamic"
 
 [tool.ty.src]
-exclude = ["tests"]
+exclude = ["tests","benchmark"]
 
 [tool.ty.rules]
 unused-ignore-comment = "ignore"

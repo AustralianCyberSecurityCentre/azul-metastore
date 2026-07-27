@@ -456,6 +456,10 @@ class Wrapper:
             sd.security_filter = "AND"
         return body
 
+    def stats(self, sd: search_data.SearchData) -> dict:
+        """Get the stats for an index alias."""
+        return sd.es().indices.stats(index=self.alias)
+
     def count(self, sd: search_data.SearchData, body: dict, *args, **kwargs):
         """Perform basic opensearch count."""
         body = self._limit_search(sd, body)

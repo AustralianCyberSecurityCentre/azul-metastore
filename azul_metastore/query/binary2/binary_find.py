@@ -2,6 +2,7 @@
 
 import itertools
 import logging
+import re
 from typing import Optional
 
 from azul_bedrock import exceptions_metastore
@@ -306,64 +307,75 @@ def find_binaries(
     # FUTURE if all supplied hashes are sha256s, skip to the summarise query
     # SSDeep hashes are case-sensitive
     hashes_normal = []
+    is_all_sha256 = True
+    sha256_regex = re.compile("^[a-fA-F0-9]{64}$")
     for x in hashes:
+        if is_all_sha256 and (not bool(sha256_regex.fullmatch(x))):
+            is_all_sha256 = False
+
         if x.count(":") == 2:
             hashes_normal.append(x)
         else:
             hashes_normal.append(x.lower())
-    if hashes_normal:
-        # similar to term filter, but over less fields and more precise matching
-        qf_highlight += [
-            {
-                "bool": {
-                    "should": [
-                        {"terms": {"md5": hashes_normal}},
-                        {"terms": {"sha1": hashes_normal}},
-                        {"terms": {"sha256": hashes_normal}},
-                        {"terms": {"sha512": hashes_normal}},
-                        {"terms": {"ssdeep.hash": hashes_normal}},
-                    ],
-                    "minimum_should_match": 1,
-                }
-            }
-        ]
-        # biggest of max_entities or one collision for each hash being searched
-        body["size"] = max(len(hashes_normal) * 2, max_binaries)
 
-    # Avoid including highlights if the query uses any tags.
-    # This avoids issues with cross index searching on very large number of tagged items e.g
-    # 1000 binaries with the same tag will break the opensearch query if highlighting is included.
-    include_highlights = not extra_info.is_binary_tag_search and not extra_info.is_feature_tag_search
-    # ensure queries are has_child compatible
-    qf_highlight = _wrap_search_has_child(qf_highlight, include_highlights=include_highlights)
-    # add highlight filters to main filter
-    body["query"]["bool"]["filter"] += qf_highlight
-
-    # perform search to retrieve matching sha256s
-    resp = ctx.man.binary2.w.complex_search(ctx.sd, body=body)
-
-    # store data for entities in same order as found
     binary_info = {}
-    for outer in resp["hits"]["hits"]:
-        eid = outer["_id"]
-        binary_info[eid] = {}
+    if len(hashes_normal) > 0 and is_all_sha256:
+        for hash in hashes_normal:
+            binary_info[hash] = {}
+    # Perform highlighting as there is some non-sha256 hashes.
+    else:
+        if hashes_normal:
+            # similar to term filter, but over less fields and more precise matching
+            qf_highlight += [
+                {
+                    "bool": {
+                        "should": [
+                            {"terms": {"md5": hashes_normal}},
+                            {"terms": {"sha1": hashes_normal}},
+                            {"terms": {"sha256": hashes_normal}},
+                            {"terms": {"sha512": hashes_normal}},
+                            {"terms": {"ssdeep.hash": hashes_normal}},
+                        ],
+                        "minimum_should_match": 1,
+                    }
+                }
+            ]
+            # biggest of max_entities or one collision for each hash being searched
+            body["size"] = max(len(hashes_normal) * 2, max_binaries)
 
-        # collect highlighting information from has_child inner hits
-        hls = binary_info[eid].setdefault("highlight", {})
-        for x in outer.get("inner_hits", {}).values():
-            for y in x["hits"]["hits"]:
-                # highlighting may not be present for the hit
-                highlight = y.get("highlight")
-                if not highlight:
-                    continue
-                for k, v in highlight.items():
-                    if k == "sha256" and v[0] in hashes_normal:
-                        # searched for a specific sha256 so don't highlight it
+        # Avoid including highlights if the query uses any tags.
+        # This avoids issues with cross index searching on very large number of tagged items e.g
+        # 1000 binaries with the same tag will break the opensearch query if highlighting is included.
+        include_highlights = not extra_info.is_binary_tag_search and not extra_info.is_feature_tag_search
+        # ensure queries are has_child compatible
+        qf_highlight = _wrap_search_has_child(qf_highlight, include_highlights=include_highlights)
+        # add highlight filters to main filter
+        body["query"]["bool"]["filter"] += qf_highlight
+
+        # perform search to retrieve matching sha256s
+        resp = ctx.man.binary2.w.complex_search(ctx.sd, body=body)
+
+        # store data for entities in same order as found
+        for outer in resp["hits"]["hits"]:
+            eid = outer["_id"]
+            binary_info[eid] = {}
+
+            # collect highlighting information from has_child inner hits
+            hls = binary_info[eid].setdefault("highlight", {})
+            for x in outer.get("inner_hits", {}).values():
+                for y in x["hits"]["hits"]:
+                    # highlighting may not be present for the hit
+                    highlight = y.get("highlight")
+                    if not highlight:
                         continue
-                    tmp = hls.setdefault(k, [])
-                    tmp += v
-                    # deduplicate unique highlights
-                    hls[k] = list(set(hls[k]))
+                    for k, v in highlight.items():
+                        if k == "sha256" and v[0] in hashes_normal:
+                            # searched for a specific sha256 so don't highlight it
+                            continue
+                        tmp = hls.setdefault(k, [])
+                        tmp += v
+                        # deduplicate unique highlights
+                        hls[k] = list(set(hls[k]))
 
     # perform query to enrich with summary info for binary
     if binary_info:
@@ -431,7 +443,8 @@ def find_binaries(
 
     # assemble final result object
     ret: dict = {"items": found_binaries}
-    if count_binaries:
+    # Resp will not be set if only hashes have been provided.
+    if count_binaries and resp:
         ret["items_count"] = resp["hits"]["total"]["value"]
     return bedr_binaries.EntityFind(**ret)
 

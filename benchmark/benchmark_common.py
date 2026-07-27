@@ -1,23 +1,27 @@
 """Script used to download a batch of binary events from dispatcher ready for seeding into Opensearch for testing."""
 
-import unittest
-
 import logging
 import os
-from azul_metastore import context, opensearch_config, settings
+import unittest
+
+import pytest
 from azul_bedrock import dispatcher
 from azul_bedrock import models_network as azm
 
-from azul_metastore import context
-from azul_metastore.query import binary_create
-from tests.support import integration_test
-import pytest_benchmark
-import pytest
-from tests.support import auth, basic_test, gen, system
+from azul_metastore import context, settings
 from azul_metastore.common import memcache
+from azul_metastore.query import binary_create
+from azul_metastore.query.binary2.binary_find import find_binaries
+from tests.support import system
 
 logger = logging.getLogger(__name__)
 DISPATCHER_URL = "<add-dispatcher-instance-here>"
+
+
+def get_json_docs_location() -> str:
+    """Get the location of the downloaded kafka data that can be indexed."""
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(current_dir, "test-content.json")
 
 
 class BinaryIngestorLocal:
@@ -35,14 +39,17 @@ class BinaryIngestorLocal:
             to_process.append(ev)
         return to_process
 
-    def set_data(self, ctx, docs: list[azm.BinaryEvent]) -> None:
+    def set_data(self, ctx, docs: list[azm.BinaryEvent], refresh: bool = False) -> None:
         """Write docs continually, logging errors."""
         results = self._prefilter(docs)
-        binary_create.create_binary_events(ctx, results)
+        binary_create.create_binary_events(ctx, results, immediate=refresh)
 
     @classmethod
     def download_events(self):
-        """Download events from dispatcher and save them to a local file for repeated testing usage."""
+        """Download events from dispatcher and save them to a local file for repeated testing usage.
+
+        This should be done and the saved file used for all benchmarking and discarded once completed.
+        """
         dp = dispatcher.DispatcherAPI(
             events_url=DISPATCHER_URL,
             data_url=DISPATCHER_URL,
@@ -54,8 +61,7 @@ class BinaryIngestorLocal:
         )
 
         total_captured_docs = 0
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        with open(os.path.join(current_dir, "test-content.json"), "w") as f:
+        with open(get_json_docs_location(), "w") as f:
             while total_captured_docs < 50000:
                 new_docs = dp.get_binary_events(
                     count=1000,
@@ -70,39 +76,47 @@ class BinaryIngestorLocal:
 
                 total_captured_docs += len(binary_events)
 
-    def main(self):
-        """Load binary events from a file and upload them to opensearch."""
+    def main(self, quick: bool = False, refresh: bool = False):
+        """Load binary events from a file and index them into opensearch."""
         ctx = context.get_writer_context()
         print("starting local ingestor")
         progress_loaded = 0
-        with open("/home/danacsc/armada-dev/code/azul-core/azul-metastore/scripts/test-content.json", "r") as f:
+        with open(get_json_docs_location(), "r") as f:
             loaded_events = []
             while json_event := f.readline():
                 loaded_event = azm.BinaryEvent.model_validate_json(json_event)
                 loaded_events.append(loaded_event)
                 if len(loaded_events) > 1000:
-                    self.set_data(ctx, loaded_events)
+                    self.set_data(ctx, loaded_events, refresh=refresh)
                     progress_loaded += len(loaded_events)
                     loaded_events = []
                     print(f"Loaded {progress_loaded} events so far")
+                    if quick:
+                        break
 
             if len(loaded_events) > 0:
                 self.set_data(ctx, loaded_events)
 
             print(f"Finished loading {progress_loaded} events")
 
+    def get_index_stats(self) -> dict:
+        """Get the index stats."""
+        ctx = context.get_writer_context()
+        return ctx.man.binary2.w.stats(ctx.sd)["_all"]["total"]
+
 
 def sius(key, data):
+    """Set Env if it's not set."""
     if not os.environ.get(key):
         if os.environ.get(key.upper()):
-            os.environ[key] = os.environ.get(key.upper())
+            os.environ[key] = os.environ.get(key.upper())  # ty:ignore[invalid-assignment]
         else:
             os.environ[key] = data
     return os.environ[key]
 
 
 def setup_opensearch_creds():
-    """Setup opensearch creds for benchmarking"""
+    """Setup opensearch creds for benchmarking."""
     sius("metastore_opensearch_username", "azul_writer")
     sius("metastore_opensearch_password", "dummyPassword!")
     sius("metastore_opensearch_url", "https://localhost:9204")
@@ -117,8 +131,11 @@ def setup_opensearch_creds():
 
 
 class TestBenchmarkIngestion(unittest.TestCase):
+    """Benchmark the ingestion speed and size of a fixed set of Opensearch data."""
+
     @classmethod
     def setUpClass(cls):
+        """Required."""
         setup_opensearch_creds()
         os.environ["security_allow_releasability_priority_gte"] = "30"
         os.environ["security_labels"] = (
@@ -133,18 +150,87 @@ class TestBenchmarkIngestion(unittest.TestCase):
             '{ "assemblyline": { "description": "Samples forwarded to Azul by Assemblyline", "elastic": { "number_of_replicas": 2, "number_of_shards": 6 }, "expire_events_after": "0", "icon_class": "gears", "partition_unit": "month", "references": [ { "description": "Kind of submission (e.g USER)", "name": "type", "required": true }, { "description": "Short description of what/why samples collected", "name": "description", "required": true }, { "description": "User who submitted the sample", "name": "user", "required": false, "priority": false } ] }, "incidents": { "description": "Incident response and samples collected during investigations", "elastic": { "number_of_replicas": 2, "number_of_shards": 3 }, "expire_events_after": "0", "icon_class": "ambulance", "partition_unit": "year", "references": [ { "description": "Task tracking identifier for incident or request", "name": "task_id", "required": true, "highlight": true }, { "description": "Short description of what/why samples collected", "name": "description", "required": true }, { "description": "Investigation/operation name the samples were collected under", "name": "operation", "required": false }, { "description": "Local submitter or point of contact for samples", "name": "user", "required": false, "priority": false } ] }, "reporting": { "description": "Malware reports and blogs from public, partner and commercial sources", "elastic": { "number_of_replicas": 2, "number_of_shards": 3 }, "expire_events_after": "0", "icon_class": "book", "partition_unit": "year", "references": [ { "description": "How widely the report was distributed, eg. public, commercial, partner", "name": "distribution", "required": true }, { "description": "The company or agency that authored the report", "name": "publisher", "required": true }, { "description": "The reports title", "name": "title", "required": true }, { "description": "Website the report was published to if applicable", "name": "site", "required": false }, { "description": "Local submitter or point of contact for samples", "name": "user", "required": false, "priority": false }, { "description": "Unique identifier", "name": "id", "required": false } ] }, "samples": { "description": "Generic source for miscellaneous or uncategorised samples", "elastic": { "number_of_replicas": 2, "number_of_shards": 3 }, "expire_events_after": "0", "icon_class": "bug", "partition_unit": "year", "references": [ { "description": "Short description of what/why samples collected", "name": "description", "required": true, "priority": false }, { "description": "Submitter or point of contact for samples", "name": "user", "required": false, "priority": false }, { "description": "Internal team who are the data owners of the samples", "name": "team", "required": false }, { "description": "Any investigation/operation name the samples are collected under", "name": "operation", "required": false, "highlight": true } ] }, "tasking": { "partition_unit": "year", "description": "Malware Analysis tasking and activities", "elastic": { "number_of_replicas": 2, "number_of_shards": 3 }, "expire_events_after": "0", "icon_class": "search", "references": [ { "description": "Malware analysis task tracking identifier", "name": "task_id", "required": true, "highlight": true }, { "description": "Short description of the task or samples", "name": "description", "required": true, "priority": false }, { "description": "Local submitter or point of contact for samples", "name": "user", "required": false, "priority": false } ] }, "testing": { "partition_unit": "year", "description": "Files submitted during testing of Azul", "exclude_from_backup": true, "elastic": { "number_of_replicas": 2, "number_of_shards": 3 }, "expire_events_after": "0", "icon_class": "trash-alt", "references": [ { "description": "Local submitter or point of contact for samples", "name": "user", "required": true, "highlight": true } ] }, "virustotal": { "partition_unit": "week", "expire_events_after": "0", "description": "Recent full take metadata and selected content from virustotal.com", "exclude_from_backup": true, "elastic": { "number_of_replicas": 1, "number_of_shards": 5 }, "icon_class": "cloud-download-alt", "references": [ { "description": "Anonymised id of VirusTotal submitter", "name": "submitter_id", "required": false }, { "description": "Submission interface used to submit to VirusTotal", "name": "interface", "required": false }, { "description": "Region within country the submission originated from", "name": "submitter_region", "required": false }, { "description": "Country the submission originated from", "name": "submitter_country", "required": false }, { "description": "City within region the submission originated from", "name": "submitter_city", "required": false } ] }, "watch": { "partition_unit": "all", "description": "24/7 Operations Watch Tasking", "elastic": { "number_of_replicas": 2, "number_of_shards": 3 }, "expire_events_after": "0", "icon_class": "heartbeat", "references": [ { "description": "Task tracking identifier for samples/activity", "name": "task_id", "required": true, "highlight": true }, { "description": "Short description of why samples were obtained", "name": "description", "required": true }, { "description": "Local submitter or point of contact for task", "name": "user", "required": false, "priority": false } ] } }'
         )
 
-    def cleanup_indices(self):
-        self.system = system.System(settings.get().partition)
-        self.system.setup(delete_existing=True)
+        cls.ctx = context.get_writer_context()
+
+    @classmethod
+    def cleanup_indices(cls):
+        """Delete and cleanup the existing indices."""
+        cls.system = system.System(settings.get().partition)
+        cls.system.setup(delete_existing=True)
 
     @pytest.fixture(autouse=True)
     def setup_benchmark(self, benchmark):
+        """Setup benchmark for use during tests to time results."""
         self.benchmark = benchmark
 
     def test_ingestion_speed(self):
+        """Test ingestion speed for the provided docs to allow for mapping changes impact to be considered."""
+        # Start with clean indices.
         self.cleanup_indices()
         local_benchmark = BinaryIngestorLocal()
+        # Index all docs and then in-between each run teardown the indices.
         self.benchmark.pedantic(local_benchmark.main, teardown=self.cleanup_indices, rounds=3)
+
+    def test_ingestion_size(self):
+        """Test the ingestion size and document count.
+
+        Allow for investigation of the impact of changes to the total size or the doc from changes to mappings.
+        """
+        self.cleanup_indices()
+        # Perform indexation with refresh true to ensure consistent doc count and doc deletions.
+        local_benchmark = BinaryIngestorLocal()
+        local_benchmark.main(refresh=True)
+        # Check the resulting stats.
+        stats = local_benchmark.get_index_stats()
+        print("docs", stats["docs"])
+        print(f"size: {stats['store']['size_in_bytes'] / (1024 * 1024):.2f}MiB")
+        self.assertEqual(stats["docs"]["count"], 58599)
+        self.assertEqual(stats["docs"]["deleted"], 31828)
+
+
+class TestBenchmarkSearch(TestBenchmarkIngestion):
+    """Test Individual queries against a known index."""
+
+    @classmethod
+    def reseed_indexes(cls):
+        """Reseed the index each iteration."""
+        cls.cleanup_indices()
+        local_benchmark = BinaryIngestorLocal()
+        local_benchmark.main(refresh=True)
+        stats = local_benchmark.get_index_stats()
+        print("docs", stats["docs"])
+        print(f"size: {stats['store']['size_in_bytes'] / (1024 * 1024):.2f}MiB")
+
+    @classmethod
+    def setUpClass(cls):
+        """Required."""
+        super().setUpClass()
+        # seed and cleanup indices, for faster results disable this re-seeding between runs.
+        # cls.reseed_indexes()
+
+    def test_get_binaries(self):
+        """Get binaries by hash."""
+
+        def func_wrapper():
+            find_binaries(
+                self.ctx,
+                hashes=[
+                    "095a3e32f2239e579df5fc641e994cc09d528003da2e2df0c146a8b342abf069",
+                    "72d7349074f2af22bbaba0c885aa8d81a0e0ccd1168bb36fd601c98f38f7f7a3",
+                    "09767ba3d56df0608ddf83a12c7d5b95e6369eb25f585a754a759a3afeed01d8",
+                    "6553f3e9bc8de493a98df35bb911050f99979887edcedc42434ef554a7666044",
+                    "08837361ec44d30342d569937d9b515ccf823ce479ebd65a634b9a14f2c16a9e",
+                    "7c7f60dfb88f4ba581e00e20fce45df185013b419ad506e8b5ad04739ef1417e",
+                    "2ef30a4d04d5ab8cc0a24606900e649e916c8ece9c21e41d53e863f56af7aba9",
+                    "072957968bbae0752e565f98b5e9defeac6a3e38c79efd2703ae749c06da8378",
+                    "71c7d050dfa44f5d29da434dcfb2db4543f3e9c8a930cdde6d35477ec0223547",
+                    "4e6276cc400b3b9e9616d04474b64a8fa0c35375b9673ab41a92a6d5bce72d8d",
+                    "079b028e566eca22ccf29ade5616d2688f0610428ffe684d1b01f3a0faca7fbd",
+                    "782e8ee044abd03d455eeeefe7d54fee338100dac65f58621f1d84c463edad1d",
+                ],
+            )
+
+        self.benchmark.pedantic(func_wrapper, rounds=1000)
 
 
 if __name__ == "___main__":
