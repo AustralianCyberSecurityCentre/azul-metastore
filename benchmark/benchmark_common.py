@@ -234,6 +234,30 @@ class TestBenchmarkSearch(BaseBenchmarkTest):
 
         self.benchmark.pedantic(func_wrapper, rounds=1000)
 
+    def test_find_binaries_by_term_file_format(self):
+        def func_wrapper():
+            find_binaries(self.ctx, term='"executable/windows/pe32"')  # file_format
+
+        self.benchmark.pedantic(func_wrapper, rounds=1000)
+
+    def test_find_binaries_by_term_sha256(self):
+        def func_wrapper():
+            find_binaries(self.ctx, term="71c7d050dfa44f5d29da434dcfb2db4543f3e9c8a930cdde6d35477ec0223547")  # sha256
+
+        self.benchmark.pedantic(func_wrapper, rounds=1000)
+
+    def test_find_binaries_by_term_md5(self):
+        def func_wrapper():
+            find_binaries(self.ctx, term="958b4a4d6cbebfa85b87c8bc59376775")  # md5
+
+        self.benchmark.pedantic(func_wrapper, rounds=1000)
+
+    def test_find_binaries_by_term_magic(self):
+        def func_wrapper():
+            find_binaries(self.ctx, term='"PE32 executable for MS Windows 4.00 (GUI), Intel i386"')  # magic
+
+        self.benchmark.pedantic(func_wrapper, rounds=1000)
+
 
 if __name__ == "___main__":
     testIngestor = BinaryIngestorLocal()
