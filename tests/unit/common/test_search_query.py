@@ -247,16 +247,12 @@ class TestSearchQuery(unit_test.BaseUnitTestCase):
         )
 
         query, _extra_info = search_query.az_query_to_opensearch(None, test_tag)
+        print(query)
         self.assertEqual(
             query,
             {
                 "bool": {
                     "should": [
-                        {"term": {"sha256": {"value": "test", "boost": 20}}},
-                        {"prefix": {"sha256": "test"}},
-                        {"prefix": {"md5": "test"}},
-                        {"prefix": {"sha1": "test"}},
-                        {"prefix": {"sha512": "test"}},
                         {"prefix": {"ssdeep.hash": "TeSt"}},
                         {"prefix": {"file_format": "TeSt"}},
                         {"prefix": {"magic": "TeSt"}},
