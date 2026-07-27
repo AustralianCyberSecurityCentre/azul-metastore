@@ -304,7 +304,6 @@ def find_binaries(
             result, extra_info = az_query_to_opensearch(ctx, parse_ast)
             qf_highlight.append(result)
 
-    # FUTURE if all supplied hashes are sha256s, skip to the summarise query
     # SSDeep hashes are case-sensitive
     hashes_normal = []
     is_all_sha256 = True
