@@ -57,16 +57,20 @@ class TestBinaryFind(integration_test.BaseRestapi):
     def test_binary_find_term(self):
         self.write_binary_events(
             [
-                gen.binary_event(eid="e1"),
+                gen.binary_event(eid="e1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef"),
                 gen.binary_event(eid="e2"),
                 gen.binary_event(eid="e3"),
             ]
         )
-        response = self.client.get("/v0/binaries?term=e1&max_entities=500")
+        response = self.client.get(
+            "/v0/binaries?term=e1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef&max_entities=500"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(1, len(resp["data"]["items"]))
-        response = self.client.get("/v0/binaries?term=E1&max_entities=500")
+        response = self.client.get(
+            "/v0/binaries?term=E1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef&max_entities=500"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(1, len(resp["data"]["items"]))
@@ -74,18 +78,22 @@ class TestBinaryFind(integration_test.BaseRestapi):
     def test_binary_find_term_query_logs(self):
         self.write_binary_events(
             [
-                gen.binary_event(eid="e1"),
+                gen.binary_event(eid="e1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef"),
                 gen.binary_event(eid="e2"),
                 gen.binary_event(eid="e3"),
             ]
         )
-        response = self.client.get("/v0/binaries?term=e1&max_entities=500")
+        response = self.client.get(
+            "/v0/binaries?term=e1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef&max_entities=500"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(1, len(resp["data"]["items"]))
         self.assertIsNone(resp["meta"].get("queries"))
 
-        response = self.client.get("/v0/binaries?term=e1&max_entities=500&include_queries=true")
+        response = self.client.get(
+            "/v0/binaries?term=e1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef&max_entities=500&include_queries=true"
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(1, len(resp["data"]["items"]))
@@ -105,15 +113,39 @@ class TestBinaryFind(integration_test.BaseRestapi):
                                         "query": {
                                             "bool": {
                                                 "should": [
-                                                    {"term": {"sha256": {"value": "e1", "boost": 20}}},
-                                                    {"prefix": {"sha256": "e1"}},
-                                                    {"prefix": {"md5": "e1"}},
-                                                    {"prefix": {"sha1": "e1"}},
-                                                    {"prefix": {"sha512": "e1"}},
-                                                    {"prefix": {"ssdeep.hash": "E1"}},
-                                                    {"prefix": {"file_format": "E1"}},
-                                                    {"prefix": {"magic": "E1"}},
-                                                    {"prefix": {"mime": "E1"}},
+                                                    {
+                                                        "prefix": {
+                                                            "sha256": "e1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef"
+                                                        }
+                                                    },
+                                                    {
+                                                        "term": {
+                                                            "sha256": {
+                                                                "value": "e1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef",
+                                                                "boost": 20,
+                                                            }
+                                                        }
+                                                    },
+                                                    {
+                                                        "prefix": {
+                                                            "ssdeep.hash": "E1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef"
+                                                        }
+                                                    },
+                                                    {
+                                                        "prefix": {
+                                                            "file_format": "E1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef"
+                                                        }
+                                                    },
+                                                    {
+                                                        "prefix": {
+                                                            "magic": "E1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef"
+                                                        }
+                                                    },
+                                                    {
+                                                        "prefix": {
+                                                            "mime": "E1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef"
+                                                        }
+                                                    },
                                                 ],
                                                 "minimum_should_match": 1,
                                             }
@@ -147,7 +179,19 @@ class TestBinaryFind(integration_test.BaseRestapi):
             {
                 "query_type": "search",
                 "query": {
-                    "query": {"bool": {"filter": [{"terms": {"sha256": ["e1"]}}], "must_not": [], "must": []}},
+                    "query": {
+                        "bool": {
+                            "filter": [
+                                {
+                                    "terms": {
+                                        "sha256": ["e1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef"]
+                                    }
+                                }
+                            ],
+                            "must_not": [],
+                            "must": [],
+                        }
+                    },
                     "size": 0,
                     "_source": False,
                     "aggs": {
@@ -204,7 +248,14 @@ class TestBinaryFind(integration_test.BaseRestapi):
                 "query": {
                     "query": {
                         "bool": {
-                            "filter": [{"term": {"type": "entity_tag"}}, {"terms": {"sha256": ["e1"]}}],
+                            "filter": [
+                                {"term": {"type": "entity_tag"}},
+                                {
+                                    "terms": {
+                                        "sha256": ["e1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef"]
+                                    }
+                                },
+                            ],
                             "must_not": [{"term": {"state": "disabled"}}],
                             "must": [],
                         }
@@ -228,7 +279,8 @@ class TestBinaryFind(integration_test.BaseRestapi):
 
         # Run the query a few times to ensure the number of include_queries doesn't change
         response = self.client.get(
-            "/v0/binaries?term=E1&max_entities=500&include_queries=true", headers={"x-test-user": "low"}
+            "/v0/binaries?term=E1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef&max_entities=500&include_queries=true",
+            headers={"x-test-user": "low"},
         )
         self.assertEqual(200, response.status_code)
         resp = response.json()
@@ -237,7 +289,8 @@ class TestBinaryFind(integration_test.BaseRestapi):
         self.assertFormatted(resp["meta"]["queries"], expected)
         self.assertEqual(3, len(resp["meta"]["queries"]))
         response = self.client.get(
-            "/v0/binaries?term=E1&max_entities=500&include_queries=true", headers={"x-test-user": "low"}
+            "/v0/binaries?term=E1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef&max_entities=500&include_queries=true",
+            headers={"x-test-user": "low"},
         )
         self.assertEqual(200, response.status_code)
         resp = response.json()
@@ -245,7 +298,8 @@ class TestBinaryFind(integration_test.BaseRestapi):
         _fix_runtime(resp["meta"]["queries"])
         self.assertFormatted(resp["meta"]["queries"], expected)  # check same still
         response = self.client.get(
-            "/v0/binaries?term=E1&max_entities=500&include_queries=true", headers={"x-test-user": "low"}
+            "/v0/binaries?term=E1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef&max_entities=500&include_queries=true",
+            headers={"x-test-user": "low"},
         )
         self.assertEqual(200, response.status_code)
         resp = response.json()
@@ -257,7 +311,9 @@ class TestBinaryFind(integration_test.BaseRestapi):
         # Run concurrent queries to ensure there isn't weird interactions between concurrent queries
         # this will happen if you clear the query data list everytime you create context.
         def make_api_request(client):
-            return client.get("/v0/binaries?term=E1&max_entities=500&include_queries=true")
+            return client.get(
+                "/v0/binaries?term=E1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef&max_entities=500&include_queries=true"
+            )
 
         # Run it five times to ensure you don't just get lucky and happen to get 2 responses.
         for _ in range(5):
@@ -272,32 +328,48 @@ class TestBinaryFind(integration_test.BaseRestapi):
     def test_binary_find_free_text(self):
         self.write_binary_events(
             [
-                gen.binary_event(eid="e1", fvl=[("f1", "v1"), ("f2", "v2")]),
-                gen.binary_event(eid="e2", fvl=[("f1", "v1")]),
+                gen.binary_event(
+                    eid="e1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef",
+                    fvl=[("f1", "v1"), ("f2", "v2")],
+                ),
+                gen.binary_event(
+                    eid="e2abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef", fvl=[("f1", "v1")]
+                ),
                 gen.binary_event(eid="e3"),
             ]
         )
 
         # Search just for 'e1'
-        response = self.client.get("/v0/binaries", params={"term": "e1", "max_entities": 500})
+        response = self.client.get(
+            "/v0/binaries",
+            params={"term": "e1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef", "max_entities": 500},
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(1, len(resp["data"]["items"]))
 
         # Search for 'e1' OR 'e2'
-        response = self.client.get("/v0/binaries", params={"term": "e1 OR e2", "max_entities": 500})
+        response = self.client.get(
+            "/v0/binaries",
+            params={
+                "term": "e1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef OR e2abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef",
+                "max_entities": 500,
+            },
+        )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(2, len(resp["data"]["items"]))
 
-        # Search for binary event with both f1: v1 and fv2: v2 (should be 'e1')
+        # Search for binary event with both f1: v1 and fv2: v2 (should be 'e1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef')
         response = self.client.get(
             "/v0/binaries", params={"term": 'features_map.f1:"v1" DOCAND features_map.f2:"v2"', "max_entities": 500}
         )
         self.assertEqual(200, response.status_code)
         resp = response.json()
         self.assertEqual(1, len(resp["data"]["items"]))
-        self.assertEqual("e1", resp["data"]["items"][0]["key"])
+        self.assertEqual(
+            "e1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef", resp["data"]["items"][0]["key"]
+        )
 
     def test_binary_find_sort(self):
         # Sort order is (oldest to newest date)
