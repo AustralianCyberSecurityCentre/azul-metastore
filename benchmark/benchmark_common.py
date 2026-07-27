@@ -130,9 +130,7 @@ def setup_opensearch_creds():
     memcache.clear()
 
 
-class TestBenchmarkIngestion(unittest.TestCase):
-    """Benchmark the ingestion speed and size of a fixed set of Opensearch data."""
-
+class BaseBenchmarkTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Required."""
@@ -163,6 +161,10 @@ class TestBenchmarkIngestion(unittest.TestCase):
         """Setup benchmark for use during tests to time results."""
         self.benchmark = benchmark
 
+
+class TestBenchmarkIngestion(BaseBenchmarkTest):
+    """Benchmark the ingestion speed and size of a fixed set of Opensearch data."""
+
     def test_ingestion_speed(self):
         """Test ingestion speed for the provided docs to allow for mapping changes impact to be considered."""
         # Start with clean indices.
@@ -188,7 +190,7 @@ class TestBenchmarkIngestion(unittest.TestCase):
         self.assertEqual(stats["docs"]["deleted"], 31828)
 
 
-class TestBenchmarkSearch(TestBenchmarkIngestion):
+class TestBenchmarkSearch(BaseBenchmarkTest):
     """Test Individual queries against a known index."""
 
     @classmethod
@@ -206,7 +208,7 @@ class TestBenchmarkSearch(TestBenchmarkIngestion):
         """Required."""
         super().setUpClass()
         # seed and cleanup indices, for faster results disable this re-seeding between runs.
-        # cls.reseed_indexes()
+        cls.reseed_indexes()
 
     def test_get_binaries(self):
         """Get binaries by hash."""
