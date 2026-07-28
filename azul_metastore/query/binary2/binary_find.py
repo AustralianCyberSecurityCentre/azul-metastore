@@ -448,7 +448,7 @@ def find_binaries(
     if count_binaries and resp:
         ret["items_count"] = resp["hits"]["total"]["value"]
     elif count_binaries:
-        ret["item_count"] = len(found_binaries)
+        ret["items_count"] = len(found_binaries)
     return bedr_binaries.EntityFind(**ret)
 
 
