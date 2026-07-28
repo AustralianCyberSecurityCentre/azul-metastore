@@ -68,28 +68,89 @@ class TestEntityFind(integration_test.DynamicTestCase):
     def test_hashes_inorder(self):
         self.write_binary_events(
             [
-                gen.binary_event(eid="e1", fvl=[("f1", "v1")]),
-                gen.binary_event(eid="e2", fvl=[("f1", "v1")]),
-                gen.binary_event(eid="e3", fvl=[("f1", "v1")]),
+                gen.binary_event(
+                    eid="e111aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", fvl=[("f1", "v1")]
+                ),
+                gen.binary_event(
+                    eid="e222aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", fvl=[("f1", "v1")]
+                ),
+                gen.binary_event(
+                    eid="e333aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", fvl=[("f1", "v1")]
+                ),
             ]
         )
-        ret = binary_find.find_binaries(self.writer, hashes=["e1"])
+        ret = binary_find.find_binaries(
+            self.writer, hashes=["e111aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]
+        )
         self.assertEqual(1, len(ret.items))
         # must keep same order
-        ret = binary_find.find_binaries(self.writer, hashes=["e3", "e1", "invalid", "e2"])
+        ret = binary_find.find_binaries(
+            self.writer,
+            hashes=[
+                "e333aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "e111aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "invalid",
+                "e222aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            ],
+        )
         self.assertEqual(4, len(ret.items))
-        self.assertEqual(["e3", "e1", "invalid", "e2"], [x.key for x in ret.items])
+        self.assertEqual(
+            [
+                "e333aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "e111aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "invalid",
+                "e222aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            ],
+            [x.key for x in ret.items],
+        )
         self.assertEqual([True, True, False, True], [x.exists for x in ret.items])
 
-        # ensure that term search works with hashes and highlighting
-        ret = binary_find.find_binaries(self.writer, hashes=["e3", "e1", "e2"], term='features_map.f1:"v1"')
+        # Ensure binaries count works when searching for only hashes
+        ret = binary_find.find_binaries(
+            self.writer,
+            hashes=[
+                "e333aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "e111aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "e222aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            ],
+            count_binaries=True,
+        )
         self.assertEqual(3, len(ret.items))
-        self.assertEqual(["e3", "e1", "e2"], [x.key for x in ret.items])
+        self.assertEqual(ret.items_count, 3)
+        self.assertEqual(
+            [
+                "e333aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "e111aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "e222aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            ],
+            [x.key for x in ret.items],
+        )
+        self.assertEqual([True, True, True], [x.exists for x in ret.items])
+
+        # ensure that term search works with hashes and highlighting
+        ret = binary_find.find_binaries(
+            self.writer,
+            hashes=[
+                "e333aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "e111aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "e222aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            ],
+            term='features_map.f1:"v1"',
+        )
+        self.assertEqual(3, len(ret.items))
+        self.assertEqual(
+            [
+                "e333aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "e111aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "e222aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            ],
+            [x.key for x in ret.items],
+        )
         self.assertEqual([True, True, True], [x.exists for x in ret.items])
         self.assertFormatted(
             ret.items[0],
             models_restapi.EntityFindItem(
-                key="e3",
+                key="e333aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                 exists=True,
                 has_content=True,
                 sources=[
@@ -106,10 +167,10 @@ class TestEntityFind(integration_test.DynamicTestCase):
                 magic="ASCII text",
                 mime="text/plain",
                 highlight={"features_map.f1": ["v1"]},
-                md5="000000000000000000000000000000e3",
-                sha1="00000000000000000000000000000000000000e3",
-                sha256="e3",
-                sha512="000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e3",
+                md5="e333aaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                sha1="e333aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                sha256="e333aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                sha512="0000000000000000000000000000000000000000000000000000000000000000e333aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                 ssdeep="1:1:1",
                 tlsh="T10000000000000000000000000000000000000000000000000000000000000000000000",
             ),

@@ -320,7 +320,7 @@ def find_binaries(
     binary_info = {}
     # In case count is requested and it's just binaries.
     resp = None
-    if len(hashes_normal) > 0 and is_all_sha256:
+    if len(hashes_normal) > 0 and is_all_sha256 and not term:
         for hash in hashes_normal:
             binary_info[hash] = {}
     # Perform highlighting as there is some non-sha256 hashes.
@@ -448,7 +448,7 @@ def find_binaries(
     if count_binaries and resp:
         ret["items_count"] = resp["hits"]["total"]["value"]
     elif count_binaries:
-        ret["item_count"] = len(found_binaries)
+        ret["items_count"] = len(found_binaries)
     return bedr_binaries.EntityFind(**ret)
 
 
