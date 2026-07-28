@@ -224,7 +224,7 @@ def _az_query_to_opensearch_with_keys(
             if "/" in term:
                 # String of ascii text but always has at least one '/' in the middle.
                 should_list.append({"prefix": {"mime": term}})
-            
+
             if len(term) == 64:
                 should_list.insert(
                     0,
