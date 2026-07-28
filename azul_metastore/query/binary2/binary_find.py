@@ -320,7 +320,7 @@ def find_binaries(
     binary_info = {}
     # In case count is requested and it's just binaries.
     resp = None
-    if len(hashes_normal) > 0 and is_all_sha256:
+    if len(hashes_normal) > 0 and is_all_sha256 and not term:
         for hash in hashes_normal:
             binary_info[hash] = {}
     # Perform highlighting as there is some non-sha256 hashes.
