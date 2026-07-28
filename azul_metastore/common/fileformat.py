@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 # Max bytes before extraction of a bundled submission
 MAX_BUNDLED_PRE_EXTRACT_SIZE = 1024 * 1024 * 100
-# Max bytes after extracting a bundled submisssion
+# Max bytes after extracting a bundled submission
 MAX_BUNDLED_POST_EXTRACT_SIZE = MAX_BUNDLED_PRE_EXTRACT_SIZE * 2
 # Max number of files in a bundled submission
 MAX_BUNDLED_FILES = 1000

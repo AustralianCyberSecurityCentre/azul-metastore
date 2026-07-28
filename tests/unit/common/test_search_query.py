@@ -252,15 +252,9 @@ class TestSearchQuery(unit_test.BaseUnitTestCase):
             {
                 "bool": {
                     "should": [
-                        {"term": {"sha256": {"value": "test", "boost": 20}}},
-                        {"prefix": {"sha256": "test"}},
-                        {"prefix": {"md5": "test"}},
-                        {"prefix": {"sha1": "test"}},
-                        {"prefix": {"sha512": "test"}},
                         {"prefix": {"ssdeep.hash": "TeSt"}},
                         {"prefix": {"file_format": "TeSt"}},
                         {"prefix": {"magic": "TeSt"}},
-                        {"prefix": {"mime": "TeSt"}},
                     ],
                     "minimum_should_match": 1,
                 }

@@ -213,19 +213,45 @@ def _az_query_to_opensearch_with_keys(
                 )
 
             term = str(input.value.value)
+            should_list = [
+                # Ssdeep has a wide range of characters so can't be easily filtered out (max length 148, unknown minimum length)
+                {"prefix": {"ssdeep.hash": term}},
+                # file_format can be searched for with a prefix e.g executable is acceptable so is executable/windows/pe64 so length and '/' both vary.
+                {"prefix": {"file_format": term}},
+                # Has any length often but not always contains spaces
+                {"prefix": {"magic": term}},
+            ]
+            if "/" in term:
+                # String of ascii text but always has at least one '/' in the middle.
+                should_list.append({"prefix": {"mime": term}})
+
+            if len(term) == 64:
+                should_list.insert(
+                    0,
+                    {"term": {"sha256": {"value": term.lower(), "boost": 20}}},
+                )
+                should_list.insert(
+                    0,
+                    {"prefix": {"sha256": term.lower()}},
+                )
+            elif len(term) == 32:
+                should_list.insert(
+                    0,
+                    {"prefix": {"md5": term.lower()}},
+                )
+            elif len(term) == 40:
+                should_list.insert(
+                    0,
+                    {"prefix": {"sha1": term.lower()}},
+                )
+            elif len(term) == 128:
+                should_list.insert(
+                    0,
+                    {"prefix": {"sha512": term.lower()}},
+                )
             return {
                 "bool": {
-                    "should": [
-                        {"term": {"sha256": {"value": term.lower(), "boost": 20}}},
-                        {"prefix": {"sha256": term.lower()}},
-                        {"prefix": {"md5": term.lower()}},
-                        {"prefix": {"sha1": term.lower()}},
-                        {"prefix": {"sha512": term.lower()}},
-                        {"prefix": {"ssdeep.hash": term}},
-                        {"prefix": {"file_format": term}},
-                        {"prefix": {"magic": term}},
-                        {"prefix": {"mime": term}},
-                    ],
+                    "should": should_list,
                     # require at least one of the should queries to match
                     # or else will get unrelated binaries, especially if not sorting by score
                     "minimum_should_match": 1,
