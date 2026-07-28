@@ -141,11 +141,6 @@ class TestBinaryFind(integration_test.BaseRestapi):
                                                             "magic": "E1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef"
                                                         }
                                                     },
-                                                    {
-                                                        "prefix": {
-                                                            "mime": "E1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef"
-                                                        }
-                                                    },
                                                 ],
                                                 "minimum_should_match": 1,
                                             }
