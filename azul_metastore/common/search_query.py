@@ -214,11 +214,17 @@ def _az_query_to_opensearch_with_keys(
 
             term = str(input.value.value)
             should_list = [
+                # Ssdeep has a wide range of characters so can't be easily filtered out (max length 148, unknown minimum length)
                 {"prefix": {"ssdeep.hash": term}},
+                # file_format can be searched for with a prefix e.g executable is acceptable so is executable/windows/pe64 so length and '/' both vary.
                 {"prefix": {"file_format": term}},
+                # Has any length often but not always contains spaces
                 {"prefix": {"magic": term}},
-                {"prefix": {"mime": term}},
             ]
+            if "/" in term:
+                # String of ascii text but always has at least one '/' in the middle.
+                should_list.append({"prefix": {"mime": term}})
+            
             if len(term) == 64:
                 should_list.insert(
                     0,

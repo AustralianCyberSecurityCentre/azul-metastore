@@ -247,7 +247,6 @@ class TestSearchQuery(unit_test.BaseUnitTestCase):
         )
 
         query, _extra_info = search_query.az_query_to_opensearch(None, test_tag)
-        print(query)
         self.assertEqual(
             query,
             {
