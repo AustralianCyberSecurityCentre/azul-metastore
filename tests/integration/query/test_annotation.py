@@ -84,6 +84,20 @@ class TestAnnotations(etb.DynamicTestCase):
         resp = annotation.read_binary_tags(self.es1, "e1")
         self.assertEqual(0, len(resp))
 
+    def test_deleted_tag_count(self):
+        """Regression test to catch when the tag count is not correct when using read_binary_tags"""
+        tag = gen.entity_tag(eid="e1", tag="tag1")
+        tag2 = gen.entity_tag(eid="e2", tag="tag1")
+        tag3 = gen.entity_tag(eid="e3", tag="tag1")
+        annotation.create_binary_tags(self.writer, "generic_owner", [tag, tag2, tag3])
+        self.flush()
+        annotation.delete_binary_tag(self.writer, "e3", "tag1")
+        resp = annotation.read_binary_tags(self.es1, "e1")
+        self.assertEqual(len(resp), 1)
+        self.assertEqual(resp[0].sha256, "e1")
+        self.assertEqual(resp[0].num_entities, 2)
+        self.assertEqual(resp[0].tag, "tag1")
+
     def test_entity_tag_no_security(self):
         tag = gen.entity_tag(eid="e1", tag="tag1")
         tag.pop("security")

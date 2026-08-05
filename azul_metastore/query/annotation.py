@@ -37,7 +37,7 @@ def read_binary_tags(ctx: Context, sha256: str) -> list[models_restapi.EntityTag
     """Return tags for the entity."""
     sha256 = sha256.lower()
     # read all tags for current entity + get counts for each tag
-    body = {
+    body: dict[str, dict[str, dict[str, list[dict[str, dict[str, str]]]]] | list[str] | int] = {
         "query": {
             "bool": {
                 "filter": [
@@ -54,13 +54,14 @@ def read_binary_tags(ctx: Context, sha256: str) -> list[models_restapi.EntityTag
     tags = {x["_source"]["tag"]: x["_source"] for x in resp["hits"]["hits"]}
 
     # count other entities with same tag
-    body = {
+    body2 = {
         "query": {
             "bool": {
                 "filter": [
                     {"term": {"type": "entity_tag"}},
                     {"terms": {"tag": list(tags.keys())}},
-                ]
+                ],
+                "must_not": [{"term": {"state": "disabled"}}],
             }
         },
         "aggs": {
@@ -71,7 +72,7 @@ def read_binary_tags(ctx: Context, sha256: str) -> list[models_restapi.EntityTag
         },
         "size": 0,
     }
-    resp = ctx.man.annotation.w.search(ctx.sd, body=body)
+    resp = ctx.man.annotation.w.search(ctx.sd, body=body2)
 
     for row in resp["aggregations"]["tags"]["buckets"]:
         tags[row["key"]]["num_entities"] = row["num_entities"]["value"]
