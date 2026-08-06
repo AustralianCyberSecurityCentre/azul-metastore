@@ -276,7 +276,7 @@ def find_feature_values(
     ftype = None
     retvals_final: list[models_restapi.ReadFeatureValuesValue] = []
     while len(retvals_final) < num_values and after_key_value is not None:
-        body: dict = {
+        body = {
             "size": 1,
             "_source": ["features"],
             "query": {

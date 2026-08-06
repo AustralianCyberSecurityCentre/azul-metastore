@@ -198,6 +198,7 @@ fields_recover_source_binary_node = [
 # one mapping template is used by parents and all children
 map_binary = {
     "_routing": {"required": True},
+    "_source": {"excludes": ["tlsh_vector", "entropy_vector"]},
     "dynamic": "strict",
     "properties": {
         # mapping from parent binary to child info types
@@ -642,6 +643,29 @@ class Binary2(base_encoder.BaseIndexEncoder):
 
         return ret
 
+    @staticmethod
+    def _decoded_fields_to_remove() -> list[str]:
+        """Root fields to be removed during decoding."""
+        return [
+            "features_map",
+            "filename",
+            "num_feature_names",
+            "num_feature_values",
+            "sha256_author_action",
+            "uniq_features",
+            "uniq_info",
+            "uniq_data",
+            "track_source_references_grouped",
+            "security",
+            "binary_info",
+            "encoded_ssdeep",
+        ]
+
+    @staticmethod
+    def decoded_fields_to_exclude() -> list[str]:
+        """All fields that can be excluded from a search if the binary is going to be decoded."""
+        return Binary2._decoded_fields_to_remove() + ["features.encoded", "features.enriched"]
+
     @classmethod
     def decode(cls, event: dict) -> dict:
         """Best effort decode, reconstructs the dispatcher binary event.
@@ -656,9 +680,9 @@ class Binary2(base_encoder.BaseIndexEncoder):
         # rebuild source as best we can
         if "source" in event:
             event.pop("depth")
+            event.pop("parent_relationship", None)
             # add child node to source path
             event["source"]["path"] = [cls.recover_source_binary_node(event)]
-            event.pop("parent_relationship", None)
             # submission is always present if link is present
             if "parent" in event:
                 # add parent author above child author
@@ -674,10 +698,7 @@ class Binary2(base_encoder.BaseIndexEncoder):
             "sha1",
             "md5",
             "ssdeep",
-            "encoded_ssdeep",
             "tlsh",
-            "tlsh_vector",
-            "entropy_vector",
             "mime",
             "magic",
             "file_format",
@@ -694,39 +715,23 @@ class Binary2(base_encoder.BaseIndexEncoder):
         if not event["entity"]:
             event.pop("entity")
 
-        # remove enriched root properties
-        root_props = [
-            "features_map",
-            "filename",
-            "num_feature_names",
-            "num_feature_values",
-            "sha256_author_action",
-            "uniq_features",
-            "uniq_info",
-            "uniq_data",
-            "track_source_references_grouped",
-        ]
-        for k in list(event.keys()):
-            if k in root_props:
-                event.pop(k)
-
-        event.pop("binary_info", None)
-
-        event["model_version"] = azm.CURRENT_MODEL_VERSION
-
-        cls._decode_security(event)
-        event.pop("security", None)
-        event.pop("encoded", None)
-        event.get("source", {}).pop("encoded_references", None)
-        event.get("source", {}).pop("encoded_settings", None)
-        event.get("entity", {}).pop("encoded_ssdeep", None)
-        event.get("entity", {}).pop("tlsh_vector", None)
-        event.get("entity", {}).pop("entropy_vector", None)
-        for feat in event.get("source", {}).get("path", []):
-            feat.pop("encoded", None)
         for feat in event.get("entity", {}).get("features", []):
             feat.pop("encoded", None)
             feat.pop("enriched", None)
+
+        # remove enriched root properties
+        for k in list(event.keys()):
+            if k in Binary2._decoded_fields_to_remove():
+                event.pop(k)
+
+        # Features is removed here because it is still needed to be placed on entity but not part of root.
+        event.pop("features", None)
+        event["model_version"] = azm.CURRENT_MODEL_VERSION
+        cls._decode_security(event)
+        event.get("source", {}).pop("encoded_references", None)
+        event.get("source", {}).pop("encoded_settings", None)
+        for feat in event.get("source", {}).get("path", []):
+            feat.pop("encoded", None)
 
         return event
 

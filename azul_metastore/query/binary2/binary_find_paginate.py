@@ -46,7 +46,7 @@ def find_all_binaries(
     # FUTURE could use PIT point-in-time to stabilise these results.
     #  Right now, if new docs enter the system after the first search, they may
     #  be included in results depending on timing.
-    body: dict = {
+    body = {
         "query": {
             "bool": {
                 "filter": [{"has_child": {"type": "metadata", "query": {"exists": {"field": "source.name"}}}}],
@@ -150,7 +150,7 @@ def find_all_family_binaries(
     sha256_field = "parent.sha256" if is_parent else "sha256"
     sha256_term = "sha256" if is_parent else "parent.sha256"
 
-    body: dict = {
+    body = {
         "track_total_hits": True,
         "size": 0,
         "query": {

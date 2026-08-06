@@ -27,6 +27,7 @@ def _stream_expeditable(
                 ],
             }
         },
+        "_source": {"excludes": rc.Binary2.decoded_fields_to_exclude()},
     }
 
     for resp in ctx.man.binary2.w.scan(ctx.sd, body=body, routing=sha256):
@@ -34,9 +35,6 @@ def _stream_expeditable(
         resp_source.pop("_id", None)
         resp_source.pop("_routing", None)
         resp_source.pop("_index", None)
-        # Security is taken from sourced information.
-        resp_source.pop("security", None)
-        resp_source.pop("encoded_security", None)
         yield rc.Binary2.decode(resp_source)
 
 
