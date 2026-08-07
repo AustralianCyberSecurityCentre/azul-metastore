@@ -198,7 +198,6 @@ fields_recover_source_binary_node = [
 # one mapping template is used by parents and all children
 map_binary = {
     "_routing": {"required": True},
-    "_source": {"excludes": ["tlsh_vector", "entropy_vector"]},
     "dynamic": "strict",
     "properties": {
         # mapping from parent binary to child info types
@@ -659,6 +658,8 @@ class Binary2(base_encoder.BaseIndexEncoder):
             "security",
             "binary_info",
             "encoded_ssdeep",
+            "tlsh_vector",
+            "entropy_vector",
         ]
 
     @staticmethod
