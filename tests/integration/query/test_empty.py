@@ -76,7 +76,7 @@ class TestEmpty(integration_test.DynamicTestCase):
         self.assertFalse(binary_source.read_source(self.writer, "s1")["num_entities"])
 
     def test_status(self):
-        self.assertFalse(status.get_statuses(self.writer, "e1"))
+        self.assertFalse(status._get_statuses(self.writer, "e1"))
         self.assertFalse(status._get_opensearch_binary_status(self.writer, "e1"))
         self.assertFalse(status.get_binary_status(self.writer, "e1"))
         self.assertFalse(plugin.get_author_stats(self.writer, "p1", "1"))

@@ -40,7 +40,7 @@ def read_similar_from_tlsh(ctx: Context, tlsh: str, maxCount: int) -> list[dict]
     without_version = strip_tlsh_version(tlsh)
 
     body = {
-        "_source": {"includes": ["sha256", "tlsh", "tlsh_vector"]},
+        "_source": {"includes": ["sha256"]},
         "query": {
             "knn": {
                 "tlsh_vector": {

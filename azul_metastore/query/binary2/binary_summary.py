@@ -63,7 +63,7 @@ def _read_within(
         details.append(Detail.features)
 
     # sorting done on top hits to ensure latest doc is acquired at each bucket
-    body: dict = {
+    body = {
         # usually caps at 10k but we want the full count when detail is requested
         "track_total_hits": True if Detail.total_hits in details else 10000,
         # don't want individual docs

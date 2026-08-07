@@ -52,9 +52,7 @@ def _find_stream_references(ctx: Context, sha256: str) -> list[tuple[str, azm.Da
         raise BaseAzulException(internal=ExceptionCodeEnum.MetastoreSha256NotProvidedForFindingStreamRefs)
     sha256 = sha256.lower()
     # Search any metadata to find the datastream source/label references
-    body: dict[
-        str, int | dict[str, dict[str, list[dict[str, dict[str, str]]]]] | list[dict[str, dict[str, str]]] | list[str]
-    ] = {
+    body = {
         # Size 10 was chosen to account for cases where a stream may have aged off and have multiple sources.
         # In theory size 1 should be enough but if a binary aged off in the dispatcher S3 store and hadn't aged-off in
         # opensearch, this size allows for other source/labels to be search for an older sourcing event that still has

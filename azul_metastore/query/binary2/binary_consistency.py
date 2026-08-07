@@ -41,6 +41,7 @@ def get_dispatcher_datastreams(ctx: context.Context, sha256: str) -> Iterable[tu
                 },
             }
         },
+        "size": 0,
     }
     resp = ctx.man.binary2.w.search(ctx.sd, body)
     aggs = resp["aggregations"]["CHILDREN"]

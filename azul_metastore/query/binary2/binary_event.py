@@ -38,6 +38,7 @@ def get_best_event(ctx: Context, sha256: str) -> azm.BinaryEvent | None:
             # Timestamp allows the status events to have the newest sourced/extracted timestamp.
             {"source.timestamp": "desc"},  # tiebreaker
         ],
+        "_source": {"excludes": rc.Binary2.decoded_fields_to_exclude()},
     }
     resp = ctx.man.binary2.w.search(ctx.sd, body=body)
     # check we got anything and decode
@@ -51,7 +52,7 @@ def get_binary_documents(
 ) -> models_restapi.OpensearchDocuments:
     """Get raw documents associated with the provided event type."""
     sha256 = sha256.lower()
-    body: dict = {
+    body = {
         "track_total_hits": True,
         "size": size,
         "query": {
