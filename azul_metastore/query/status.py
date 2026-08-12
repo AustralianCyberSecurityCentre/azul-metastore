@@ -25,7 +25,7 @@ duplicate_status_id = Counter(
 logger = logging.getLogger(__name__)
 
 
-def get_statuses(ctx: Context, sha256: str) -> list[dict]:
+def _get_statuses(ctx: Context, sha256: str) -> list[dict]:
     """Return all statuses for entity, intended for debugging purposes only.
 
     :param ctx: context

@@ -13,6 +13,8 @@ from azul_metastore.common import memcache
 from azul_metastore.query import binary_create
 from azul_metastore.query.binary2.binary_find import find_binaries
 from tests.support import system
+from azul_metastore.query.binary2.binary_similar import read_similar_from_tlsh
+from azul_metastore.query.binary2.binary_event import get_best_event
 
 logger = logging.getLogger(__name__)
 DISPATCHER_URL = "<add-dispatcher-instance-here>"
@@ -210,6 +212,13 @@ class TestBenchmarkSearch(BaseBenchmarkTest):
         # seed and cleanup indices, for faster results disable this re-seeding between runs.
         cls.reseed_indexes()
 
+    # def test_stats(self):
+    #     local_benchmark = BinaryIngestorLocal()
+    #     stats = local_benchmark.get_index_stats()
+    #     print("docs", stats["docs"])
+    #     print(f"size: {stats['store']['size_in_bytes'] / (1024 * 1024):.2f}MiB")
+    #     self.assertTrue(False)
+
     def test_get_binaries(self):
         """Get binaries by hash."""
 
@@ -255,6 +264,36 @@ class TestBenchmarkSearch(BaseBenchmarkTest):
     def test_find_binaries_by_term_magic(self):
         def func_wrapper():
             find_binaries(self.ctx, term='"PE32 executable for MS Windows 4.00 (GUI), Intel i386"')  # magic
+
+        self.benchmark.pedantic(func_wrapper, rounds=1000)
+
+    def test_find_similar_tlsh(self):
+        def func_wrapper():
+            read_similar_from_tlsh(
+                self.ctx, "T14e24a513eb1c83340a81c1596a2e04f97b15c1b93e56712c2b8ae1b97317e58b2fb7f5", maxCount=100
+            )
+
+        self.benchmark.pedantic(func_wrapper, rounds=1000)
+
+    def test_get_best_event(self):
+        def func_wrapper():
+            hashes = [
+                "095a3e32f2239e579df5fc641e994cc09d528003da2e2df0c146a8b342abf069",
+                "72d7349074f2af22bbaba0c885aa8d81a0e0ccd1168bb36fd601c98f38f7f7a3",
+                "09767ba3d56df0608ddf83a12c7d5b95e6369eb25f585a754a759a3afeed01d8",
+                "6553f3e9bc8de493a98df35bb911050f99979887edcedc42434ef554a7666044",
+                "08837361ec44d30342d569937d9b515ccf823ce479ebd65a634b9a14f2c16a9e",
+                "7c7f60dfb88f4ba581e00e20fce45df185013b419ad506e8b5ad04739ef1417e",
+                "2ef30a4d04d5ab8cc0a24606900e649e916c8ece9c21e41d53e863f56af7aba9",
+                "072957968bbae0752e565f98b5e9defeac6a3e38c79efd2703ae749c06da8378",
+                "71c7d050dfa44f5d29da434dcfb2db4543f3e9c8a930cdde6d35477ec0223547",
+                "4e6276cc400b3b9e9616d04474b64a8fa0c35375b9673ab41a92a6d5bce72d8d",
+                "079b028e566eca22ccf29ade5616d2688f0610428ffe684d1b01f3a0faca7fbd",
+                "782e8ee044abd03d455eeeefe7d54fee338100dac65f58621f1d84c463edad1d",
+                "2720c2744bd13f118d85bdb6b08834d66ee8f3e93f237bc81408205598d4d646",
+            ]
+            for hash in hashes:
+                get_best_event(self.ctx, hash)
 
         self.benchmark.pedantic(func_wrapper, rounds=1000)
 

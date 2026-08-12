@@ -35,8 +35,18 @@ def _stream_events_for_manual_submission(
         "collapse": {
             "field": "source.name",
             "inner_hits": [
-                {"name": "securities", "collapse": {"field": "security"}, "size": 100},
-                {"name": "references", "collapse": {"field": "track_source_references"}, "size": 100},
+                {
+                    "name": "securities",
+                    "collapse": {"field": "security"},
+                    "size": 100,
+                    "_source": {"excludes": rc.Binary2.decoded_fields_to_exclude()},
+                },
+                {
+                    "name": "references",
+                    "collapse": {"field": "track_source_references"},
+                    "size": 100,
+                    "_source": {"excludes": rc.Binary2.decoded_fields_to_exclude()},
+                },
             ],
         },
         "query": {

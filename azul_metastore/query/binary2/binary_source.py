@@ -23,7 +23,7 @@ def read_source_references(
     if grouped:
         field_key = "track_source_references_grouped"
 
-    body: dict = {
+    body = {
         "query": {
             "bool": {
                 "filter": [{"term": {"depth": 0}}, {"term": {"source.name": source}}],
@@ -98,7 +98,7 @@ def read_submissions(
     submission_timestamp: datetime | None = None,
 ) -> list[bedr_sources.ReferenceSet]:
     """Return all of a sources submission or a specific submission if a timestamp and tracking id is given."""
-    body: dict = {
+    body = {
         "query": {"bool": {"filter": [{"term": {"depth": 0}}, {"term": {"source.name": source}}]}},
         "aggs": {
             "datas": {

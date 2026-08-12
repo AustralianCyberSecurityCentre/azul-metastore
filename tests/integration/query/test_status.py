@@ -73,7 +73,7 @@ class TestStatus(integration_test.DynamicTestCase):
             self.writer, [gen.status(eid="e1", authornv=("p1", "1"), status="heartbeat", ts="2000-01-02T00:00:00Z")]
         )
         self.flush()
-        actual = status.get_statuses(self.writer, sha256="e1")
+        actual = status._get_statuses(self.writer, sha256="e1")
         self.assertEqual(1, len(actual))
 
     def test_duplicate_status_creation(self):
@@ -102,10 +102,10 @@ class TestStatus(integration_test.DynamicTestCase):
         status.create_status(self.writer, statuses)
         self.flush()
 
-        self.assertEqual(6, len(status.get_statuses(self.writer, sha256="e1")))
-        self.assertEqual(2, len(status.get_statuses(self.es1, sha256="e1")))
-        self.assertEqual(4, len(status.get_statuses(self.es2, sha256="e1")))
-        self.assertEqual(6, len(status.get_statuses(self.es3, sha256="e1")))
+        self.assertEqual(6, len(status._get_statuses(self.writer, sha256="e1")))
+        self.assertEqual(2, len(status._get_statuses(self.es1, sha256="e1")))
+        self.assertEqual(4, len(status._get_statuses(self.es2, sha256="e1")))
+        self.assertEqual(6, len(status._get_statuses(self.es3, sha256="e1")))
 
     def test_queued_or_filtered(self):
         self.dp_simulate_consumers_on_event_mm.side_effect = lambda *vs, **kv: mapi.EventSimulate(

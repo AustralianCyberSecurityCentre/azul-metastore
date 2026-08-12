@@ -46,6 +46,7 @@ def stream_dispatcher_events_for_binary(
                 ]
             }
         },
+        "_source": {"excludes": rc.Binary2.decoded_fields_to_exclude()},
     }
 
     for resp in ctx.man.binary2.w.scan(ctx.sd, body=body, routing=sha256):

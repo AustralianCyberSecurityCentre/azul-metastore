@@ -247,7 +247,7 @@ def find_binaries(
     asc_or_desc = "asc" if sort_asc else "desc"
 
     # begin constructing main search object
-    body: dict = {
+    body = {
         "query": {
             "bool": {
                 # ensure we can access a child doc with submission info
