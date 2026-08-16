@@ -15,6 +15,7 @@ from azul_metastore.query.binary2.binary_find import find_binaries
 from tests.support import system
 from azul_metastore.query.binary2.binary_similar import read_similar_from_tlsh
 from azul_metastore.query.binary2.binary_event import get_best_event
+from azul_metastore.query.binary2.binary_find_paginate import find_all_family_binaries
 
 logger = logging.getLogger(__name__)
 DISPATCHER_URL = "<add-dispatcher-instance-here>"
@@ -296,6 +297,28 @@ class TestBenchmarkSearch(BaseBenchmarkTest):
                 get_best_event(self.ctx, hash)
 
         self.benchmark.pedantic(func_wrapper, rounds=1000)
+
+    def test_find_all_binaries(self):
+        def func_wrapper():
+            hashes = [
+                "095a3e32f2239e579df5fc641e994cc09d528003da2e2df0c146a8b342abf069",
+                "72d7349074f2af22bbaba0c885aa8d81a0e0ccd1168bb36fd601c98f38f7f7a3",
+                "09767ba3d56df0608ddf83a12c7d5b95e6369eb25f585a754a759a3afeed01d8",
+                "6553f3e9bc8de493a98df35bb911050f99979887edcedc42434ef554a7666044",
+                "08837361ec44d30342d569937d9b515ccf823ce479ebd65a634b9a14f2c16a9e",
+                "7c7f60dfb88f4ba581e00e20fce45df185013b419ad506e8b5ad04739ef1417e",
+                "2ef30a4d04d5ab8cc0a24606900e649e916c8ece9c21e41d53e863f56af7aba9",
+                "072957968bbae0752e565f98b5e9defeac6a3e38c79efd2703ae749c06da8378",
+                "71c7d050dfa44f5d29da434dcfb2db4543f3e9c8a930cdde6d35477ec0223547",
+                "4e6276cc400b3b9e9616d04474b64a8fa0c35375b9673ab41a92a6d5bce72d8d",
+                "079b028e566eca22ccf29ade5616d2688f0610428ffe684d1b01f3a0faca7fbd",
+                "782e8ee044abd03d455eeeefe7d54fee338100dac65f58621f1d84c463edad1d",
+            ]
+            for sha256 in hashes:
+                resp = find_all_family_binaries(self.ctx, sha256=sha256, is_parent=True)
+                resp = find_all_family_binaries(self.ctx, sha256=sha256, is_parent=False)
+
+        self.benchmark.pedantic(func_wrapper, rounds=400)
 
 
 if __name__ == "___main__":

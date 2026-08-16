@@ -49,7 +49,7 @@ reset_doc_id_cache()
 
 map_common = {
     "timestamp": {"type": "date"},
-    "action": {"type": "keyword"},
+    "action": {"type": "keyword", "doc_values": False},
     "track_author": {"type": "keyword"},
     "author": {
         "properties": {
@@ -70,8 +70,8 @@ map_common = {
     "encoded_ssdeep": {
         "properties": {
             "blocksize": {"type": "integer"},
-            "chunk": {"type": "text", "analyzer": "ssdeep_ngram_analyzer"},
-            "dchunk": {"type": "text", "analyzer": "ssdeep_ngram_analyzer"},
+            "chunk": {"type": "text", "analyzer": "ssdeep_ngram_analyzer", "norms": False},
+            "dchunk": {"type": "text", "analyzer": "ssdeep_ngram_analyzer", "norms": False},
         },
         "type": "object",
     },
@@ -120,7 +120,7 @@ map_common = {
             "file_extension": {"type": "keyword"},  # expected file type extension
             "size": {"type": "unsigned_long"},  # support large files via unsigned_long
             # if text, the programming language
-            "language": {"type": "keyword"},
+            "language": {"type": "keyword", "doc_values": False},
         },
         "type": "object",
     },
@@ -165,17 +165,17 @@ map_submission = {
             "settings": {"enabled": False, "type": "object"},
             "encoded_settings": {
                 "properties": {
-                    "key": {"type": "keyword"},
-                    "value": {"type": "keyword"},
+                    "key": {"type": "keyword", "doc_values": False},
+                    "value": {"type": "keyword", "doc_values": False},
                 },
                 "type": "object",
             },
             "references": {"enabled": False, "type": "object"},
             "encoded_references": {
                 "properties": {
-                    "key": {"type": "keyword"},
-                    "value": {"type": "keyword"},
-                    "key_value": {"type": "keyword"},
+                    "key": {"type": "keyword", "doc_values": False},
+                    "value": {"type": "keyword", "doc_values": False},
+                    "key_value": {"type": "keyword", "doc_values": False},
                 },
                 "type": "object",
             },
