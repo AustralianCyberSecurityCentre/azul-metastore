@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import threading
 import time
 import traceback
 from typing import Any
@@ -17,6 +18,8 @@ from azul_metastore import context, settings
 from azul_metastore.query import binary_create, plugin, status
 
 logger = logging.getLogger(__name__)
+
+stop_event = threading.Event()
 
 
 class BaseIngestor:
@@ -93,7 +96,7 @@ class BaseIngestor:
         count = 0
         time_spent_getting_data = 0
         time_spent_setting_data = 0
-        while not self.is_done():
+        while not self.is_done() and not stop_event.is_set():
             logger.debug(f"fetch {self.model} events")
             try:
                 start_get_data = time.time()

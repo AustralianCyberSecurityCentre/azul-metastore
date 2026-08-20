@@ -4,7 +4,9 @@ import logging
 import os
 import time
 import traceback
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from enum import IntEnum
+from typing import Type
 
 import click
 from azul_bedrock import exceptions_bedrock
@@ -14,6 +16,7 @@ from prometheus_client import start_http_server
 
 from azul_metastore import context, entry_purge, ingestor, settings
 from azul_metastore.common import manager, search_data
+from azul_metastore.ingestor import BaseIngestor, stop_event
 from azul_metastore.opensearch_config import (
     get_opensearch_cli_commands,
     write_config_to_opensearch,
@@ -45,6 +48,33 @@ def force_update_templates():
     """
     man = manager.Manager()
     man.initialise(sd=search_data.get_writer_search_data(), force=True)
+
+
+def start_ingestor(ingestor: Type[BaseIngestor]):
+    """Start an ingestor of any variety within a thread."""
+    ctx = context.get_writer_context()
+    ing = ingestor(ctx)
+    ing.main()
+
+
+@cli.command()
+def ingest_all():
+    """Start all Azul ingestors in a single process with multiple threads."""
+    start_prometheus_server()
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        futures = [
+            executor.submit(start_ingestor, ingestor.PluginIngestor),
+            executor.submit(start_ingestor, ingestor.BinaryIngestor),
+            executor.submit(start_ingestor, ingestor.StatusIngestor),
+            executor.submit(start_ingestor, ingestor.DownloadIngestor),
+        ]
+
+        done, pending = wait(futures, return_when=FIRST_COMPLETED)
+        # Cancel all running ingestors
+        stop_event.set()
+        # Cancel all pending futures.
+        for future in pending:
+            future.cancel()
 
 
 @cli.command()
