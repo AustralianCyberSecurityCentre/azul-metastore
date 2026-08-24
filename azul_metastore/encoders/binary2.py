@@ -611,13 +611,13 @@ class Binary2(base_encoder.BaseIndexEncoder):
         for i, evt in enumerate([parent_event, event]):
             if i == 0:
                 # Parent event doesn't have any implications to the plugin version.
-                basic = evt["_id"]
+                basic: str = evt["_id"]
             else:
                 # Normal binary enrichment event will be different depending on the author.
                 # Append the author version to ensure that new versions overwrite old features, etc
-                basic = evt["_id"] + "." + event["author"].get("version", "")
+                basic: str = evt["_id"] + "." + event["author"].get("version", "")
             # fast hash the id to use less ram
-            hashed = xxhash.xxh3_128_digest(basic)
+            hashed = xxhash.xxh3_128_digest(basic.encode())
             if hashed not in cache_ids:
                 # add id to cache
                 cache_ids[hashed] = None

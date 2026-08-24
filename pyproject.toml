@@ -43,7 +43,7 @@ dependencies = [
     "python-json-logger>=3.2.1",
     "python-multipart>=0.0.5",
     "pyzipper>=0.3.6",
-    "xxhash>=3.6.0",
+    "xxhash>=4.0.0",
 ]
 
 [project.scripts]
