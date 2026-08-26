@@ -88,11 +88,11 @@ class TestPlugins(integration_test.BaseRestapi):
         resp = response.json()
         self.assertFormatted(resp["detail"]["external"], "user 'low' not superuser")
         # simulate with no further filters
-        response = self.client.delete(f"/v0/purge/submission/{track}", headers={"x-test-user": user})
+        response = self.client.delete(f"/v0/purge/submission/{track}", headers={"x-test-user": "writer"})
         self.assertEqual(422, response.status_code, response.json())
 
         # test that deletion is refused
-        response = self.client.delete(f"/v0/purge/submission/{track}?purge=true", headers={"x-test-user": user})
+        response = self.client.delete(f"/v0/purge/submission/{track}?purge=true", headers={"x-test-user": "writer"})
         self.assertEqual(422, response.status_code, response.json())
 
         # test that partial deletion from a source does not delete entity

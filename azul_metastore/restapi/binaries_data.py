@@ -15,6 +15,7 @@ from azul_bedrock.exceptions_bedrock import (
     BaseError,
     DispatcherApiException,
 )
+from azul_bedrock.models_restapi import ApiAccessEnum
 from azul_bedrock.models_restapi import binaries_data as bedr_binaries_data
 from cart import cart
 from fastapi import (
@@ -34,7 +35,7 @@ from azul_metastore import context, settings
 from azul_metastore.common import data_hex, data_strings, string_filter
 from azul_metastore.common.fileformat import get_attachment_type
 from azul_metastore.query.binary2 import binary_read
-from azul_metastore.restapi.quick import qr
+from azul_metastore.restapi.quick import can_user_access_api_wrapper, qr
 
 router = APIRouter()
 
@@ -50,7 +51,9 @@ logging.basicConfig(
 async def check_has_binary(
     resp: Response,
     sha256: str = Path(..., pattern="[a-fA-F0-9]{64}", description="SHA256 of entity to check"),
-    ctx: context.Context = Depends(qr.ctx_without_queries),
+    ctx: context.Context = Depends(
+        can_user_access_api_wrapper(ApiAccessEnum.BinarySearch, context_without_query=True)
+    ),
 ):
     """Check if a binary exists."""
     # check user can access binary (enforce security)
@@ -79,7 +82,7 @@ async def check_has_binary(
 async def download_binary_encoded(
     resp: Response,
     sha256: str = Path(..., pattern="[a-fA-F0-9]{64}", description="SHA256 of entity to download"),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinaryDownloadStreams)),
 ):
     """Download a binary file and cart it."""
     # check user can access binary (enforce security)
@@ -120,7 +123,7 @@ async def download_binary_encoded(
 async def download_binaries(
     request: Request,
     binaries: list[str] = Body(..., description="SHA256 of binaries to download.", embed=True),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinaryDownloadStreams)),
 ):
     """Download requested binaries in a ZIP file."""
     # do simple hash lookup to check if user can access binary
@@ -193,7 +196,7 @@ async def download_binary_raw(
     resp: Response,
     sha256: str = Path(..., pattern="[a-fA-F0-9]{64}", description="SHA256 of entity containing stream"),
     stream: str = Path(..., pattern="[a-fA-F0-9]{64}", description="SHA256 of stream to download"),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinaryDownloadStreams)),
 ):
     """Download a stream for a binary for permitted file types."""
     source, stream_data = binary_read.find_stream_metadata(
@@ -265,7 +268,7 @@ def get_hex_view(
         False,
         description="If true, will return 16 hex bytes as a string instead of 16 strings in a list",
     ),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinaryHexAndStrings)),
 ) -> bedr_binaries_data.BinaryHexView:
     """Return JSON of hex text of file requested."""
 
@@ -460,7 +463,7 @@ async def get_strings(
     take_n_strings: int = Query(1000, gt=0, description="How many strings to return"),
     filter: str | None = Query(None, description="Case-insensitive search string to filter strings with"),
     regex: str | None = Query(None, description="Regex pattern to search strings with"),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinaryHexAndStrings)),
     file_format: str | None = Query(
         None,
         description="File type for AI string filter (required if using the ai filter).",
@@ -631,7 +634,7 @@ async def search_hex(
     ),
     take_n_hits: int = Query(1000, ge=0, description="How many hits to return"),
     filter: str = Query(description="Hex filter to apply to the file"),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinaryHexAndStrings)),
 ) -> bedr_binaries_data.BinaryStrings:
     """Return hits found in the binary for a specific hex pattern."""
     exported_filter = filter
@@ -714,7 +717,7 @@ async def get_common_strings(
         + "returns 10MB of the file, if it set to larger than the file the whole file will be searched.",
     ),
     take_n_strings: int = Query(5000, gt=0, description="Stop once at least this many common strings are found."),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinaryHexAndStrings)),
 ) -> bedr_binaries_data.CommonBinaryStrings:
     """Return strings found in the binary.
 

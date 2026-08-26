@@ -7,6 +7,7 @@ from typing import Annotated, Optional, Self
 from azul_bedrock import models_network as azm
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException, BaseError
+from azul_bedrock.models_restapi import ApiAccessEnum
 from azul_bedrock.models_restapi import binaries_data as bedr_binaries_data
 from fastapi import (
     APIRouter,
@@ -26,7 +27,7 @@ from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT, HTTP_423_LOCKED
 from azul_metastore import context
 from azul_metastore.common.utils import to_utc_no_future
 from azul_metastore.query.binary2 import binary_expedite, binary_submit
-from azul_metastore.restapi.quick import qr
+from azul_metastore.restapi.quick import can_user_access_api_wrapper, qr
 from azul_metastore.settings import get as get_metastore_settings
 
 router = APIRouter()
@@ -224,7 +225,7 @@ async def submit_binary_to_source(
     refresh: bool = Query(
         False, description="Make data and plugin results available as quickly as possible (slower upload rate)."
     ),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinarySourceUpload)),
 ):
     """Submit a binary file to source for analysis.
 
@@ -312,7 +313,7 @@ async def submit_binary_to_source_dataless(
     refresh: bool = Query(
         False, description="Make data and plugin results available as quickly as possible (slower upload rate)."
     ),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinarySourceUpload)),
 ):
     """Submit additional metadata about an existing binary.
 
@@ -387,7 +388,7 @@ async def submit_child_binary_to_source(
     refresh: bool = Query(
         False, description="Make data and plugin results available as quickly as possible (slower upload rate)."
     ),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinaryChildUpload)),
 ):
     """Submit a child binary to a parent binary for analysis."""
     if get_metastore_settings().readonly_mode:
@@ -449,7 +450,7 @@ async def submit_child_binary_to_source_dataless(
     refresh: bool = Query(
         False, description="Make data and plugin results available as quickly as possible (slower upload rate)."
     ),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinaryChildUpload)),
 ):
     """Submit child metadata and attach it to an existing parent binary.
 
@@ -495,7 +496,7 @@ async def expedite_processing(
     resp: Response,
     sha256: str = Path(..., pattern="[a-fA-F0-9]{64}", description="SHA256 of entity to expedite"),
     bypass_cache: bool = Query(False),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinaryExpedite)),
 ):
     """Trigger an entity to be (re)processed at a higher priority than normal."""
     # This doesn't tell the user about the existence of a given file, so it is

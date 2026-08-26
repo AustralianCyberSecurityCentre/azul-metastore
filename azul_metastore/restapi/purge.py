@@ -16,6 +16,18 @@ from azul_metastore.restapi.quick import qr
 router = APIRouter()
 
 
+def get_admin_ctx(ctx: context.Context = Depends(qr.ctx)) -> context.Context:
+    """Dependency to require that a user is an admin before using an API endpoint."""
+    if not ctx.is_admin():
+        raise ApiException(
+            status_code=HTTP_403_FORBIDDEN,
+            internal=ExceptionCodeEnum.MetastoreUserNotAllowedToPurge,
+            ref=f"user '{ctx.user_info}' not superuser",
+            parameters={"username": ctx.user_info.username},
+        )
+    return ctx
+
+
 @router.delete(
     "/v0/purge/submission/{track_source_references}",
     response_model=qr.gr(bedr_purge.PurgeSimulation | bedr_purge.PurgeResults),
@@ -26,16 +38,9 @@ def purge_submission(
     track_source_references: str,
     timestamp: str = Query(description="Timestamp of submission to purge."),
     purge: bool = Query(False, description="Perform purge instead of simulation."),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(get_admin_ctx),
 ):
     """Purge a set of submissions."""
-    if not ctx.is_admin():
-        raise ApiException(
-            status_code=HTTP_403_FORBIDDEN,
-            internal=ExceptionCodeEnum.MetastoreUserNotAllowedToPurge,
-            ref=f"user '{ctx.user_info}' not superuser",
-            parameters={"username": ctx.user_info.username},
-        )
     try:
         pendulum.parse(timestamp)
     except ParserError:
@@ -71,17 +76,9 @@ def purge_link(
     resp: Response,
     track_link: str = Path(..., description="Tracking information of link to remove."),
     purge: bool = Query(False, description="Perform purge instead of simulation."),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(get_admin_ctx),
 ):
     """Purge a manually added relationship between binaries."""
-    if not ctx.is_admin():
-        raise ApiException(
-            status_code=HTTP_403_FORBIDDEN,
-            internal=ExceptionCodeEnum.MetastoreUserNotAllowedToPurge,
-            ref=f"user '{ctx.user_info.username}' not superuser",
-            parameters={"username": ctx.user_info.username},
-        )
-
     purger = qpurge.Purger()
     try:
         ret = purger.purge_link(

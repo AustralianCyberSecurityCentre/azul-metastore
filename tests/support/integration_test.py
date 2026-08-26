@@ -284,11 +284,15 @@ class DynamicTestCase(basic_test.BasicTest):
 
     @classmethod
     def setup_users(cls):
-        cls.es1 = cls.system.get_ctx(auth.Auth.user_low)
-        cls.es2 = cls.system.get_ctx(auth.Auth.user_med)
-        cls.es3 = cls.system.get_ctx(auth.Auth.user_high)
-        cls.es3o2 = cls.system.get_ctx(auth.Auth.user_high_org2)
-        cls.user_high_all = cls.system.get_ctx(auth.Auth.user_high_all)
+        cls.es1 = cls.system.get_ctx_with_api_access(auth.Auth.user_low.creds, auth.Auth.user_low.api_access)
+        cls.es2 = cls.system.get_ctx_with_api_access(auth.Auth.user_med.creds, auth.Auth.user_med.api_access)
+        cls.es3 = cls.system.get_ctx_with_api_access(auth.Auth.user_high.creds, auth.Auth.user_high.api_access)
+        cls.es3o2 = cls.system.get_ctx_with_api_access(
+            auth.Auth.user_high_org2.creds, auth.Auth.user_high_org2.api_access
+        )
+        cls.user_high_all = cls.system.get_ctx_with_api_access(
+            auth.Auth.user_high_all.creds, auth.Auth.user_high_all.api_access
+        )
 
     def count_binary_events(self, _id, *, user=None):
         return len(list(self.read_binary_events(_id, user=user, raw=True)))

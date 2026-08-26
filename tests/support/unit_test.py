@@ -11,7 +11,8 @@ from azul_metastore.context import BaseContext, Context
 from tests.support import basic_test, gen
 from azul_bedrock.datastore import Credentials, CredentialFormat
 from . import system
-
+from azul_bedrock.models_auth import Credentials, UserInfo
+from azul_bedrock.models_restapi import ApiAccessEnum
 from azul_bedrock import models_auth
 
 
@@ -96,7 +97,7 @@ class BaseUnitTestCase(basic_test.BasicTest):
                 security_exclude=[],
                 security_include=[],
             ),
-            user_info=models_auth.UserInfo(unique_id="unique_test_user_id"),
+            user_info=models_auth.UserInfo(unique_id="unique_test_user_id", api_access=[ApiAccessEnum.All]),
         )
 
 

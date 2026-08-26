@@ -9,7 +9,7 @@ from azul_bedrock import models_network as azm
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException
 from azul_bedrock.exceptions_security import SecurityAccessException, SecurityParseException
-from azul_bedrock.models_restapi import AutocompleteContext
+from azul_bedrock.models_restapi import ApiAccessEnum, AutocompleteContext
 from azul_bedrock.models_restapi import binaries as bedr_binaries
 from fastapi import (
     APIRouter,
@@ -35,13 +35,15 @@ from azul_metastore.query.binary2 import (
     binary_similar,
     binary_summary,
 )
-from azul_metastore.restapi.quick import qr
+from azul_metastore.restapi.quick import can_user_access_api_wrapper, qr
 
 router = APIRouter()
 
 
 @router.get("/v0/binaries/tags", response_model=qr.gr(bedr_binaries.ReadTags), **qr.kw)
-def get_all_tags_on_binaries(resp: Response, ctx: context.Context = Depends(qr.ctx)):
+def get_all_tags_on_binaries(
+    resp: Response, ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinarySearch))
+):
     """Read existing tags across all entities."""
     return qr.fr(ctx, annotation.read_all_binary_tags(ctx), resp)
 
@@ -62,7 +64,7 @@ def find_binaries(
     ),
     max_entities: int = Query(100, description="Maximum number of binaries to return"),
     count_entities: bool = Query(False, description="Also return the total number of binaries that match the search"),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinarySearch)),
 ):
     """Find entities in the system based on search term.
 
@@ -106,7 +108,7 @@ def find_all_binaries(
     term: str = Query(None, description="A free text Azul search term"),
     after: str | None = Body(None, embed=True),
     num_binaries: int = Query(1000, description="Number of sha256s to return per request"),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinarySearch)),
 ):
     """Find binaries in the system based on search term.
 
@@ -151,7 +153,7 @@ def find_all_parents(
     resp: Response,
     family_sha256: str = Query(..., pattern="[a-fA-F0-9]{64}"),
     after: str | None = Body(None, embed=True),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinarySearch)),
 ):
     """Find parent binaries in the system based on family_sha256.
 
@@ -183,7 +185,7 @@ def find_all_children(
     resp: Response,
     family_sha256: str = Query(..., pattern="[a-fA-F0-9]{64}"),
     after: str | None = Body(None, embed=True),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinarySearch)),
 ):
     """Find child binaries in the system based on family_sha256.
 
@@ -210,7 +212,7 @@ def find_all_children(
 
 
 @router.get("/v0/binaries/model", response_model=qr.gr(bedr_binaries.EntityModel), **qr.kw)
-def get_model(resp: Response, ctx: context.Context = Depends(qr.ctx)):
+def get_model(resp: Response, ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinarySearch))):
     """Return the flattened opensearch mapping for binaries to support user searches."""
     keys = binary_event.get_opensearch_binary_mapping(qr.writer)
 
@@ -218,7 +220,12 @@ def get_model(resp: Response, ctx: context.Context = Depends(qr.ctx)):
 
 
 @router.get("/v0/binaries/autocomplete", response_model=qr.gr(AutocompleteContext), **qr.kw)
-def find_autocomplete(resp: Response, term: str, offset: int, ctx: context.Context = Depends(qr.ctx)):
+def find_autocomplete(
+    resp: Response,
+    term: str,
+    offset: int,
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinarySearch)),
+):
     """Return the model for binaries."""
     keys = binary_find.generate_autocomplete(term, offset)
     # although this looks like it doesn't do anything, it actually works around the
@@ -231,7 +238,9 @@ def find_autocomplete(resp: Response, term: str, offset: int, ctx: context.Conte
 def check_metadata_exists(
     resp: Response,
     sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"),
-    ctx: context.Context = Depends(qr.ctx_without_queries),
+    ctx: context.Context = Depends(
+        can_user_access_api_wrapper(ApiAccessEnum.BinarySearch, context_without_query=True)
+    ),
 ):
     """Return 404 if entity not found, 200 if entity found."""
     data = binary_read.check_binaries(ctx, [sha256])[0]
@@ -260,7 +269,7 @@ def get_metadata(
         gt=0,
         le=1000,
     ),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinarySearch)),
 ):
     """Return all simple metadata for the entity."""
     try:
@@ -285,7 +294,7 @@ def get_has_newer_metadata(
     resp: Response,
     timestamp: str,
     sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinarySearch)),
 ):
     """Retrieve timestamp of newest result doc for entity."""
     data = binary_read.get_binary_newer(ctx, sha256, timestamp)
@@ -297,7 +306,7 @@ def get_similar_tlsh_binaries(
     resp: Response,
     tlsh: str = Query(description="TLSH hash to do comparison on"),
     max_matches: int = Query(20, description="Maximum number of matches to return"),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinarySearch)),
 ):
     """Return id and similarity score of entities with a similar TLSH hash."""
     data = {"matches": binary_similar.read_similar_from_tlsh(ctx, tlsh, max_matches)}
@@ -309,7 +318,7 @@ def get_similar_ssdeep_binaries(
     resp: Response,
     ssdeep: str = Query(description="ssdeep fuzzyhash to do comparison on"),
     max_matches: int = Query(20, description="Maximum number of matches to return"),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinarySearch)),
 ):
     """Return id and similarity score of entities with a similar ssdeep fuzzyhash."""
     data = {"matches": binary_similar.read_similar_from_ssdeep(ctx, ssdeep, max_matches)}
@@ -326,7 +335,7 @@ def get_similar_entropy_binaries(
     sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"),
     max_matches: int = Query(20, description="Maximum number of matches to return"),
     entropy: list[float] = Body(description="list of entropy values"),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinarySearch)),
 ):
     """Search for binaries with similar entropy to the entropy provided."""
     result = binary_similar.read_similar_from_entropy(
@@ -341,7 +350,7 @@ def get_similar_feature_binaries(
     bt: BackgroundTasks,
     sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"),
     recalculate: bool = False,
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinarySearch)),
 ):
     """Return info about entities with similar features to the provided sha256."""
     gen = binary_similar.read_similar_from_features(ctx, sha256, recalculate=recalculate)
@@ -358,7 +367,7 @@ def get_nearby_binaries(
         bedr_binaries.IncludeCousinsEnum.Standard,
         description=".",
     ),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinarySearch)),
 ):
     """Return info about nearby entities."""
     if include_cousins == bedr_binaries.IncludeCousinsEnum.No:
@@ -392,7 +401,9 @@ def get_nearby_binaries(
 
 @router.get("/v0/binaries/{sha256}/tags", response_model=qr.gr(bedr_binaries.ReadAllEntityTags), **qr.kw)
 def get_binary_tags(
-    resp: Response, sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"), ctx: context.Context = Depends(qr.ctx)
+    resp: Response,
+    sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinarySearch)),
 ):
     """Return tags for entity."""
     data = annotation.read_binary_tags(ctx, sha256)
@@ -405,7 +416,7 @@ def create_tag_on_binary(
     tag: str,
     sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"),
     security: str = Body(None, embed=True),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinaryModifyTags)),
 ):
     """Attach a tag to an entity."""
     security = ctx.validate_user_security(security)
@@ -447,7 +458,7 @@ def delete_tag_on_binary(
     resp: Response,
     tag: str,
     sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinaryModifyTags)),
 ):
     """Delete a tag from an entity."""
     if tag:
@@ -468,7 +479,9 @@ def delete_tag_on_binary(
 
 @router.get("/v0/binaries/{sha256}/statuses", response_model=qr.gr(bedr_binaries.Status), **qr.kw)
 def get_binary_status(
-    resp: Response, sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"), ctx: context.Context = Depends(qr.ctx)
+    resp: Response,
+    sha256: str = Path(..., pattern="[a-fA-F0-9]{64}"),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinarySearch)),
 ):
     """Status messages for all plugins that have run on the entity, including if they have timed out.
 
@@ -496,7 +509,7 @@ def get_binary_documents(
         gt=0,
         le=10000,
     ),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinarySearch)),
 ):
     """Get all documents from opensearch that match the provided filters.
 

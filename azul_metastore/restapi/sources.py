@@ -5,13 +5,14 @@ from datetime import datetime
 from azul_bedrock import models_settings
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException
+from azul_bedrock.models_restapi import ApiAccessEnum
 from azul_bedrock.models_restapi import sources as bedr_sources
 from fastapi import APIRouter, Depends, Query, Response
 from starlette.status import HTTP_404_NOT_FOUND
 
 from azul_metastore import context, settings
 from azul_metastore.query.binary2 import binary_source as binary_source
-from azul_metastore.restapi.quick import qr
+from azul_metastore.restapi.quick import can_user_access_api_wrapper, qr
 
 router = APIRouter()
 
@@ -19,7 +20,9 @@ router = APIRouter()
 @router.get("/v0/sources", response_model=qr.gr(dict[str, models_settings.Source]), **qr.kw)
 def get_all_sources(
     resp: Response,
-    ctx: context.Context = Depends(qr.ctx_without_queries),
+    ctx: context.Context = Depends(
+        can_user_access_api_wrapper(ApiAccessEnum.SourcesSearch, context_without_query=True)
+    ),
 ):
     """Read summary info for all sources."""
     data = binary_source.read_sources()
@@ -33,7 +36,9 @@ def get_all_sources(
 def check_source_exists(
     resp: Response,
     source: str,
-    ctx: context.Context = Depends(qr.ctx_without_queries),
+    ctx: context.Context = Depends(
+        can_user_access_api_wrapper(ApiAccessEnum.SourcesSearch, context_without_query=True)
+    ),
 ):
     """Read basic source information."""
     try:
@@ -47,7 +52,7 @@ def check_source_exists(
 def read_source(
     resp: Response,
     name: str,
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.SourcesSearch)),
 ):
     """Read basic source information."""
     if not settings.check_source_exists(name):
@@ -61,7 +66,7 @@ def read_source(
 def source_refs_read(
     resp: Response,
     source: str,
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.SourcesSearch)),
     term: str = Query(""),
 ):
     """Read source reference details."""
@@ -76,7 +81,7 @@ def source_refs_read(
 def source_grouped_refs(
     resp: Response,
     source: str,
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.SourcesSearch)),
     term: str = Query(""),
 ):
     """Read source reference details only including the priority reference fields."""
@@ -91,7 +96,7 @@ def source_grouped_refs(
 def source_submissions_read(
     resp: Response,
     source: str,
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.SourcesSearch)),
     track_source_references: str = Query(
         None, description="Tracking submission ID for the submission that is being searched for."
     ),
