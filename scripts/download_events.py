@@ -8,6 +8,7 @@ import hashlib
 import json
 
 from azul_bedrock.models_auth import Credentials, UserInfo
+from azul_bedrock.models_restapi import ApiAccessEnum
 
 from azul_metastore import context, settings
 from azul_metastore.common import search_data
@@ -23,7 +24,7 @@ def md5(text: str):
 
 def get_ctx(creds: Credentials) -> context.Context:
     """Create context using creds."""
-    user_info = UserInfo(username=creds.unique, unique_id=creds.unique)
+    user_info = UserInfo(username=creds.unique, unique_id=creds.unique, api_access=[ApiAccessEnum.All])
     sd = search_data.SearchData(credentials=creds, security_exclude=[], security_include=[])
     return context.get_general_context().copy_with(user_info=user_info, sd=sd)
 

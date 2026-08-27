@@ -2,7 +2,7 @@
 
 import functools
 
-from azul_bedrock.models_auth import Credentials, UserInfo
+from azul_bedrock.models_auth import Credentials, UserInfo, ApiAccessEnum
 from fastapi import Depends, FastAPI, Request
 from starlette.testclient import TestClient
 
@@ -18,13 +18,16 @@ from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
 
 def set_token(request: Request) -> UserInfo:
     """Ignore input and return static token."""
-    user = request.headers.get("x-test-user", "high_all")
+    user: str = request.headers.get("x-test-user", "high_all")
     extra_roles = []
+    api_access: list[ApiAccessEnum] = []
     if user == "writer":
         creds = settings.get_writer_creds()
+        api_access = [ApiAccessEnum.All]
         extra_roles = ["admin"]
     elif user in auth.Auth.users:
-        creds = auth.Auth.users[user]
+        creds = auth.Auth.users[user].creds
+        api_access = auth.Auth.users[user].api_access
     else:
         raise BaseAzulException(f"unknown user {user}")
     data = {
@@ -41,6 +44,7 @@ def set_token(request: Request) -> UserInfo:
         roles=["validated"] + extra_roles,
         decoded=data,
         credentials=creds,
+        api_access=api_access,
         unique_id=user,
     )
     return request.state.user_info
@@ -123,11 +127,11 @@ class System:
     @property
     def writer(self):
         """Get writer context."""
-        return self.get_ctx(settings.get_writer_creds())
+        return self.get_ctx_with_api_access(settings.get_writer_creds(), [ApiAccessEnum.All])
 
-    def get_ctx(self, creds: Credentials) -> context.Context:
+    def get_ctx_with_api_access(self, creds: Credentials, api_access: list[ApiAccessEnum]) -> context.Context:
         """Create context using creds."""
-        user_info = UserInfo(username=creds.unique, unique_id=creds.unique)
+        user_info = UserInfo(username=creds.unique, unique_id=creds.unique, api_access=[ApiAccessEnum.All])
         sd = search_data.SearchData(credentials=creds, security_exclude=[], security_include=[])
         return self.base.copy_with(user_info=user_info, sd=sd)
 

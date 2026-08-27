@@ -9,7 +9,7 @@ from azul_bedrock.datastore import get_user_account
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException
 from azul_bedrock.exceptions_security import SecurityException
-from azul_bedrock.models_restapi import UserAccess, UserSecurity
+from azul_bedrock.models_restapi import ApiAccessEnum, UserAccess, UserSecurity
 from azul_security import admin
 from azul_security import security as sec
 from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT
@@ -159,7 +159,9 @@ def get_writer_context() -> Context:
     ret = get_general_context().copy_with(
         # Technically a risk that if the OIDC "sub" field is equal to opensearch_username you could be granted
         # permissions you shouldn't have as a generic user.
-        user_info=models_auth.UserInfo(username=s.opensearch_username, unique_id=s.opensearch_username),
+        user_info=models_auth.UserInfo(
+            username=s.opensearch_username, unique_id=s.opensearch_username, api_access=[ApiAccessEnum.All]
+        ),
         sd=search_data.get_writer_search_data(),
     )
     try:

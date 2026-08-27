@@ -3,6 +3,7 @@
 from azul_bedrock import models_restapi
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException, BaseError
+from azul_bedrock.models_restapi import ApiAccessEnum
 from azul_bedrock.models_restapi import binaries_download as bedr_binaries_down
 from fastapi import (
     APIRouter,
@@ -19,7 +20,7 @@ from starlette.status import HTTP_404_NOT_FOUND, HTTP_423_LOCKED
 from azul_metastore import context
 from azul_metastore.query import status
 from azul_metastore.query.binary2 import binary_submit
-from azul_metastore.restapi.quick import qr
+from azul_metastore.restapi.quick import can_user_access_api_wrapper, qr
 from azul_metastore.settings import get as get_metastore_settings
 
 router = APIRouter()
@@ -55,7 +56,7 @@ async def submit_binary_download_request(
         description="Settings key value pairs.",
         embed=True,
     ),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinaryDownloadRequest)),
 ):
     """Submit a request to download a file from a remote source.
 
@@ -97,7 +98,7 @@ async def get_binary_download_request_status(
     include_download_requests: bool = Query(
         False, description="Include the Download requests with the plugin statuses."
     ),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinaryDownloadRequest)),
 ):
     """Get the status per plugin for a download request that was submitted."""
     result = status.get_binary_status_for_download_plugins(ctx, sha256, include_download_requests)

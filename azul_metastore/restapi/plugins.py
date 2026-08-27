@@ -2,6 +2,7 @@
 
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException
+from azul_bedrock.models_restapi import ApiAccessEnum
 from azul_bedrock.models_restapi import Author as PluginAuthor
 from azul_bedrock.models_restapi import plugins as bedr_plugins
 from fastapi import APIRouter, Depends, Response
@@ -9,7 +10,7 @@ from fastapi import APIRouter, Depends, Response
 from azul_metastore import context
 from azul_metastore.query import plugin
 from azul_metastore.query.binary2 import binary_read
-from azul_metastore.restapi.quick import qr
+from azul_metastore.restapi.quick import can_user_access_api_wrapper, qr
 
 router = APIRouter()
 
@@ -17,7 +18,7 @@ router = APIRouter()
 @router.get("/v0/plugins", response_model=qr.gr(list[bedr_plugins.LatestPluginWithVersions]), **qr.kw)
 def get_all_plugins(
     resp: Response,
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch)),
 ):
     """Read names and versions of all registered plugins."""
     data = plugin.get_all_plugins(ctx)
@@ -30,7 +31,7 @@ def get_all_plugins(
 @router.get("/v0/plugins/status", response_model=qr.gr(list[bedr_plugins.PluginStatusSummary]), **qr.kw)
 def get_all_plugin_statuses(
     resp: Response,
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch)),
 ):
     """Read names and versions of all registered plugins.
 
@@ -45,7 +46,12 @@ def get_all_plugin_statuses(
 
 
 @router.get("/v0/plugins/{name}/versions/{version}", response_model=qr.gr(bedr_plugins.PluginInfo), **qr.kw)
-def get_plugin(resp: Response, name: str, version: str, ctx: context.Context = Depends(qr.ctx)):
+def get_plugin(
+    resp: Response,
+    name: str,
+    version: str,
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch)),
+):
     """Read data for one plugin version."""
     data = {
         # count entity results from this author
@@ -64,7 +70,9 @@ def get_plugin(resp: Response, name: str, version: str, ctx: context.Context = D
 
 
 @router.get("/v0/plugins/download", response_model=qr.gr(list[PluginAuthor]), **qr.kw)
-def get_download_plugins(resp: Response, ctx: context.Context = Depends(qr.ctx)):
+def get_download_plugins(
+    resp: Response, ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch))
+):
     """Find all plugins that are able to download files."""
     data = plugin.get_download_plugins(ctx)
     if not data:

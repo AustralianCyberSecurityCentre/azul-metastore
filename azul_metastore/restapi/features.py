@@ -4,6 +4,7 @@ import pendulum
 from azul_bedrock import exceptions_metastore
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException
+from azul_bedrock.models_restapi import ApiAccessEnum
 from azul_bedrock.models_restapi import features as bedr_features
 from fastapi import APIRouter, Body, Depends, Query, Response
 from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT
@@ -13,7 +14,7 @@ from azul_metastore.encoders.annotation import InvalidAnnotation
 from azul_metastore.query import annotation
 from azul_metastore.query import plugin as plg
 from azul_metastore.query.binary2 import binary_feature, binary_feature_pivot
-from azul_metastore.restapi.quick import qr
+from azul_metastore.restapi.quick import can_user_access_api_wrapper, qr
 
 router = APIRouter()
 
@@ -27,7 +28,7 @@ def count_values_in_features(
     skip_count: bool = Query(False),
     author: str = Query(""),
     author_version: str = Query(""),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.FeatureSearch)),
 ):
     """Count number of unique values for features."""
     ret = {}
@@ -50,7 +51,7 @@ def count_binaries_in_features(
     skip_count: bool = Query(False),
     author: str = Query(""),
     author_version: str = Query(""),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.FeatureSearch)),
 ):
     """Count number of unique entities for features."""
     ret = {}
@@ -75,7 +76,7 @@ def count_binaries_in_featurevalues(
     skip_count: bool = Query(False),
     author: str = Query(""),
     author_version: str = Query(""),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.FeatureSearch)),
 ):
     """Count unique entities for multiple feature values."""
     ret = {}
@@ -102,7 +103,7 @@ def count_binaries_in_featurevalueparts(
     author: str = Query(""),
     author_version: str = Query(""),
     skip_count: bool = Query(False),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.FeatureSearch)),
 ):
     """Count unique entities for multiple value parts."""
     ret = {}
@@ -117,13 +118,17 @@ def count_binaries_in_featurevalueparts(
 
 
 @router.get("/v0/features/all/tags", response_model=qr.gr(bedr_features.ReadFeatureValueTags), **qr.kw)
-def get_all_feature_value_tags(resp: Response, ctx: context.Context = Depends(qr.ctx)):
+def get_all_feature_value_tags(
+    resp: Response, ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.FeatureSearch))
+):
     """Attach a tag to a specific feature value."""
     return qr.fr(ctx, annotation.read_all_feature_value_tags(ctx), resp)
 
 
 @router.get("/v0/features/tags/{tag}", response_model=qr.gr(bedr_features.ReadFeatureTagValues), **qr.kw)
-def get_feature_values_in_tag(resp: Response, tag: str, ctx: context.Context = Depends(qr.ctx)):
+def get_feature_values_in_tag(
+    resp: Response, tag: str, ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.FeatureSearch))
+):
     """Attach a tag to a specific feature value."""
     return qr.fr(ctx, annotation.read_feature_values_for_tag(ctx, tag), resp)
 
@@ -135,7 +140,7 @@ def create_feature_value_tag(
     feature: str,
     value: str,
     security: str = Body(None, embed=True),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.FeatureModifyTags)),
 ):
     """Attach a tag to a specific feature value."""
     security = ctx.validate_user_security(security)
@@ -160,7 +165,11 @@ def create_feature_value_tag(
 
 @router.delete("/v0/features/tags/{tag}", **qr.kw)
 def delete_feature_value_tag(
-    resp: Response, feature: str, value: str, tag: str, ctx: context.Context = Depends(qr.ctx)
+    resp: Response,
+    feature: str,
+    value: str,
+    tag: str,
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.FeatureModifyTags)),
 ):
     """Remove a tag from a specific feature value."""
     try:
@@ -179,7 +188,7 @@ def find_features(
     resp: Response,
     author: str = Query(""),
     author_version: str = Query(""),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.FeatureSearch)),
 ):
     """Return features present in system."""
     filters = (
@@ -206,7 +215,7 @@ def find_values_in_feature(
     author_version: str = Query("", description="Version of plugin that produced this."),
     num_values: int = Query(500, description="Number of feature values to return per request"),
     after: str | None = Body(None, embed=True),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.FeatureSearch)),
 ):
     """Return a set of values for the specified feature.
 
@@ -241,7 +250,7 @@ def find_values_in_feature(
 def feature_pivot_search(
     resp: Response,
     feature_values: list[bedr_features.FeaturePivotRequest] = Body([], embed=True),
-    ctx: context.Context = Depends(qr.ctx),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.FeatureSearch)),
 ):
     """Return all the common features for binaries that contain the provided features.
 

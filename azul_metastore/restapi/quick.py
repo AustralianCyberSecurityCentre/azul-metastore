@@ -1,18 +1,19 @@
 """Fastapi helpers for constructing queries."""
 
 import logging
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 import cachetools
 from azul_bedrock import exceptions_metastore
 from azul_bedrock.exception_enums import ExceptionCodeEnum
-from azul_bedrock.exceptions_bedrock import BaseAzulException
+from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
 from azul_bedrock.exceptions_security import SecurityAccessException
 from azul_bedrock.models_auth import UserInfo
+from azul_bedrock.models_restapi import ApiAccessEnum, can_user_access_api
 from azul_bedrock.models_restapi import basic as bedr_basic
-from fastapi import HTTPException, Query, Request, Response
+from fastapi import Depends, HTTPException, Query, Request, Response
 from pydantic import create_model
-from starlette.status import HTTP_401_UNAUTHORIZED
+from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
 
 from azul_metastore import context, settings
 from azul_metastore.common import memcache, search_data
@@ -191,3 +192,24 @@ class QuickRefs:
 
 
 qr = QuickRefs()
+
+
+def can_user_access_api_wrapper(
+    api_endpoint_enum: ApiAccessEnum, *, context_without_query: bool = False
+) -> Callable[[], context.Context]:
+    """Wrapper for function that checks a users access and checks if they should be able to access a particular API."""
+    dep = qr.ctx
+    if context_without_query:
+        dep = qr.ctx_without_queries
+
+    def check_user_can_access(ctx: context.Context = Depends(dep)) -> context.Context:
+        """Check a user can access a specific API endpoint and then return the context if they can."""
+        if can_user_access_api(ctx.user_info.api_access, api_endpoint_enum):
+            return ctx
+        raise ApiException(
+            status_code=HTTP_403_FORBIDDEN,
+            internal=ExceptionCodeEnum.MetastoreApiAccessForbidden,
+            parameters={"api_endpoint_enum": api_endpoint_enum.value},
+        )
+
+    return check_user_can_access
