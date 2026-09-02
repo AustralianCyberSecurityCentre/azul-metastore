@@ -14,7 +14,7 @@ def get_dispatcher_datastreams(ctx: context.Context, sha256: str) -> Iterable[tu
         "query": {
             "bool": {
                 "filter": [
-                    {"ids": {"values": [sha256]}},
+                    {"ids": {"values": [sha256.lower()]}},
                 ],
             }
         },
@@ -43,7 +43,7 @@ def get_dispatcher_datastreams(ctx: context.Context, sha256: str) -> Iterable[tu
         },
         "size": 0,
     }
-    resp = ctx.man.binary2.w.search(ctx.sd, body)
+    resp = ctx.man.binary2.w.search(ctx.sd, body, routing=sha256.lower())
     aggs = resp["aggregations"]["CHILDREN"]
     sources = [x["key"] for x in aggs["SOURCES"]["buckets"]]
     datastreams = []
