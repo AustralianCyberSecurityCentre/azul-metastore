@@ -342,7 +342,9 @@ def _parse_diagnostics(
 def _parse_security(resp: dict) -> list[str]:
     buckets = resp["aggregations"]["SECURITY"]["buckets"]
     security = utils.azsec().string_rank(x["key"] for x in buckets)
-    security = utils.azsec()._friendly.from_labels(utils.azsec()._friendly.to_labels(security))
+    # Make security REL:APPLEO instead of REL:APPLE where appropriate
+    for i, sec in enumerate(security):
+        security[i] = utils.azsec()._friendly.from_labels(utils.azsec()._friendly.to_labels(sec))
     return security
 
 
