@@ -34,9 +34,18 @@ class TestFeatures(integration_test.BaseRestapi):
         self.assertEqual(422, response.status_code)
 
     def test_pivot_features(self):
+        """Test that pivoting on features produces all the binaries with a common features and the
+        associated counts are an accurate representation of the number of matching binaries.
+        """
         self.write_binary_events(
             [
                 gen.binary_event(eid="e1", authornv=("a1", "1"), fvl=[("f1", "v1"), ("f1", "v2"), ("f1", "v3")]),
+                # Different authors producing the same feature value for the same binary shouldn't impact binary count
+                # If cardinality search isn't used for counts the same sha256 will be counted multiple times in this case.
+                gen.binary_event(eid="e1", authornv=("a2", "1"), fvl=[("f1", "v1")]),
+                # Include duplicate features from a different author for the same sha256 as there is then only 1 matching
+                # sha256 but more than one matching doc which would could be included.
+                gen.binary_event(eid="e1", authornv=("a3", "1"), fvl=[("f1", "v1"), ("f1", "v2"), ("f1", "v3")]),
                 gen.binary_event(eid="e2", authornv=("a1", "1"), fvl=[("f1", "v1"), ("f1", "v2")]),
                 gen.binary_event(eid="e3", authornv=("a1", "2"), fvl=[("f1", "v1"), ("f3", "v1")]),
                 gen.binary_event(
