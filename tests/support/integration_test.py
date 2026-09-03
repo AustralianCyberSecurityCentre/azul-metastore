@@ -195,10 +195,15 @@ class DynamicTestCase(basic_test.BasicTest):
     def setUp(self):
         # FUTURE make similar to unit tests
         self.dp_submit_binary_mm = self.dp_submit_binary.start()
+        self.addCleanup(self.dp_submit_binary.stop)
         self.dp_submit_events_mm = self.dp_submit_events.start()
+        self.addCleanup(self.dp_submit_events.stop)
         self.dp_delete_binary_mm = self.dp_delete_binary.start()
+        self.addCleanup(self.dp_delete_binary.stop)
         self.dp_simulate_consumers_on_event_mm = self.dp_simulate_consumers_on_event.start()
+        self.addCleanup(self.dp_simulate_consumers_on_event.stop)
         self.async_dp_submit_binary_mm = self.async_dp_submit_binary.start()
+        self.addCleanup(self.async_dp_submit_binary.stop)
 
         self.system.delete_all_docs()
         self.writer = self.system.writer
@@ -209,11 +214,6 @@ class DynamicTestCase(basic_test.BasicTest):
         self.writer.clear_state()
 
     def tearDown(self) -> None:
-        self.dp_submit_binary.stop()
-        self.dp_submit_events.stop()
-        self.dp_delete_binary.stop()
-        self.dp_simulate_consumers_on_event.stop()
-        self.async_dp_submit_binary.stop()
         # delete docs here to not influence runtime of next test
         self.system.delete_all_docs()
 
