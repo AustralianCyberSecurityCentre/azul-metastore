@@ -16,6 +16,7 @@ def _stream_expeditable(
     """Read raw binary sourced and extracted documents, useful for resubmissions."""
     sha256 = sha256.lower()
     body = {
+        "size": 1000,
         "query": {
             "bool": {
                 "should": [
