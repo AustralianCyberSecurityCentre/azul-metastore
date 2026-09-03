@@ -2,6 +2,7 @@
 
 import copy
 import logging
+import re
 
 from azul_bedrock import models_restapi
 from azul_bedrock.models_restapi import BinaryMetadataDetail as Detail
@@ -344,7 +345,17 @@ def _parse_security(resp: dict) -> list[str]:
     security = utils.azsec().string_rank(x["key"] for x in buckets)
     # Make security REL:APPLEO instead of REL:APPLE where appropriate
     for i, sec in enumerate(security):
-        security[i] = utils.azsec()._friendly.from_labels(utils.azsec()._friendly.to_labels(sec))
+        s_as_labels = utils.azsec()._friendly.to_labels(sec)
+        if (
+            len(s_as_labels.inclusive) == 1
+            and list(s_as_labels.inclusive)[0] == utils.azsec()._s.labels.releasability.origin
+            and utils.azsec()._s.labels.releasability.origin_alt_name
+        ):
+            security[i] = re.sub(
+                rf"{utils.azsec()._s.labels.releasability.prefix}[^ ]*",
+                f"{utils.azsec()._s.labels.releasability.prefix}{utils.azsec()._s.labels.releasability.origin_alt_name}",
+                sec,
+            )
     return security
 
 
