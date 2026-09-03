@@ -46,7 +46,11 @@ def _get_subctx(user_info: UserInfo, security_exclude: list[str], security_inclu
     security_exclude = [x.upper() for x in security_exclude]  # FUTURE use security module for this.
     security_include = [i.upper() for i in security_include]
     if user_info.credentials is None:
-        raise Exception()  # TODO
+        raise ApiException(
+            status_code=HTTP_401_UNAUTHORIZED,
+            internal=ExceptionCodeEnum.MetastoreUserNoSubctxCredentials,
+            parameters={"username": user_info.username},
+        )
     ctx = _get_base().copy_with(
         user_info=user_info,
         sd=search_data.SearchData(

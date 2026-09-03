@@ -60,7 +60,7 @@ def _stream_events_for_manual_submission(
     }
 
     seen = set()
-    resp = ctx.man.binary2.w.search(ctx.sd, body=body)
+    resp = ctx.man.binary2.w.search(ctx.sd, body=body, routing=sha256)
     for outer in resp["hits"]["hits"]:
         for collapse in ["references", "securities"]:
             for inner in outer["inner_hits"][collapse]["hits"]["hits"]:
