@@ -150,9 +150,11 @@ def ensure_valid_links(
     # determine if the sha256s still exist in the system
     # FUTURE this set could be stored to disk to ensure that the operation can be retried.
     children_affected = set()
-    for chunk in utils.chunker(sha256s, max_items=1000):
+    MAX_ITEMS = 1000
+    for chunk in utils.chunker(sha256s, max_items=MAX_ITEMS):
         # if binary no longer exists, add to next working set
         body = {
+            "size": MAX_ITEMS,
             "query": {
                 "bool": {
                     "filter": [{"ids": {"values": chunk}}],
@@ -170,6 +172,7 @@ def ensure_valid_links(
                     "filter": [{"terms": {"parent.sha256": deleted_parents}}],
                 }
             },
+            "size": MAX_ITEMS,
         }
         # record child sha256 for every link we are about to delete from
         for child in ctx.man.binary2.w.scan(ctx.sd, body):
