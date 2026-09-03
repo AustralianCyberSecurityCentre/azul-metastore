@@ -341,7 +341,9 @@ def _parse_diagnostics(
 
 def _parse_security(resp: dict) -> list[str]:
     buckets = resp["aggregations"]["SECURITY"]["buckets"]
-    return utils.azsec().string_rank(x["key"] for x in buckets)
+    security = utils.azsec().string_rank(x["key"] for x in buckets)
+    security = utils.azsec()._friendly.from_labels(utils.azsec()._friendly.to_labels(security))
+    return security
 
 
 def _parse_sources(resp: dict) -> list[models_restapi.BinarySource]:
