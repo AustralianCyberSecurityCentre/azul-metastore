@@ -56,7 +56,7 @@ class TestRelationGroups(etb.DynamicTestCase):
             [
                 models_restapi.PathNode(
                     author=azm.Author(
-                        security="MEDIUM REL:APPLEO",
+                        security="MEDIUM REL:APPLE",
                         category="plugin",
                         name="generic_plugin",
                         version="2021-01-01T12:00:00+00:00",
