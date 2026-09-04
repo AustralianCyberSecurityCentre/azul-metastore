@@ -42,7 +42,7 @@ def md5(text: str):
 
 
 @cachetools.cached(cache=memcache.get_lru_cache("azsec"))
-def azsec():
+def azsec() -> azul_security.Security:
     """Return an initialised and cached security provider."""
     return azul_security.Security()
 

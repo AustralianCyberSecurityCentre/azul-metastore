@@ -4,7 +4,6 @@ FUTURE don't add classmethods on to pydantic classes
 """
 
 import json
-import re
 
 from azul_bedrock import exceptions_metastore
 from azul_bedrock import models_network as azm
@@ -17,19 +16,7 @@ from azul_metastore.common.utils import azsec, jsondict
 def normalise_security(d: dict) -> None:
     """Normalise an embedded security string or assign default value."""
     normalised_security = azsec().string_normalise(d.get("security") or azsec().get_default_security())
-    s_as_labels = azsec()._friendly.to_labels(normalised_security)
-    if (
-        len(s_as_labels.inclusive) == 1
-        and list(s_as_labels.inclusive)[0] == azsec()._s.labels.releasability.origin
-        and azsec()._s.labels.releasability.origin_alt_name
-    ):
-        normalised_security = re.sub(
-            rf"{azsec()._s.labels.releasability.prefix}[^ ]*",
-            f"{azsec()._s.labels.releasability.prefix}{azsec()._s.labels.releasability.origin_alt_name}",
-            normalised_security,
-        )
-
-    d["security"] = normalised_security
+    d["security"] = azsec().convert_to_alternative_releasibility_to_security(normalised_security)
 
 
 class BinaryEvent(azm.BinaryEvent):

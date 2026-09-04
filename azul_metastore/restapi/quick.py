@@ -1,7 +1,6 @@
 """Fastapi helpers for constructing queries."""
 
 import logging
-import re
 from typing import Any, Callable, Optional
 
 import cachetools
@@ -98,17 +97,7 @@ class QuickRefs:
         if security_label is None:
             security_label = ctx.get_user_current_security_for_display()
         else:
-            s_as_labels = ctx.azsec._friendly.to_labels(security_label)
-            if (
-                len(s_as_labels.inclusive) == 1
-                and list(s_as_labels.inclusive)[0] == ctx.azsec._s.labels.releasability.origin
-                and ctx.azsec._s.labels.releasability.origin_alt_name
-            ):
-                security_label = re.sub(
-                    rf"{ctx.azsec._s.labels.releasability.prefix}[^ ]*",
-                    f"{ctx.azsec._s.labels.releasability.prefix}{ctx.azsec._s.labels.releasability.origin_alt_name}",
-                    security_label,
-                )
+            security_label = ctx.azsec.convert_to_alternative_releasibility_to_security(security_label)
         # Raised HTTPResponses might not encode a regular response. Do this ourselves:
         if ex is not None:
             new_headers: dict = dict()
