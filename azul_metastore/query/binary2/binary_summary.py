@@ -361,6 +361,8 @@ def _parse_sources(resp: dict) -> list[models_restapi.BinarySource]:
             rc.Binary2.decode(row)
             source: dict[str, Any] = row["source"]
             source.pop("path", None)  # decoding results in a path regeneration
+            if source.get("security", None):
+                source["security"] = utils.azsec().convert_to_alternative_releasibility_to_security(source["security"])
             source["track_source_references"] = row["track_source_references"]
             if depth > 0:
                 indirect.append(source)
@@ -484,6 +486,9 @@ def _parse_instances(resp: dict) -> list[models_restapi.EntityInstance]:
             "action": row["action"],
             "num_feature_values": row.get("num_feature_values", 0),
         }
+        author_sec = instance.get("author", {}).get("security", {})
+        if author_sec:
+            instance["author"]["security"] = utils.azsec().convert_to_alternative_releasibility_to_security(author_sec)
         instances.append(instance)
     return [models_restapi.EntityInstance(**x) for x in sorted(instances, key=lambda x: x["key"])]
 

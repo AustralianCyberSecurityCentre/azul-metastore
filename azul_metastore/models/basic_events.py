@@ -15,8 +15,7 @@ from azul_metastore.common.utils import azsec, jsondict
 
 def normalise_security(d: dict) -> None:
     """Normalise an embedded security string or assign default value."""
-    normalised_security = azsec().string_normalise(d.get("security") or azsec().get_default_security())
-    d["security"] = azsec().convert_to_alternative_releasibility_to_security(normalised_security)
+    d["security"] = azsec().string_normalise(d.get("security") or azsec().get_default_security())
 
 
 class BinaryEvent(azm.BinaryEvent):
