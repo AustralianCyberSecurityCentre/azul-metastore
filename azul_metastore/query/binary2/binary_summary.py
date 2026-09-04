@@ -2,6 +2,7 @@
 
 import copy
 import logging
+from typing import Any
 
 from azul_bedrock import models_restapi
 from azul_bedrock.models_restapi import BinaryMetadataDetail as Detail
@@ -341,7 +342,11 @@ def _parse_diagnostics(
 
 def _parse_security(resp: dict) -> list[str]:
     buckets = resp["aggregations"]["SECURITY"]["buckets"]
-    return utils.azsec().string_rank(x["key"] for x in buckets)
+    security = utils.azsec().string_rank(x["key"] for x in buckets)
+    # Make security REL:APPLEO instead of REL:APPLE where appropriate
+    for i, sec in enumerate(security):
+        security[i] = utils.azsec().convert_to_alternative_releasibility_to_security(sec)
+    return security
 
 
 def _parse_sources(resp: dict) -> list[models_restapi.BinarySource]:
@@ -354,8 +359,10 @@ def _parse_sources(resp: dict) -> list[models_restapi.BinarySource]:
             row = bucket2["HITS"]["hits"]["hits"][0]["_source"]
             depth = int(bucket2["DEPTH"]["value"])
             rc.Binary2.decode(row)
-            source = row["source"]
+            source: dict[str, Any] = row["source"]
             source.pop("path", None)  # decoding results in a path regeneration
+            if source.get("security", None):
+                source["security"] = utils.azsec().convert_to_alternative_releasibility_to_security(source["security"])
             source["track_source_references"] = row["track_source_references"]
             if depth > 0:
                 indirect.append(source)
@@ -479,6 +486,9 @@ def _parse_instances(resp: dict) -> list[models_restapi.EntityInstance]:
             "action": row["action"],
             "num_feature_values": row.get("num_feature_values", 0),
         }
+        author_sec = instance.get("author", {}).get("security", {})
+        if author_sec:
+            instance["author"]["security"] = utils.azsec().convert_to_alternative_releasibility_to_security(author_sec)
         instances.append(instance)
     return [models_restapi.EntityInstance(**x) for x in sorted(instances, key=lambda x: x["key"])]
 
