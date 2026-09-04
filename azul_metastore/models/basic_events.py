@@ -3,9 +3,8 @@
 FUTURE don't add classmethods on to pydantic classes
 """
 
-import re
-
 import json
+import re
 
 from azul_bedrock import exceptions_metastore
 from azul_bedrock import models_network as azm
