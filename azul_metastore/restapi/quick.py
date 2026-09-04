@@ -96,8 +96,8 @@ class QuickRefs:
         """Configures security headers for the response for this request."""
         if security_label is None:
             security_label = ctx.get_user_current_security_for_display()
-        else:
-            security_label = ctx.azsec.convert_to_alternative_releasibility_to_security(security_label)
+        # else:
+        #     security_label = ctx.azsec.convert_to_alternative_releasibility_to_security(security_label)
         # Raised HTTPResponses might not encode a regular response. Do this ourselves:
         if ex is not None:
             new_headers: dict = dict()
