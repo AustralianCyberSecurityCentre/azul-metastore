@@ -516,3 +516,4 @@ async def expedite_processing(
         return True
     except (HTTPException, ApiException) as e:
         qr.set_security_headers(ctx, resp, security, ex=e)
+        raise
