@@ -427,9 +427,9 @@ class TestBinaryRead(integration_test.DynamicTestCase):
             ]
         )
         ret = binary_summary.read(self.writer, "e1").security
-        self.assertFormatted(ret, ["LOW TLP:CLEAR", "MEDIUM REL:APPLE", "MEDIUM MOD1 REL:APPLE"])
+        self.assertFormatted(ret, ["LOW TLP:CLEAR", "MEDIUM REL:APPLEO", "MEDIUM MOD1 REL:APPLEO"])
         ret = binary_summary.read(self.writer, "E1").security
-        self.assertFormatted(ret, ["LOW TLP:CLEAR", "MEDIUM REL:APPLE", "MEDIUM MOD1 REL:APPLE"])
+        self.assertFormatted(ret, ["LOW TLP:CLEAR", "MEDIUM REL:APPLEO", "MEDIUM MOD1 REL:APPLEO"])
 
     def test_binary_read_authors(self):
         now = pendulum.datetime(year=2002, month=1, day=1)

@@ -143,7 +143,7 @@ def get_all_plugins(ctx: Context) -> list[models_restapi.LatestPluginWithVersion
                 break
         result.append(cur_plugin)
 
-    result.sort(key=lambda x: x.newest_version.name.lower())
+    result.sort(key=lambda x: x.newest_version.name.lower() if x.newest_version else "")
 
     return result
 
