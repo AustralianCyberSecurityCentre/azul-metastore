@@ -23,9 +23,10 @@ classifiers=[
     "Intended Audience :: Developers",
     "Topic :: Software Development :: Libraries",
 ]
+# TODO - release bedrock pinning.
 dependencies = [
-    "azul-bedrock>=v12.0.31",
-    "azul-security>=11.0.83",
+    "azul-bedrock==v13.0.18-dev1",
+    "azul-security>=13.0.20",
     "black>=26.1.0",
     "cachetools>=7.0.0",
     "cart>=1.2.3",

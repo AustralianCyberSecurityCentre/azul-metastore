@@ -496,6 +496,10 @@ async def expedite_processing(
     resp: Response,
     sha256: str = Path(..., pattern="[a-fA-F0-9]{64}", description="SHA256 of entity to expedite"),
     bypass_cache: bool = Query(False),
+    plugin: str = Query(
+        None,
+        description="Target a single plugin to expedite rather than all plugins, plugin name is case sensitive and expected to be the exact plugin name.",
+    ),
     ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinaryExpedite)),
 ):
     """Trigger an entity to be (re)processed at a higher priority than normal."""
@@ -508,7 +512,7 @@ async def expedite_processing(
     security = ctx.azsec.get_default_security()
     try:
         qr.set_security_headers(ctx, resp, security)
-        binary_expedite.expedite_processing(ctx, qr.writer, sha256, bypass_cache)
+        binary_expedite.expedite_processing(ctx, qr.writer, sha256, bypass_cache, plugin)
         return True
     except (HTTPException, ApiException) as e:
         qr.set_security_headers(ctx, resp, security, ex=e)
