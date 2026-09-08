@@ -86,7 +86,7 @@ def get_plugin_summary(
     resp: Response,
     ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch)),
 ):
-    """Return plugin name, versions, and features"""
+    """Return plugin name, versions, and features."""
     # this is intentionally super jank during testing
     data = plugin.get_plugin_summary(ctx)
     if not data:

@@ -494,5 +494,3 @@ def get_plugin_summary(
     plugin_res = ctx.man.plugin.w.search(ctx.sd, body=body)
 
     return plugin_res
-
-    plugin_summary: list[dict] = []
