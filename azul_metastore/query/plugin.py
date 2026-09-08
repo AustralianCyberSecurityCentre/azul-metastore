@@ -468,3 +468,31 @@ def get_download_plugins(
             )
         )
     return download_plugins
+
+
+def get_plugin_summary(
+    ctx: Context,
+) -> list[dict]:
+    """Returns plugin name, version, and features."""
+    body = {
+        "size": 0,
+        "aggs": {
+            "plugin": {
+                "terms": {"field": "author.name", "size": 1000},
+                "aggs": {
+                    "plugin_versions": {
+                        "terms": {"field": "author.version", "size": 100, "order": {"newest": "desc"}},
+                        "aggs": {"newest": {"max": {"field": "timestamp"}}},
+                    },
+                    "plugin_features": {
+                        "terms": {"field": "entity.features.name", "size": 1000},
+                    },
+                },
+            }
+        },
+    }
+    plugin_res = ctx.man.plugin.w.search(ctx.sd, body=body)
+
+    return plugin_res
+
+    plugin_summary: list[dict] = []

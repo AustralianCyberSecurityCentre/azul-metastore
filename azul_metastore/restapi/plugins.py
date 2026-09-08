@@ -79,3 +79,17 @@ def get_download_plugins(
         qr.set_security_headers(ctx, resp)
         raise ApiException(status_code=404, internal=ExceptionCodeEnum.MetastoreNoDownloadPluginsInAzul)
     return qr.fr(ctx, data, resp)
+
+
+@router.get("/v0/plugins/summary", response_model=qr.gr(list[dict]), **qr.kw)
+def get_plugin_summary(
+    resp: Response,
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch)),
+):
+    """Return plugin name, versions, and features"""
+    # this is intentionally super jank during testing
+    data = plugin.get_plugin_summary(ctx)
+    if not data:
+        qr.set_security_headers(ctx, resp)
+        raise ApiException(status_code=404, internal=ExceptionCodeEnum.MetastoreNoPluginsInAzul)
+    return qr.fr(ctx, data, resp)
