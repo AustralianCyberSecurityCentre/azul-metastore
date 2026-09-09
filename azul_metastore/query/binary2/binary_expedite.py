@@ -1,5 +1,6 @@
 """Rerun plugins on the target binary as high priority."""
 
+import logging
 from typing import Iterable
 
 from azul_bedrock import models_network as azm
@@ -8,6 +9,13 @@ from azul_bedrock.models_network import SourceSettingsKeys
 from azul_metastore import context
 from azul_metastore.common.utils import chunker
 from azul_metastore.encoders import binary2 as rc
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(
+    format="%(asctime)s %(name)s:%(levelname)s: %(message)s",
+    datefmt="%Y-%m-%dT%H:%M:%S%z",
+    level=logging.WARNING,
+)
 
 
 def _stream_expeditable(
@@ -60,6 +68,8 @@ def _yield_expedite_events(ctx: context.Context, sha256: str, bypass_cache: bool
                 )
                 event.source.settings[SourceSettingsKeys.SETTINGS_EXPEDITE_PLUGIN_KEY.value] = plugin
             events.append(event)
+            print(event.model_dump())
+            logger.error("expediting!", event.model_dump())
         yield events
 
 
