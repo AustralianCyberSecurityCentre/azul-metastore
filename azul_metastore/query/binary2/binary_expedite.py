@@ -1,7 +1,7 @@
 """Rerun plugins on the target binary as high priority."""
 
 import logging
-from typing import Iterable
+from typing import Generator, Iterable
 
 from azul_bedrock import models_network as azm
 from azul_bedrock.models_network import SourceSettingsKeys
@@ -48,7 +48,9 @@ def _stream_expeditable(
         yield rc.Binary2.decode(resp_source)
 
 
-def _yield_expedite_events(ctx: context.Context, sha256: str, bypass_cache: bool, plugin: str = ""):
+def _yield_expedite_events(
+    ctx: context.Context, sha256: str, bypass_cache: bool, plugin: str = ""
+) -> Generator[list[azm.BinaryEvent]]:
     """Yield chunks of events for an entity that should be run during an expedite operation."""
     sha256 = sha256.lower()
     for chunk in chunker(_stream_expeditable(ctx, sha256)):
@@ -78,4 +80,8 @@ def expedite_processing(ctx: context.Context, priv_ctx: context.Context, sha256:
     params = {"name": "metastore-insert", "version": "2021-03-19"}
     chunks = _yield_expedite_events(priv_ctx, sha256, bypass_cache, plugin)
     for events in chunks:
+        for ev in events:
+            print("expediting submission!", ev.model_dump_json(exclude_defaults=True, exclude_unset=True))
+            logger.error("expediting, excludes dump!", ev.model_dump(exclude_defaults=True, exclude_unset=True))
+            logger.error("expediting, raw dump!", ev.model_dump())
         ctx.dispatcher.submit_events(events, model=azm.ModelType.Binary, params=params)
