@@ -105,7 +105,7 @@ def get_plugin_summary_static(
 
 
 @router.get("/v0/plugins/summary/dynamic", response_model=qr.gr(list[dict]), **qr.kw)
-def get_plugin_summary_static(
+def get_plugin_summary_dynamic(
     resp: Response, ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch))
 ):
     """Returns the dynamic values of all plugins. Covers: Last completed, Completed, Error, and Completed percent."""
