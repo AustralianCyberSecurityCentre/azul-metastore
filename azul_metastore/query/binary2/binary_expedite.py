@@ -70,7 +70,6 @@ def _yield_expedite_events(
                 )
                 event.source.settings[SourceSettingsKeys.SETTINGS_EXPEDITE_PLUGIN_KEY.value] = plugin
             events.append(event)
-            print(event.model_dump())
             logger.error(
                 f"expediting! {event.model_dump()}",
             )
@@ -85,6 +84,12 @@ def expedite_processing(ctx: context.Context, priv_ctx: context.Context, sha256:
         for ev in events:
             logger.error(
                 f"expediting, excludes dump! {ev.model_dump(exclude_defaults=True, exclude_unset=True)}",
+            )
+            logger.error(
+                f"expediting, excludes dump with only unset! {ev.model_dump(exclude_unset=True)}",
+            )
+            logger.error(
+                f"expediting, excludes dump with only default! {ev.model_dump(exclude_defaults=True)}",
             )
             logger.error(
                 f"expediting, raw dump! {ev.model_dump()}",
