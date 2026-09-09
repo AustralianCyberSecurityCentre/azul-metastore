@@ -71,7 +71,9 @@ def _yield_expedite_events(
                 event.source.settings[SourceSettingsKeys.SETTINGS_EXPEDITE_PLUGIN_KEY.value] = plugin
             events.append(event)
             print(event.model_dump())
-            logger.error("expediting!", event.model_dump())
+            logger.error(
+                f"expediting! {event.model_dump()}",
+            )
         yield events
 
 
@@ -81,7 +83,10 @@ def expedite_processing(ctx: context.Context, priv_ctx: context.Context, sha256:
     chunks = _yield_expedite_events(priv_ctx, sha256, bypass_cache, plugin)
     for events in chunks:
         for ev in events:
-            print("expediting submission!", ev.model_dump_json(exclude_defaults=True, exclude_unset=True))
-            logger.error("expediting, excludes dump!", ev.model_dump(exclude_defaults=True, exclude_unset=True))
-            logger.error("expediting, raw dump!", ev.model_dump())
+            logger.error(
+                f"expediting, excludes dump! {ev.model_dump(exclude_defaults=True, exclude_unset=True)}",
+            )
+            logger.error(
+                f"expediting, raw dump! {ev.model_dump()}",
+            )
         ctx.dispatcher.submit_events(events, model=azm.ModelType.Binary, params=params)

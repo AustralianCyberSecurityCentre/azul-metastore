@@ -238,7 +238,7 @@ class TestMain(unit_test.DataMockingUnitTest):
         )
         json_events = []
         for evt in events_sent:
-            json_events.append(evt.model_dump())
+            json_events.append(evt.model_dump(exclude_defaults=True, exclude_unset=True))
         print(json_events)
 
         self.assertEqual(events_sent[0].source.settings[SourceSettingsKeys.SETTINGS_DEPTH_REMOVAL_KEY.value], "3")
@@ -264,38 +264,15 @@ class TestMain(unit_test.DataMockingUnitTest):
                         "sha512": "b6dcb9e2bfb285a9201d10e2d9580e4400d31d92e99717eda2a9c29491eb3d3757a8e9764b671d77f4c39b4ee2e3ec0b5effa844ad5eadcac5aec8b78e944d90",
                         "sha1": "f40825d0089a923ce635ee39c981eefb9fd1f3bb",
                         "md5": "ef090a5c998861a5917bd3e976594f8f",
-                        "ssdeep": None,
-                        "tlsh": None,
                         "size": 651994,
-                        "file_format": None,
-                        "file_extension": None,
-                        "mime": None,
-                        "magic": None,
                         "features": [
-                            {
-                                "name": "filename",
-                                "type": azm.FeatureType.Filepath,
-                                "value": "91cc5.exe",
-                                "label": None,
-                                "offset": None,
-                                "size": None,
-                            },
+                            {"name": "filename", "type": azm.FeatureType.Filepath, "value": "91cc5.exe"},
                             {
                                 "name": "magic",
                                 "type": azm.FeatureType.String,
                                 "value": "PE32 executable (GUI) Intel 80386 Mono/.Net assembly, for MS Windows",
-                                "label": None,
-                                "offset": None,
-                                "size": None,
                             },
-                            {
-                                "name": "mime",
-                                "type": azm.FeatureType.String,
-                                "value": "application/x-dosexec",
-                                "label": None,
-                                "offset": None,
-                                "size": None,
-                            },
+                            {"name": "mime", "type": azm.FeatureType.String, "value": "application/x-dosexec"},
                         ],
                         "datastreams": [
                             {
@@ -303,19 +280,12 @@ class TestMain(unit_test.DataMockingUnitTest):
                                 "sha512": "b6dcb9e2bfb285a9201d10e2d9580e4400d31d92e99717eda2a9c29491eb3d3757a8e9764b671d77f4c39b4ee2e3ec0b5effa844ad5eadcac5aec8b78e944d90",
                                 "sha1": "f40825d0089a923ce635ee39c981eefb9fd1f3bb",
                                 "md5": "ef090a5c998861a5917bd3e976594f8f",
-                                "ssdeep": None,
-                                "tlsh": None,
                                 "size": 651994,
-                                "file_format": None,
-                                "file_extension": None,
                                 "mime": "application/x-dosexec",
                                 "magic": "PE32 executable (GUI) Intel 80386 Mono/.Net assembly, for MS Windows",
-                                "identify_version": 0,
                                 "label": "content",
-                                "language": None,
                             }
                         ],
-                        "info": {},
                     },
                     "action": azm.BinaryAction.Extracted,
                     "source": {
@@ -328,12 +298,9 @@ class TestMain(unit_test.DataMockingUnitTest):
                                 "sha256": "de99ace77d365e7d9c9305d6396a9465004042658a9adcaf0927e3e0d7c2b07c",
                                 "action": azm.BinaryAction.Sourced,
                                 "timestamp": "2023-07-07T04:00:00+00:00",
-                                "author": {"category": "user", "name": "user", "version": None, "security": "carrot"},
-                                "relationship": {},
-                                "file_format": None,
+                                "author": {"category": "user", "name": "user", "security": "carrot"},
                                 "size": 570307,
                                 "filename": "91cc5",
-                                "language": None,
                             },
                             {
                                 "sha256": "acae1918dbee5d579b5cdfdd05d9c57f714efa50c2937999f475c569ff4d9cc5",
@@ -346,20 +313,13 @@ class TestMain(unit_test.DataMockingUnitTest):
                                     "security": "carrot",
                                 },
                                 "relationship": {"action": "extracted"},
-                                "file_format": None,
                                 "size": 651994,
                                 "filename": "91cc5.exe",
-                                "language": None,
                             },
                         ],
                         "settings": {"remove_at_depth": "3", "expedite_plugin": "TestPlugin"},
                     },
-                    "dequeued": None,
-                    "retries": None,
-                    "flags": {"bypass_cache": True, "expedite": True, "retry": False},
-                    "track_source_references": "",
-                    "track_links": [],
-                    "track_authors": [],
+                    "flags": {"bypass_cache": True, "expedite": True},
                 }
             ],
         )
