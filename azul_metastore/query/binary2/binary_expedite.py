@@ -50,7 +50,7 @@ def _stream_expeditable(
 
 def _yield_expedite_events(
     ctx: context.Context, sha256: str, bypass_cache: bool, plugin: str = ""
-) -> Generator[list[azm.BinaryEvent]]:
+) -> Generator[list[azm.BinaryEvent], None, None]:
     """Yield chunks of events for an entity that should be run during an expedite operation."""
     sha256 = sha256.lower()
     for chunk in chunker(_stream_expeditable(ctx, sha256)):
