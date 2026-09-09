@@ -470,27 +470,60 @@ def get_download_plugins(
     return download_plugins
 
 
-def get_plugin_summary(
+def get_plugin_summary_static(
     ctx: Context,
 ) -> list[dict]:
-    """Returns plugin name, version, and features."""
+    """Returns plugin name, version, security, description, and feature count."""
     body = {
         "size": 0,
         "aggs": {
             "plugin": {
                 "terms": {"field": "author.name", "size": 1000},
                 "aggs": {
-                    "plugin_versions": {
-                        "terms": {"field": "author.version", "size": 100, "order": {"newest": "desc"}},
+                    "latest_version": {
+                        "terms": {"field": "author.version", "size": 1, "order": {"newest": "desc"}},
                         "aggs": {"newest": {"max": {"field": "timestamp"}}},
                     },
-                    "plugin_features": {
-                        "terms": {"field": "entity.features.name", "size": 1000},
-                    },
+                    "secutiy": {"terms": {"field": "security", "size": 1}},
+                    "description": {"terms": {"field": "entity.description", "size": 1}},
+                    "feature_count": {"cardinality": {"field": "entity.features.name"}},
                 },
             }
         },
     }
-    plugin_res = ctx.man.plugin.w.search(ctx.sd, body=body)
-
+    plugin_res = ctx.man.plugin.w.search(ctx.sd, body)
     return plugin_res
+
+
+def get_plugin_summary_dynamic(
+    ctx: Context,
+) -> list[dict]:
+    """Returns the dynamic values from plugins. Contains: Last completion, Complected count, Error count, and Completed percent."""
+    body_last_completion = {
+        "size": 0,
+        "query": {"bool": {"filter": [{"terms": {"entity.status": [x.value for x in azm.StatusEnumSuccess]}}]}},
+        "aggs": {
+            "plugin": {
+                "terms": {"field": "encoded.author", "size": 1000},
+                "aggs": {"most_recent_completion": {"max": {"field": "timestamp"}}},
+            }
+        },
+    }
+    last_completion_resp = ctx.man.status.w.search(ctx.sd, body_last_completion)
+
+    body_success_stats = {
+        "size": 0,
+        "query": {"bool": {"must": [_plugin_stats_date_limiter()]}},
+        "aggs": {
+            "plugin": {
+                "terms": {"field": "encoded.author", "size": 500},
+                "aggs": {"stats": {"terms": {"field": "entity.status"}}},
+            }
+        },
+    }
+    success_stats_resp = ctx.man.status.w.search(ctx.sd, body_success_stats)
+
+    return [
+        last_completion_resp,
+        success_stats_resp,
+    ]

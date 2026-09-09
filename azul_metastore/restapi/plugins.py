@@ -87,9 +87,34 @@ def get_plugin_summary(
     ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch)),
 ):
     """Return plugin name, versions, and features."""
-    # this is intentionally super jank during testing
-    data = plugin.get_plugin_summary(ctx)
+    # TODO: combine the two below
+    return ["todo"]
+
+
+@router.get("/v0/plugins/summary/static", response_model=qr.gr(list[dict]), **qr.kw)
+def get_plugin_summary_static(
+    resp: Response, ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch))
+):
+    """Returns the static values of all plugins. Covers: Name, Version, Security, Descriptions, and Feature count."""
+    data = plugin.get_plugin_summary_static(ctx)
     if not data:
         qr.set_security_headers(ctx, resp)
         raise ApiException(status_code=404, internal=ExceptionCodeEnum.MetastoreNoPluginsInAzul)
+
+    return qr.fr(ctx, data, resp)
+
+
+@router.get("/v0/plugins/summary/dynamic", response_model=qr.gr(list[dict]), **qr.kw)
+def get_plugin_summary_static(
+    resp: Response, ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch))
+):
+    """Returns the dynamic values of all plugins. Covers: Last completed, Completed, Error, and Completed percent."""
+    data = [
+        plugin.get_plugin_summary_last_completion(ctx),
+        plugin.get_plugin_summary_completion_stats(ctx),
+    ]
+    if not data[0] and not data[1]:
+        qr.set_security_headers(ctx, resp)
+        raise ApiException(status_code=404, internal=ExceptionCodeEnum.MetastoreNoPluginsInAzul)
+
     return qr.fr(ctx, data, resp)
