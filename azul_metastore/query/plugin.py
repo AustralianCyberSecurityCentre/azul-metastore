@@ -15,6 +15,8 @@ import pendulum
 from azul_bedrock import models_network as azm
 from azul_bedrock import models_restapi
 from azul_bedrock.models_restapi.basic import Author as PluginAuthor
+from azul_bedrock.models_restapi.basic import BaseModelRepr  # TODO: Move to bedrock
+
 from pydantic import BaseModel
 
 from azul_metastore.common import memcache
@@ -470,9 +472,19 @@ def get_download_plugins(
     return download_plugins
 
 
+class PluginStatic(BaseModelRepr):
+    """Info for specific plugin."""
+
+    name: str
+    version: str
+    security: str
+    description: str
+    features: int
+
+
 def get_plugin_summary_static(
     ctx: Context,
-) -> list[dict]:
+) -> list[PluginStatic]:
     """Returns plugin name, version, security, description, and feature count."""
     body = {
         "size": 0,
@@ -492,6 +504,17 @@ def get_plugin_summary_static(
         },
     }
     plugin_res = ctx.man.plugin.w.search(ctx.sd, body)
+    plugin_data: list[PluginStatic] = []
+    for plugin in plugin_res["aggregations"]["plugin"]["buckets"]:
+        plugin_data.append(
+            PluginStatic(
+                name=plugin["key"],
+                version=plugin["latest_version"]["buckets"][0]["key"],
+                security=plugin["security"]["buckets"][0]["key"],
+                description=plugin["description"]["buckets"][0]["key"],
+                features=plugin["feature_count"]["value"],
+            )
+        )
     return plugin_res
 
 

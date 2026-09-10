@@ -91,9 +91,10 @@ def get_plugin_summary(
     return ["todo"]
 
 
-@router.get("/v0/plugins/summary/static", response_model=qr.gr(list[dict]), **qr.kw)
+@router.get("/v0/plugins/summary/static", response_model=qr.gr(list[plugin.PluginStatic]), **qr.kw)
 def get_plugin_summary_static(
-    resp: Response, ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch))
+    resp: Response,
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch)),
 ):
     """Returns the static values of all plugins. Covers: Name, Version, Security, Descriptions, and Feature count."""
     data = plugin.get_plugin_summary_static(ctx)
@@ -106,7 +107,8 @@ def get_plugin_summary_static(
 
 @router.get("/v0/plugins/summary/dynamic", response_model=qr.gr(list[dict]), **qr.kw)
 def get_plugin_summary_dynamic(
-    resp: Response, ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch))
+    resp: Response,
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch)),
 ):
     """Returns the dynamic values of all plugins. Covers: Last completed, Completed, Error, and Completed percent."""
     data = [
