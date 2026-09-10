@@ -176,6 +176,8 @@ def _submit_binary_event(
         # generate deep copy with the expedite flag set
         ev_expedited = azm.BinaryEvent(**event_details.model_dump())
         ev_expedited.flags.expedite = True
+        # Explicitly re-assign the child object or pydantic will exclude it during json dump as it's considered unset.
+        ev_expedited.flags = ev_expedited.flags
         submission.append(ev_expedited)
 
     # send to dispatcher and get enhanced copy of events

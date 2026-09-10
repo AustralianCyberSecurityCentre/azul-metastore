@@ -1,6 +1,5 @@
 """Rerun plugins on the target binary as high priority."""
 
-import logging
 from typing import Generator, Iterable
 
 from azul_bedrock import models_network as azm
@@ -9,13 +8,6 @@ from azul_bedrock.models_network import SourceSettingsKeys
 from azul_metastore import context
 from azul_metastore.common.utils import chunker
 from azul_metastore.encoders import binary2 as rc
-
-logger = logging.getLogger(__name__)
-logging.basicConfig(
-    format="%(asctime)s %(name)s:%(levelname)s: %(message)s",
-    datefmt="%Y-%m-%dT%H:%M:%S%z",
-    level=logging.WARNING,
-)
 
 
 def _stream_expeditable(
@@ -60,6 +52,8 @@ def _yield_expedite_events(
             event = azm.BinaryEvent(kafka_key="tmp", **row)
             event.flags.expedite = True
             event.flags.bypass_cache = bypass_cache
+            # Explicitly re-assign the child object or pydantic will exclude it during json dump as it's considered unset.
+            event.flags = event.flags
             # Target a specific plugin if a name was provided.
             if plugin:
                 # Only expedite for the specified plugin, this only last one depth value.
@@ -70,9 +64,6 @@ def _yield_expedite_events(
                 )
                 event.source.settings[SourceSettingsKeys.SETTINGS_EXPEDITE_PLUGIN_KEY.value] = plugin
             events.append(event)
-            logger.error(
-                f"expediting! {event.model_dump()}",
-            )
         yield events
 
 
@@ -81,17 +72,4 @@ def expedite_processing(ctx: context.Context, priv_ctx: context.Context, sha256:
     params = {"name": "metastore-insert", "version": "2021-03-19"}
     chunks = _yield_expedite_events(priv_ctx, sha256, bypass_cache, plugin)
     for events in chunks:
-        for ev in events:
-            logger.error(
-                f"expediting, excludes dump! {ev.model_dump(exclude_defaults=True, exclude_unset=True)}",
-            )
-            logger.error(
-                f"expediting, excludes dump with only unset! {ev.model_dump(exclude_unset=True)}",
-            )
-            logger.error(
-                f"expediting, excludes dump with only default! {ev.model_dump(exclude_defaults=True)}",
-            )
-            logger.error(
-                f"expediting, raw dump! {ev.model_dump()}",
-            )
         ctx.dispatcher.submit_events(events, model=azm.ModelType.Binary, params=params)

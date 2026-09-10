@@ -55,7 +55,6 @@ class TestMain(unit_test.DataMockingUnitTest):
                     "size": 651994,
                 },
                 "action": "extracted",
-                "flags": {"expedite": True},
                 "source": {
                     "name": "testing",
                     "path": [
@@ -168,7 +167,6 @@ class TestMain(unit_test.DataMockingUnitTest):
                     "size": 651994,
                 },
                 "action": "extracted",
-                "flags": {"expedite": True},
                 "source": {
                     "name": "testing",
                     "path": [
