@@ -16,7 +16,6 @@ from azul_bedrock import models_network as azm
 from azul_bedrock import models_restapi
 from azul_bedrock.models_restapi.basic import Author as PluginAuthor
 from azul_bedrock.models_restapi.basic import BaseModelRepr  # TODO: Move to bedrock
-
 from pydantic import BaseModel
 
 from azul_metastore.common import memcache
