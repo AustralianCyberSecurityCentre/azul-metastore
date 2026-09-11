@@ -485,7 +485,6 @@ class PluginSummary(BaseModelRepr):
     completion_percent: float | None = None
 
 
-
 def get_plugin_summary_static(
     ctx: Context,
 ) -> list[PluginSummary]:
@@ -582,15 +581,15 @@ def get_plugin_summary_dynamic(
     # compile into plugin summary
     plugin_data: list[PluginSummary] = []
     for plugin_name in compiled_queries:
-        success = compiled_queries[plugin_name].get("success",0)
-        failed = compiled_queries[plugin_name].get("failure",0)
+        success = compiled_queries[plugin_name].get("success", 0)
+        failed = compiled_queries[plugin_name].get("failure", 0)
         completion = 0
         try:
-            completion = success/(success+failed)
+            completion = success / (success + failed)
         except ZeroDivisionError:
             completion = 0
 
-        plugin_data.append (
+        plugin_data.append(
             PluginSummary(
                 name=plugin_name,
                 last_completion=compiled_queries[plugin_name].get("recent", None),

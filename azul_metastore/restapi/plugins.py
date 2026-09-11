@@ -97,14 +97,14 @@ def get_plugin_summary(
         if plugin_.name not in combined_data:
             combined_data[plugin_.name] = plugin_
             continue
-        
+
         combined_data[plugin_.name].last_completion = plugin_.last_completion
         combined_data[plugin_.name].completion_count = plugin_.completion_count
         combined_data[plugin_.name].error_count = plugin_.error_count
         combined_data[plugin_.name].completion_percent = plugin_.completion_percent
 
     if not static and not dynamic:
-        qr.set_security_headers(ctx,resp)
+        qr.set_security_headers(ctx, resp)
         raise ApiException(status_code=404, internal=ExceptionCodeEnum.MetastoreNoPluginsInAzul)
 
     return qr.fr(ctx, combined_data.values(), resp)
