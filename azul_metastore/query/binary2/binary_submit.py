@@ -11,7 +11,7 @@ from azul_bedrock import models_network as azm
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException, BaseAzulException
 from azul_bedrock.exceptions_security import SecurityAccessException, SecurityParseException
-from azul_bedrock.models_network import DataLabel
+from azul_bedrock.models_network import DataLabel, SourceSettingsKeys
 from azul_bedrock.models_restapi import binaries_data as bedr_bdata
 from azul_bedrock.models_restapi import binaries_download as bedr_binaries_down
 from fastapi import UploadFile
@@ -142,7 +142,7 @@ def _submit_binary_event(
 
     # Remove on any event beyond the inital submission as, always 1 on a sourced event.
     if submit_settings:
-        submit_settings[binary_submit_manual.SUBMIT_SETTINGS_DEPTH_REMOVAL_KEY] = "2"
+        submit_settings[SourceSettingsKeys.SETTINGS_DEPTH_REMOVAL_KEY.value] = "2"
     event_details = azm.BinaryEvent(
         kafka_key="meta-tmp",  # temporary id so we can create the object
         action=azm.BinaryAction.Sourced,
@@ -176,6 +176,8 @@ def _submit_binary_event(
         # generate deep copy with the expedite flag set
         ev_expedited = azm.BinaryEvent(**event_details.model_dump())
         ev_expedited.flags.expedite = True
+        # Explicitly re-assign the child object or pydantic will exclude it during json dump as it's considered unset.
+        ev_expedited.flags = ev_expedited.flags
         submission.append(ev_expedited)
 
     # send to dispatcher and get enhanced copy of events

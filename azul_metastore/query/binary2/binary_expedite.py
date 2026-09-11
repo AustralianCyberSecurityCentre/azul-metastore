@@ -1,8 +1,9 @@
 """Rerun plugins on the target binary as high priority."""
 
-from typing import Iterable
+from typing import Generator, Iterable
 
 from azul_bedrock import models_network as azm
+from azul_bedrock.models_network import SourceSettingsKeys
 
 from azul_metastore import context
 from azul_metastore.common.utils import chunker
@@ -39,7 +40,9 @@ def _stream_expeditable(
         yield rc.Binary2.decode(resp_source)
 
 
-def _yield_expedite_events(ctx: context.Context, sha256: str, bypass_cache: bool):
+def _yield_expedite_events(
+    ctx: context.Context, sha256: str, bypass_cache: bool, plugin: str = ""
+) -> Generator[list[azm.BinaryEvent], None, None]:
     """Yield chunks of events for an entity that should be run during an expedite operation."""
     sha256 = sha256.lower()
     for chunk in chunker(_stream_expeditable(ctx, sha256)):
@@ -49,13 +52,24 @@ def _yield_expedite_events(ctx: context.Context, sha256: str, bypass_cache: bool
             event = azm.BinaryEvent(kafka_key="tmp", **row)
             event.flags.expedite = True
             event.flags.bypass_cache = bypass_cache
+            # Explicitly re-assign the child object or pydantic will exclude it during json dump as it's considered unset.
+            event.flags = event.flags
+            # Target a specific plugin if a name was provided.
+            if plugin:
+                # Only expedite for the specified plugin, this only last one depth value.
+                if not event.source.settings:
+                    event.source.settings = {}
+                event.source.settings[SourceSettingsKeys.SETTINGS_DEPTH_REMOVAL_KEY.value] = str(
+                    len(event.source.path) + 1
+                )
+                event.source.settings[SourceSettingsKeys.SETTINGS_EXPEDITE_PLUGIN_KEY.value] = plugin
             events.append(event)
         yield events
 
 
-def expedite_processing(ctx: context.Context, priv_ctx: context.Context, sha256: str, bypass_cache: bool):
+def expedite_processing(ctx: context.Context, priv_ctx: context.Context, sha256: str, bypass_cache: bool, plugin: str):
     """Trigger an entity to be (re)processed at a higher priority than normal."""
     params = {"name": "metastore-insert", "version": "2021-03-19"}
-    chunks = _yield_expedite_events(priv_ctx, sha256, bypass_cache)
+    chunks = _yield_expedite_events(priv_ctx, sha256, bypass_cache, plugin)
     for events in chunks:
         ctx.dispatcher.submit_events(events, model=azm.ModelType.Binary, params=params)
