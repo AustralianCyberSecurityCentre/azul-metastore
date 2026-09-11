@@ -15,6 +15,7 @@ import pendulum
 from azul_bedrock import models_network as azm
 from azul_bedrock import models_restapi
 from azul_bedrock.models_restapi.basic import Author as PluginAuthor
+from azul_bedrock.models_restapi.basic import BaseModelRepr  # TODO: Move to bedrock
 from pydantic import BaseModel
 
 from azul_metastore.common import memcache
@@ -468,3 +469,177 @@ def get_download_plugins(
             )
         )
     return download_plugins
+
+
+class PluginSummary(BaseModelRepr):
+    """Info for plugin summary page."""
+
+    name: str
+    version: str | None = None
+    security: str | None = None
+    description: str | None = None
+    features: int | None = None
+    last_completion: str | None = None
+    completion_count: int | None = None
+    error_count: int | None = None
+    completion_percent: float | None = None
+
+
+def get_plugin_summary_static(
+    ctx: Context,
+) -> list[PluginSummary]:
+    """Returns plugin name, version, security, description, and feature count."""
+    body = {
+        "size": 0,
+        "aggs": {
+            "plugin": {
+                "terms": {"field": "author.name", "size": 1000},
+                "aggs": {
+                    "latest_version": {
+                        "terms": {"field": "author.version", "size": 1, "order": {"newest": "desc"}},
+                        "aggs": {"newest": {"max": {"field": "timestamp"}}},
+                    },
+                    "security": {"terms": {"field": "security", "size": 1}},
+                    "description": {"terms": {"field": "entity.description", "size": 1}},
+                    "feature_count": {"cardinality": {"field": "entity.features.name"}},
+                },
+            }
+        },
+    }
+    plugin_res = ctx.man.plugin.w.search(ctx.sd, body)
+    plugin_data: list[PluginSummary] = []
+    for plugin in plugin_res["aggregations"]["plugin"]["buckets"]:
+        plugin_data.append(
+            PluginSummary(
+                name=plugin["key"],
+                version=plugin["latest_version"]["buckets"][0]["key"],
+                security=plugin["security"]["buckets"][0]["key"],
+                description=plugin["description"]["buckets"][0]["key"],
+                features=plugin["feature_count"]["value"],
+            )
+        )
+    return plugin_data
+
+
+def get_plugin_summary_dynamic(
+    ctx: Context,
+) -> list[PluginSummary]:
+    """Returns the dynamic values from plugins. Contains: Last completion, Complected count, Error count, and Completed percent."""
+    # Find the most recent plugin completion time
+    body_last_completion = {
+        "size": 0,
+        "query": {"bool": {"filter": [{"terms": {"entity.status": [x.value for x in azm.StatusEnumSuccess]}}]}},
+        "aggs": {
+            "plugin": {
+                "multi_terms": {
+                    "terms": [
+                        {"field": "author.name"},
+                        {"field": "author.version"},
+                    ],
+                    "size": 1000,
+                },
+                "aggs": {"most_recent_completion": {"max": {"field": "timestamp"}}},
+            }
+        },
+    }
+    last_completion_resp = ctx.man.status.w.search(ctx.sd, body_last_completion)
+
+    # plugin_recent = {}
+    # for plugin in last_completion_resp["aggregations"]["plugin"]["buckets"]:
+    #    plugin_recent[name] = plugin["most_recent_completion"]["value_as_string"]
+
+    body_success_stats = {
+        "size": 0,
+        "query": {"bool": {"must": [_plugin_stats_date_limiter()]}},
+        "aggs": {
+            "plugin": {
+                "multi_terms": {
+                    "terms": [
+                        {"field": "author.name"},
+                        {"field": "author.version"},
+                    ],
+                    "size": 1000,
+                },
+                "aggs": {"stats": {"terms": {"field": "entity.status"}}},
+            }
+        },
+    }
+    success_stats_resp = ctx.man.status.w.search(ctx.sd, body_success_stats)
+
+    # build the combined array
+    # using the plugin name, and version pair as a key
+    # opensearch provides this as a key under "key_as_string"
+    plugin_data = {}
+    for plugin in last_completion_resp["aggregations"]["plugin"]["buckets"]:
+        plugin_name = plugin["key"][0]
+        plugin_version = plugin["key"][1]
+        plugin_key = plugin["key_as_string"]
+        recent_completion = plugin["most_recent_completion"]["value_as_string"]
+
+        if plugin_key not in plugin_data:
+            plugin_data[plugin_key] = {
+                "name": plugin_name,
+                "version": plugin_version,
+            }
+
+        plugin_data[plugin_key]["most_recent_completion"] = recent_completion
+
+    for plugin in success_stats_resp["aggregations"]["plugin"]["buckets"]:
+        plugin_name = plugin["key"][0]
+        plugin_version = plugin["key"][1]
+        plugin_key = plugin["key_as_string"]
+
+        if plugin_key not in plugin_data:
+            plugin_data[plugin_key] = {
+                "name": plugin_name,
+                "version": plugin_version,
+            }
+
+        plugin_data[plugin_key]["success"] = 0
+        plugin_data[plugin_key]["failure"] = 0
+
+        # increment the values based on bedrock saying its a success or failure key
+        for stat in plugin["stats"]["buckets"]:
+            if stat["key"] in [x.value for x in azm.StatusEnumSuccess]:
+                plugin_data[plugin_key]["success"] += stat["doc_count"]
+            if stat["key"] in [x.value for x in azm.StatusEnumErrored]:
+                plugin_data[plugin_key]["failure"] += stat["doc_count"]
+
+    # get plugin static will pull the latest version and I can use that to determine which is the correct version
+    baseline_plugin = get_plugin_summary_static(ctx)
+    return_values: list[PluginSummary] = []
+    for plugin in baseline_plugin:
+        name = plugin.name
+        version = plugin.version
+
+        for plugin2 in plugin_data.values():
+            # determine if its the same plugin
+            if name != plugin2["name"]:
+                continue
+            if version != plugin2["version"]:
+                continue
+
+            success = plugin2.get("success", None)
+            failed = plugin2.get("failure", None)
+
+            completion = 0
+            if None not in (success, failed):
+                try:
+                    completion = success / (success + failed)
+                except ZeroDivisionError:
+                    completion = 0
+
+            return_values.append(
+                PluginSummary(
+                    name=name,
+                    version=version,
+                    security=plugin.security,
+                    description=plugin.description,
+                    last_completion=plugin2.get("most_recent_completion", None),
+                    features=plugin.features,
+                    completion_count=success,
+                    error_count=failed,
+                    completion_percent=float(completion),
+                )
+            )
+    return return_values
