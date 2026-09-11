@@ -81,17 +81,36 @@ def get_download_plugins(
     return qr.fr(ctx, data, resp)
 
 
-@router.get("/v0/plugins/summary", response_model=qr.gr(list[dict]), **qr.kw)
+@router.get("/v0/plugins/summary", response_model=qr.gr(list[plugin.PluginSummary]), **qr.kw)
 def get_plugin_summary(
     resp: Response,
     ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch)),
 ):
-    """Return plugin name, versions, and features."""
-    # TODO: combine the two below
-    return ["todo"]
+    """Return all plugin data."""
+    static = plugin.get_plugin_summary_static(ctx)
+    dynamic = plugin.get_plugin_summary_dynamic(ctx)
+
+    combined_data = {}
+    for plugin_ in static:
+        combined_data[plugin_.name] = plugin_
+    for plugin_ in dynamic:
+        if plugin_.name not in combined_data:
+            combined_data[plugin_.name] = plugin_
+            continue
+        
+        combined_data[plugin_.name].last_completion = plugin_.last_completion
+        combined_data[plugin_.name].completion_count = plugin_.completion_count
+        combined_data[plugin_.name].error_count = plugin_.error_count
+        combined_data[plugin_.name].completion_percent = plugin_.completion_percent
+
+    if not static and not dynamic:
+        qr.set_security_headers(ctx,resp)
+        raise ApiException(status_code=404, internal=ExceptionCodeEnum.MetastoreNoPluginsInAzul)
+
+    return qr.fr(ctx, combined_data.values(), resp)
 
 
-@router.get("/v0/plugins/summary/static", response_model=qr.gr(list[plugin.PluginStatic]), **qr.kw)
+@router.get("/v0/plugins/summary/static", response_model=qr.gr(list[plugin.PluginSummary]), **qr.kw)
 def get_plugin_summary_static(
     resp: Response,
     ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch)),
@@ -105,17 +124,14 @@ def get_plugin_summary_static(
     return qr.fr(ctx, data, resp)
 
 
-@router.get("/v0/plugins/summary/dynamic", response_model=qr.gr(list[dict]), **qr.kw)
+@router.get("/v0/plugins/summary/dynamic", response_model=qr.gr(list[plugin.PluginSummary]), **qr.kw)
 def get_plugin_summary_dynamic(
     resp: Response,
     ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch)),
 ):
     """Returns the dynamic values of all plugins. Covers: Last completed, Completed, Error, and Completed percent."""
-    data = [
-        plugin.get_plugin_summary_last_completion(ctx),
-        plugin.get_plugin_summary_completion_stats(ctx),
-    ]
-    if not data[0] and not data[1]:
+    data = plugin.get_plugin_summary_dynamic(ctx)
+    if not data:
         qr.set_security_headers(ctx, resp)
         raise ApiException(status_code=404, internal=ExceptionCodeEnum.MetastoreNoPluginsInAzul)
 

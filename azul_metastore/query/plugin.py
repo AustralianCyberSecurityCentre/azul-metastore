@@ -471,19 +471,24 @@ def get_download_plugins(
     return download_plugins
 
 
-class PluginStatic(BaseModelRepr):
-    """Info for specific plugin."""
+class PluginSummary(BaseModelRepr):
+    """Info for plugin summary page."""
 
     name: str
-    version: str
-    security: str
-    description: str
-    features: int
+    version: str | None = None
+    security: str | None = None
+    description: str | None = None
+    features: int | None = None
+    last_completion: str | None = None
+    completion_count: int | None = None
+    error_count: int | None = None
+    completion_percent: float | None = None
+
 
 
 def get_plugin_summary_static(
     ctx: Context,
-) -> list[PluginStatic]:
+) -> list[PluginSummary]:
     """Returns plugin name, version, security, description, and feature count."""
     body = {
         "size": 0,
@@ -495,7 +500,7 @@ def get_plugin_summary_static(
                         "terms": {"field": "author.version", "size": 1, "order": {"newest": "desc"}},
                         "aggs": {"newest": {"max": {"field": "timestamp"}}},
                     },
-                    "secutiy": {"terms": {"field": "security", "size": 1}},
+                    "security": {"terms": {"field": "security", "size": 1}},
                     "description": {"terms": {"field": "entity.description", "size": 1}},
                     "feature_count": {"cardinality": {"field": "entity.features.name"}},
                 },
@@ -503,10 +508,10 @@ def get_plugin_summary_static(
         },
     }
     plugin_res = ctx.man.plugin.w.search(ctx.sd, body)
-    plugin_data: list[PluginStatic] = []
+    plugin_data: list[PluginSummary] = []
     for plugin in plugin_res["aggregations"]["plugin"]["buckets"]:
         plugin_data.append(
-            PluginStatic(
+            PluginSummary(
                 name=plugin["key"],
                 version=plugin["latest_version"]["buckets"][0]["key"],
                 security=plugin["security"]["buckets"][0]["key"],
@@ -514,12 +519,12 @@ def get_plugin_summary_static(
                 features=plugin["feature_count"]["value"],
             )
         )
-    return plugin_res
+    return plugin_data
 
 
 def get_plugin_summary_dynamic(
     ctx: Context,
-) -> list[dict]:
+) -> list[PluginSummary]:
     """Returns the dynamic values from plugins. Contains: Last completion, Complected count, Error count, and Completed percent."""
     body_last_completion = {
         "size": 0,
@@ -545,7 +550,54 @@ def get_plugin_summary_dynamic(
     }
     success_stats_resp = ctx.man.status.w.search(ctx.sd, body_success_stats)
 
-    return [
-        last_completion_resp,
-        success_stats_resp,
-    ]
+    compiled_queries = {}
+    # find the plugin last completion values
+    for plugin in last_completion_resp["aggregations"]["plugin"]["buckets"]:
+        name = plugin["key"].split(".plugin.")[0]
+        recent_completion = plugin["most_recent_completion"]["value_as_string"]
+
+        compiled_queries[name] = {}
+        compiled_queries[name]["recent"] = recent_completion
+
+    # Get stats about statuses we care about
+    success_status_types = [x.value for x in azm.StatusEnumSuccess]
+    error_status_types = [x.value for x in azm.StatusEnumErrored]
+
+    # find the recent stats
+    for plugin in success_stats_resp["aggregations"]["plugin"]["buckets"]:
+        name = plugin["key"].split(".plugin.")[0]
+
+        if name not in compiled_queries:
+            compiled_queries[name] = {}
+
+        compiled_queries[name]["success"] = 0
+        compiled_queries[name]["failure"] = 0
+
+        for bucket in plugin["stats"]["buckets"]:
+            if bucket["key"] in success_status_types:
+                compiled_queries[name]["success"] += bucket["doc_count"]
+            if bucket["key"] in error_status_types:
+                compiled_queries[name]["failure"] += bucket["doc_count"]
+
+    # compile into plugin summary
+    plugin_data: list[PluginSummary] = []
+    for plugin_name in compiled_queries:
+        success = compiled_queries[plugin_name].get("success",0)
+        failed = compiled_queries[plugin_name].get("failure",0)
+        completion = 0
+        try:
+            completion = success/(success+failed)
+        except ZeroDivisionError:
+            completion = 0
+
+        plugin_data.append (
+            PluginSummary(
+                name=plugin_name,
+                last_completion=compiled_queries[plugin_name].get("recent", None),
+                completion_count=success,
+                error_count=failed,
+                completion_percent=float(completion),
+            )
+        )
+
+    return plugin_data
