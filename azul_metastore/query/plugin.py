@@ -619,8 +619,8 @@ def get_plugin_summary_dynamic(
             if version != plugin2["version"]:
                 continue
 
-            success = plugin2.get("success",None)
-            failed = plugin2.get("failure",None)
+            success = plugin2.get("success", None)
+            failed = plugin2.get("failure", None)
 
             completion = 0
             if None not in (success, failed):

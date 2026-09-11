@@ -87,7 +87,7 @@ def get_plugin_summary_fast(
     ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch)),
 ):
     """Returns values of all plugins with a single query, significantly more performant.
-    
+
     Returns name, version, security, description, and features (count)."""
     data = plugin.get_plugin_summary_static(ctx)
     if not data:
@@ -103,7 +103,7 @@ def get_plugin_summary_complete(
     ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch)),
 ):
     """Returns values of all plugins with multiple queries, includes Last completion, Completion count, Error count, and Completion percent.
-    
+
     Returns name, version, security, description, features (count), last_completion, completion_count, error_count, and completion_percent."""
     data = plugin.get_plugin_summary_dynamic(ctx)
     if not data:
