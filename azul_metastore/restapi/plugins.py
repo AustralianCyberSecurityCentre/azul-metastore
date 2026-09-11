@@ -81,41 +81,14 @@ def get_download_plugins(
     return qr.fr(ctx, data, resp)
 
 
-@router.get("/v0/plugins/summary", response_model=qr.gr(list[plugin.PluginSummary]), **qr.kw)
-def get_plugin_summary(
+@router.get("/v0/plugins/summary/fast", response_model=qr.gr(list[plugin.PluginSummary]), **qr.kw)
+def get_plugin_summary_fast(
     resp: Response,
     ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch)),
 ):
-    """Return all plugin data."""
-    static = plugin.get_plugin_summary_static(ctx)
-    dynamic = plugin.get_plugin_summary_dynamic(ctx)
-
-    combined_data = {}
-    for plugin_ in static:
-        combined_data[plugin_.name] = plugin_
-    for plugin_ in dynamic:
-        if plugin_.name not in combined_data:
-            combined_data[plugin_.name] = plugin_
-            continue
-
-        combined_data[plugin_.name].last_completion = plugin_.last_completion
-        combined_data[plugin_.name].completion_count = plugin_.completion_count
-        combined_data[plugin_.name].error_count = plugin_.error_count
-        combined_data[plugin_.name].completion_percent = plugin_.completion_percent
-
-    if not static and not dynamic:
-        qr.set_security_headers(ctx, resp)
-        raise ApiException(status_code=404, internal=ExceptionCodeEnum.MetastoreNoPluginsInAzul)
-
-    return qr.fr(ctx, combined_data.values(), resp)
-
-
-@router.get("/v0/plugins/summary/static", response_model=qr.gr(list[plugin.PluginSummary]), **qr.kw)
-def get_plugin_summary_static(
-    resp: Response,
-    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch)),
-):
-    """Returns the static values of all plugins. Covers: Name, Version, Security, Descriptions, and Feature count."""
+    """Returns values of all plugins with a single query, significantly more performant.
+    
+    Returns name, version, security, description, and features (count)."""
     data = plugin.get_plugin_summary_static(ctx)
     if not data:
         qr.set_security_headers(ctx, resp)
@@ -124,12 +97,14 @@ def get_plugin_summary_static(
     return qr.fr(ctx, data, resp)
 
 
-@router.get("/v0/plugins/summary/dynamic", response_model=qr.gr(list[plugin.PluginSummary]), **qr.kw)
-def get_plugin_summary_dynamic(
+@router.get("/v0/plugins/summary/complete", response_model=qr.gr(list[plugin.PluginSummary]), **qr.kw)
+def get_plugin_summary_complete(
     resp: Response,
     ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch)),
 ):
-    """Returns the dynamic values of all plugins. Covers: Last completed, Completed, Error, and Completed percent."""
+    """Returns values of all plugins with multiple queries, includes Last completion, Completion count, Error count, and Completion percent.
+    
+    Returns name, version, security, description, features (count), last_completion, completion_count, error_count, and completion_percent."""
     data = plugin.get_plugin_summary_dynamic(ctx)
     if not data:
         qr.set_security_headers(ctx, resp)

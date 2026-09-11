@@ -525,78 +525,121 @@ def get_plugin_summary_dynamic(
     ctx: Context,
 ) -> list[PluginSummary]:
     """Returns the dynamic values from plugins. Contains: Last completion, Complected count, Error count, and Completed percent."""
+    # Find the most recent plugin completion time
     body_last_completion = {
         "size": 0,
         "query": {"bool": {"filter": [{"terms": {"entity.status": [x.value for x in azm.StatusEnumSuccess]}}]}},
         "aggs": {
             "plugin": {
-                "terms": {"field": "encoded.author", "size": 1000},
+                "multi_terms": {
+                    "terms": [
+                        {"field": "author.name"},
+                        {"field": "author.version"},
+                    ],
+                    "size": 1000,
+                },
                 "aggs": {"most_recent_completion": {"max": {"field": "timestamp"}}},
             }
         },
     }
     last_completion_resp = ctx.man.status.w.search(ctx.sd, body_last_completion)
 
+    # plugin_recent = {}
+    # for plugin in last_completion_resp["aggregations"]["plugin"]["buckets"]:
+    #    plugin_recent[name] = plugin["most_recent_completion"]["value_as_string"]
+
     body_success_stats = {
         "size": 0,
         "query": {"bool": {"must": [_plugin_stats_date_limiter()]}},
         "aggs": {
             "plugin": {
-                "terms": {"field": "encoded.author", "size": 500},
+                "multi_terms": {
+                    "terms": [
+                        {"field": "author.name"},
+                        {"field": "author.version"},
+                    ],
+                    "size": 1000,
+                },
                 "aggs": {"stats": {"terms": {"field": "entity.status"}}},
             }
         },
     }
     success_stats_resp = ctx.man.status.w.search(ctx.sd, body_success_stats)
 
-    compiled_queries = {}
-    # find the plugin last completion values
+    # build the combined array
+    # using the plugin name, and version pair as a key
+    # opensearch provides this as a key under "key_as_string"
+    plugin_data = {}
     for plugin in last_completion_resp["aggregations"]["plugin"]["buckets"]:
-        name = plugin["key"].split(".plugin.")[0]
+        plugin_name = plugin["key"][0]
+        plugin_version = plugin["key"][1]
+        plugin_key = plugin["key_as_string"]
         recent_completion = plugin["most_recent_completion"]["value_as_string"]
 
-        compiled_queries[name] = {}
-        compiled_queries[name]["recent"] = recent_completion
+        if plugin_key not in plugin_data:
+            plugin_data[plugin_key] = {
+                "name": plugin_name,
+                "version": plugin_version,
+            }
 
-    # Get stats about statuses we care about
-    success_status_types = [x.value for x in azm.StatusEnumSuccess]
-    error_status_types = [x.value for x in azm.StatusEnumErrored]
+        plugin_data[plugin_key]["most_recent_completion"] = recent_completion
 
-    # find the recent stats
     for plugin in success_stats_resp["aggregations"]["plugin"]["buckets"]:
-        name = plugin["key"].split(".plugin.")[0]
+        plugin_name = plugin["key"][0]
+        plugin_version = plugin["key"][1]
+        plugin_key = plugin["key_as_string"]
 
-        if name not in compiled_queries:
-            compiled_queries[name] = {}
+        if plugin_key not in plugin_data:
+            plugin_data[plugin_key] = {
+                "name": plugin_name,
+                "version": plugin_version,
+            }
 
-        compiled_queries[name]["success"] = 0
-        compiled_queries[name]["failure"] = 0
+        plugin_data[plugin_key]["success"] = 0
+        plugin_data[plugin_key]["failure"] = 0
 
-        for bucket in plugin["stats"]["buckets"]:
-            if bucket["key"] in success_status_types:
-                compiled_queries[name]["success"] += bucket["doc_count"]
-            if bucket["key"] in error_status_types:
-                compiled_queries[name]["failure"] += bucket["doc_count"]
+        # increment the values based on bedrock saying its a success or failure key
+        for stat in plugin["stats"]["buckets"]:
+            if stat["key"] in [x.value for x in azm.StatusEnumSuccess]:
+                plugin_data[plugin_key]["success"] += stat["doc_count"]
+            if stat["key"] in [x.value for x in azm.StatusEnumErrored]:
+                plugin_data[plugin_key]["failure"] += stat["doc_count"]
 
-    # compile into plugin summary
-    plugin_data: list[PluginSummary] = []
-    for plugin_name in compiled_queries:
-        success = compiled_queries[plugin_name].get("success", 0)
-        failed = compiled_queries[plugin_name].get("failure", 0)
-        completion = 0
-        try:
-            completion = success / (success + failed)
-        except ZeroDivisionError:
+    # get plugin static will pull the latest version and I can use that to determine which is the correct version
+    baseline_plugin = get_plugin_summary_static(ctx)
+    return_values: list[PluginSummary] = []
+    for plugin in baseline_plugin:
+        name = plugin.name
+        version = plugin.version
+
+        for plugin2 in plugin_data.values():
+            # determine if its the same plugin
+            if name != plugin2["name"]:
+                continue
+            if version != plugin2["version"]:
+                continue
+
+            success = plugin2.get("success",None)
+            failed = plugin2.get("failure",None)
+
             completion = 0
+            if None not in (success, failed):
+                try:
+                    completion = success / (success + failed)
+                except ZeroDivisionError:
+                    completion = 0
 
-        plugin_data.append(
-            PluginSummary(
-                name=plugin_name,
-                last_completion=compiled_queries[plugin_name].get("recent", None),
-                completion_count=success,
-                error_count=failed,
-                completion_percent=float(completion),
+            return_values.append(
+                PluginSummary(
+                    name=name,
+                    version=version,
+                    security=plugin.security,
+                    description=plugin.description,
+                    last_completion=plugin2.get("most_recent_completion", None),
+                    features=plugin.features,
+                    completion_count=success,
+                    error_count=failed,
+                    completion_percent=float(completion),
+                )
             )
-        )
-
-    return plugin_data
+    return return_values
