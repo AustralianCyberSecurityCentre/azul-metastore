@@ -1,6 +1,7 @@
 import datetime
 
 from azul_bedrock import models_restapi
+from azul_bedrock.models_network import StatusEnum
 
 from azul_metastore.query import plugin, status
 from tests.support import gen, integration_test
@@ -282,3 +283,109 @@ class TestPlugin(integration_test.DynamicTestCase):
                 ),
             ],
         )
+
+    def test_summary(self):
+        self.write_plugin_events(
+            plugin_events=[
+                gen.plugin(authornv=("p1", "1.0"), features=["f1", "f2", "f3"], authorsec=gen.g1_1),
+                gen.plugin(authornv=("p2", "1.2"), features=["f4", "f6"], authorsec=gen.g2_1),
+                gen.plugin(authornv=("p3", "1.3"), features=["f10"], authorsec=gen.g3_1),
+            ]
+        )
+
+        summary: list[plugin.PluginSummary] = plugin.get_plugin_summary_static(self.writer)
+
+        desc = "generic_description"
+        expected_values = [
+            plugin.PluginSummary(name="p1", version="1.0", security=gen.g1_1, features=3, description=desc),
+            plugin.PluginSummary(name="p2", version="1.2", security=gen.g2_1, features=2, description=desc),
+            plugin.PluginSummary(name="p3", version="1.3", security=gen.g3_1, features=1, description=desc),
+        ]
+
+        self.assertEqual(3, len(summary))
+        self.assertEqual(summary, expected_values)
+
+    def test_summary_dynamic(self):
+        self.write_plugin_events(
+            plugin_events=[
+                gen.plugin(authornv=("good_plugin", "1"), features=["f1"], authorsec=gen.g1_1),
+                gen.plugin(authornv=("bad_plugin", "2"), features=["f2"], authorsec=gen.g2_1),
+                gen.plugin(authornv=("old_plugin", "3"), features=["f3", "f4"], authorsec=gen.g1_1),
+            ]
+        )
+
+        now = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
+        eightDaysAgo = datetime.datetime.now(tz=datetime.timezone.utc) - datetime.timedelta(days=8)
+        eightDaysAgo = eightDaysAgo.isoformat()
+
+        self.write_status_events(
+            [
+                # Good plugin, 1
+                gen.status(eid="gp_1", authornv=("good_plugin", "1"), status=StatusEnum.COMPLETED, ts=now),
+                gen.status(eid="gp_2", authornv=("good_plugin", "1"), status=StatusEnum.COMPLETED_EMPTY, ts=now),
+                gen.status(eid="gp_3", authornv=("good_plugin", "1"), status=StatusEnum.COMPLETED_WITH_ERRORS, ts=now),
+                gen.status(eid="gp_4", authornv=("good_plugin", "1"), status=StatusEnum.ERROR_RUNNER, ts=now),
+                # Bad Plugin, 2
+                gen.status(eid="bp_1", authornv=("bad_plugin", "2"), status=StatusEnum.COMPLETED, ts=now),
+                gen.status(eid="bp_2", authornv=("bad_plugin", "2"), status=StatusEnum.ERROR_EXCEPTION, ts=now),
+                gen.status(eid="bp_3", authornv=("bad_plugin", "2"), status=StatusEnum.ERROR_NETWORK, ts=now),
+                gen.status(eid="bp_4", authornv=("bad_plugin", "2"), status=StatusEnum.ERROR_RUNNER, ts=now),
+                gen.status(eid="bp_5", authornv=("bad_plugin", "2"), status=StatusEnum.ERROR_INPUT, ts=now),
+                gen.status(eid="bp_6", authornv=("bad_plugin", "2"), status=StatusEnum.ERROR_OUTPUT, ts=now),
+                gen.status(eid="bp_7", authornv=("bad_plugin", "2"), status=StatusEnum.ERROR_TIMEOUT, ts=now),
+                gen.status(eid="bp_8", authornv=("bad_plugin", "2"), status=StatusEnum.ERROR_OOM, ts=now),
+                # Old plugin, 3
+                gen.status(eid="op_1", authornv=("old_plugin", "3"), status=StatusEnum.COMPLETED, ts=eightDaysAgo),
+                gen.status(eid="op_2", authornv=("old_plugin", "3"), status=StatusEnum.COMPLETED, ts=eightDaysAgo),
+                gen.status(
+                    eid="op_3", authornv=("old_plugin", "3"), status=StatusEnum.ERROR_EXCEPTION, ts=eightDaysAgo
+                ),
+                gen.status(eid="op_4", authornv=("old_plugin", "3"), status=StatusEnum.COMPLETED, ts=eightDaysAgo),
+            ]
+        )
+        self.flush()
+
+        summary: list[plugin.PluginSummary] = plugin.get_plugin_summary_dynamic(self.writer)
+
+        # truncates milliseconds
+        for i in range(0, len(summary)):
+            summary[i].last_completion = summary[i].last_completion.split(".")[0]
+
+        good_plugin = plugin.PluginSummary(
+            name="good_plugin",
+            version="1",
+            features=1,
+            security=gen.g1_1,
+            description="generic_description",
+            last_completion=str(now).split(".")[0],
+            completion_count=3,
+            error_count=1,
+            completion_percent=0.75,
+        )
+        self.assertIn(good_plugin, summary)
+
+        bad_plugin = plugin.PluginSummary(
+            name="bad_plugin",
+            version="2",
+            features=1,
+            security=gen.g2_1,
+            description="generic_description",
+            last_completion=str(now).split(".")[0],
+            completion_count=1,
+            error_count=7,
+            completion_percent=0.125,
+        )
+        self.assertIn(bad_plugin, summary)
+
+        old_plugin = plugin.PluginSummary(
+            name="old_plugin",
+            version="3",
+            features=2,
+            security=gen.g1_1,
+            description="generic_description",
+            last_completion=str(eightDaysAgo).split(".")[0],
+            completion_count=0,
+            error_count=0,
+            completion_percent=0.0,
+        )
+        self.assertIn(old_plugin, summary)
