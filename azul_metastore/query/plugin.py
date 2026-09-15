@@ -544,10 +544,6 @@ def get_plugin_summary_dynamic(
     }
     last_completion_resp = ctx.man.status.w.search(ctx.sd, body_last_completion)
 
-    # plugin_recent = {}
-    # for plugin in last_completion_resp["aggregations"]["plugin"]["buckets"]:
-    #    plugin_recent[name] = plugin["most_recent_completion"]["value_as_string"]
-
     body_success_stats = {
         "size": 0,
         "query": {"bool": {"must": [_plugin_stats_date_limiter()]}},
@@ -571,28 +567,23 @@ def get_plugin_summary_dynamic(
     # opensearch provides this as a key under "key_as_string"
     plugin_data = {}
     for plugin in last_completion_resp["aggregations"]["plugin"]["buckets"]:
-        plugin_name = plugin["key"][0]
-        plugin_version = plugin["key"][1]
         plugin_key = plugin["key_as_string"]
-        recent_completion = plugin["most_recent_completion"]["value_as_string"]
 
         if plugin_key not in plugin_data:
             plugin_data[plugin_key] = {
-                "name": plugin_name,
-                "version": plugin_version,
+                "name": plugin["key"][0],
+                "version": plugin["key"][1],
             }
 
-        plugin_data[plugin_key]["most_recent_completion"] = recent_completion
+        plugin_data[plugin_key]["most_recent_completion"] = plugin["most_recent_completion"]["value_as_string"]
 
     for plugin in success_stats_resp["aggregations"]["plugin"]["buckets"]:
-        plugin_name = plugin["key"][0]
-        plugin_version = plugin["key"][1]
         plugin_key = plugin["key_as_string"]
 
         if plugin_key not in plugin_data:
             plugin_data[plugin_key] = {
-                "name": plugin_name,
-                "version": plugin_version,
+                "name": plugin["key"][0],
+                "version": plugin["key"][1],
             }
 
         plugin_data[plugin_key]["success"] = 0
@@ -619,8 +610,9 @@ def get_plugin_summary_dynamic(
             if version != plugin2["version"]:
                 continue
 
-            success = plugin2.get("success", None)
-            failed = plugin2.get("failure", None)
+            # currently it displays 0 instead of blank so keeping consistent
+            success = plugin2.get("success", 0)
+            failed = plugin2.get("failure", 0)
 
             completion = 0
             if None not in (success, failed):
