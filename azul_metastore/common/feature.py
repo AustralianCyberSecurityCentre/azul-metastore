@@ -34,7 +34,9 @@ def _parse_feature_value(value: str, _type: str) -> dict:
         azm.FeatureType.Integer.value: lambda v: {"integer": int(v)},
         azm.FeatureType.Float.value: lambda v: {"float": float(v)},
         azm.FeatureType.String.value: lambda v: {},
-        azm.FeatureType.Float.value: lambda v: {"binary_string": base64.b64decode(v).decode("utf-8", errors="ignore")},
+        azm.FeatureType.Binary.value: lambda v: {
+            "binary_string": base64.b64decode(v).decode("utf-8", errors="ignore")
+        },
         azm.FeatureType.Datetime.value: lambda v: {"datetime": v},
         azm.FeatureType.Filepath.value: _process_path,
         azm.FeatureType.Uri.value: _process_uri,
