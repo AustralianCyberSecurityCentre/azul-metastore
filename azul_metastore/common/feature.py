@@ -8,6 +8,7 @@ import logging
 from urllib.parse import urlparse
 
 from azul_bedrock import exceptions_bedrock, exceptions_metastore
+from azul_bedrock import models_network as azm
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 
 logger = logging.getLogger(__name__)
@@ -30,13 +31,13 @@ def enrich_feature(feat: dict):
 def _parse_feature_value(value: str, _type: str) -> dict:
     """Parses integers, hostnames, ports, and other info."""
     cases = {
-        "integer": lambda v: {"integer": int(v)},
-        "float": lambda v: {"float": float(v)},
-        "string": lambda v: {},
-        "binary": lambda v: {"binary_string": base64.b64decode(v).decode("utf-8", errors="ignore")},
-        "datetime": lambda v: {"datetime": v},
-        "filepath": _process_path,
-        "uri": _process_uri,
+        azm.FeatureType.Integer.value: lambda v: {"integer": int(v)},
+        azm.FeatureType.Float.value: lambda v: {"float": float(v)},
+        azm.FeatureType.String.value: lambda v: {},
+        azm.FeatureType.Float.value: lambda v: {"binary_string": base64.b64decode(v).decode("utf-8", errors="ignore")},
+        azm.FeatureType.Datetime.value: lambda v: {"datetime": v},
+        azm.FeatureType.Filepath.value: _process_path,
+        azm.FeatureType.Uri.value: _process_uri,
     }
 
     if _type not in cases.keys():
