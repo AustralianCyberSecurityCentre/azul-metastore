@@ -90,7 +90,7 @@ def get_plugin_summary_fast(
 
     Returns name, version, security, description, and features (count).
     """
-    data = plugin.get_plugin_summary_static(ctx)
+    data = plugin.get_plugin_summary_fast(ctx)
     if not data:
         qr.set_security_headers(ctx, resp)
         raise ApiException(status_code=404, internal=ExceptionCodeEnum.MetastoreNoPluginsInAzul)
@@ -98,7 +98,7 @@ def get_plugin_summary_fast(
     return qr.fr(ctx, data, resp)
 
 
-@router.get("/v0/plugins/summary/complete", response_model=qr.gr(list[plugin.PluginSummary]), **qr.kw)
+@router.get("/v0/plugins/summary/complete", response_model=qr.gr(list[plugin.PluginSummaryStats]), **qr.kw)
 def get_plugin_summary_complete(
     resp: Response,
     ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.PluginSearch)),
@@ -107,7 +107,7 @@ def get_plugin_summary_complete(
 
     Returns name, version, security, description, features (count), last_completion, completion_count, error_count, and completion_percent.
     """
-    data = plugin.get_plugin_summary_dynamic(ctx)
+    data = plugin.get_plugin_summary_complete(ctx)
     if not data:
         qr.set_security_headers(ctx, resp)
         raise ApiException(status_code=404, internal=ExceptionCodeEnum.MetastoreNoPluginsInAzul)

@@ -293,7 +293,7 @@ class TestPlugin(integration_test.DynamicTestCase):
             ]
         )
 
-        summary: list[plugin.PluginSummary] = plugin.get_plugin_summary_static(self.writer)
+        summary: list[plugin.PluginSummary] = plugin.get_plugin_summary_fast(self.writer)
 
         desc = "generic_description"
         expected_values = [
@@ -345,7 +345,7 @@ class TestPlugin(integration_test.DynamicTestCase):
         )
         self.flush()
 
-        summary: list[plugin.PluginSummary] = plugin.get_plugin_summary_dynamic(self.writer)
+        summary: list[plugin.PluginSummary] = plugin.get_plugin_summary_complete(self.writer)
 
         # truncates milliseconds
         for i in range(0, len(summary)):

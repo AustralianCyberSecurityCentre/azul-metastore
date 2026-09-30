@@ -15,7 +15,7 @@ import pendulum
 from azul_bedrock import models_network as azm
 from azul_bedrock import models_restapi
 from azul_bedrock.models_restapi.basic import Author as PluginAuthor
-from azul_bedrock.models_restapi.plugins import PluginSummary
+from azul_bedrock.models_restapi.plugins import PluginSummary, PluginSummaryStats
 from pydantic import BaseModel
 
 from azul_metastore.common import memcache
@@ -471,7 +471,7 @@ def get_download_plugins(
     return download_plugins
 
 
-def get_plugin_summary_static(
+def get_plugin_summary_fast(
     ctx: Context,
 ) -> list[PluginSummary]:
     """Returns plugin name, version, security, description, and feature count."""
@@ -501,15 +501,15 @@ def get_plugin_summary_static(
                 version=plugin["latest_version"]["buckets"][0]["key"],
                 security=plugin["security"]["buckets"][0]["key"],
                 description=plugin["description"]["buckets"][0]["key"],
-                features=plugin["feature_count"]["value"],
+                feature_count=plugin["feature_count"]["value"],
             )
         )
     return plugin_data
 
 
-def get_plugin_summary_dynamic(
+def get_plugin_summary_complete(
     ctx: Context,
-) -> list[PluginSummary]:
+) -> list[PluginSummaryStats]:
     """Returns the dynamic values from plugins. Contains: Last completion, Complected count, Error count, and Completed percent."""
     # Find the most recent plugin completion time
     body_last_completion = {
@@ -583,8 +583,8 @@ def get_plugin_summary_dynamic(
                 plugin_data[plugin_key]["failure"] += stat["doc_count"]
 
     # get plugin static will pull the latest version and I can use that to determine which is the correct version
-    baseline_plugin = get_plugin_summary_static(ctx)
-    return_values: list[PluginSummary] = []
+    baseline_plugin = get_plugin_summary_fast(ctx)
+    return_values: list[PluginSummaryStats] = []
     for plugin in baseline_plugin:
         name = plugin.name
         version = plugin.version
@@ -608,16 +608,17 @@ def get_plugin_summary_dynamic(
                     completion = 0
 
             return_values.append(
-                PluginSummary(
+                PluginSummaryStats(
                     name=name,
                     version=version,
                     security=plugin.security,
                     description=plugin.description,
+                    feature_count=plugin.feature_count,
                     last_completion=plugin2.get("most_recent_completion", None),
-                    features=plugin.features,
                     completion_count=success,
                     error_count=failed,
-                    completion_percent=float(completion),
+                    completion_percent=completion,
                 )
             )
+
     return return_values
