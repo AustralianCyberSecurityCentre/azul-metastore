@@ -15,7 +15,7 @@ import pendulum
 from azul_bedrock import models_network as azm
 from azul_bedrock import models_restapi
 from azul_bedrock.models_restapi.basic import Author as PluginAuthor
-from azul_bedrock.models_restapi.basic import BaseModelRepr  # TODO: Move to bedrock?
+from azul_bedrock.models_restapi.plugins import PluginSummary
 from pydantic import BaseModel
 
 from azul_metastore.common import memcache
@@ -469,20 +469,6 @@ def get_download_plugins(
             )
         )
     return download_plugins
-
-
-class PluginSummary(BaseModelRepr):
-    """Info for plugin summary page."""
-
-    name: str
-    version: str | None = None
-    security: str | None = None
-    description: str | None = None
-    features: int | None = None
-    last_completion: str | None = None
-    completion_count: int | None = None
-    error_count: int | None = None
-    completion_percent: float | None = None
 
 
 def get_plugin_summary_static(
