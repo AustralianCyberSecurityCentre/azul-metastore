@@ -61,7 +61,11 @@ def find_common_features_from_features(
     all_aggregations = {}
     feature_descriptions: dict[str, str] = dict()
     for feat in azul_known_features:
-        all_aggregations[feat.name] = {"terms": {"field": f"features_map.{feat.name}", "min_doc_count": 2}}
+        all_aggregations[feat.name] = {
+            "terms": {"field": f"features_map.{feat.name}", "min_doc_count": 2},
+            # Cardinality (precision threshold ensures accuracy with less then 10 sha256's are matching)
+            "aggs": {"unique_sha256s": {"cardinality": {"field": "sha256", "precision_threshold": 10}}},
+        }
         if feat.descriptions:
             feature_descriptions[feat.name] = feat.descriptions[0].desc if feat.descriptions[0].desc else ""
 
@@ -78,8 +82,11 @@ def find_common_features_from_features(
         for bucket_values in model.get("buckets"):
             found_value = bucket_values.get("key")
             number_of_matching_binaries = bucket_values.get("doc_count")
+            unique_sha256_cardinality_count = bucket_values.get("unique_sha256s", {}).get("value", None)
+            if unique_sha256_cardinality_count is not None:
+                number_of_matching_binaries = unique_sha256_cardinality_count
             # Omit value if the value is empty or the number of matching values isn't known.
-            if not found_value or not number_of_matching_binaries:
+            if not found_value or not number_of_matching_binaries or number_of_matching_binaries == 1:
                 continue
 
             current_feat_value_count.append(

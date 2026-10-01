@@ -236,7 +236,7 @@ class TestBinaryFind(integration_test.BaseRestapi):
                     },
                 },
                 "args": None,
-                "kwargs": None,
+                "kwargs": {"routing": "e1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdefe1abcdef"},
             },
             {
                 "query_type": "search",
@@ -270,6 +270,7 @@ class TestBinaryFind(integration_test.BaseRestapi):
                 # don't care about inspecting the response
                 q.pop("response", None)
 
+        # Remove variable values from the expected result.
         _fix_runtime(expected)
 
         # Run the query a few times to ensure the number of include_queries doesn't change

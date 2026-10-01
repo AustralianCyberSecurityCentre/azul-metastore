@@ -139,8 +139,8 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "azul-bedrock", specifier = ">=12.0.31", index = "https://devpi.acsc.internal/azul/stable/" },
-    { name = "azul-security", specifier = ">=11.0.83", index = "https://devpi.acsc.internal/azul/stable/" },
+    { name = "azul-bedrock", specifier = ">=13.0.18", index = "https://devpi.acsc.internal/azul/stable/" },
+    { name = "azul-security", specifier = ">=13.0.20", index = "https://devpi.acsc.internal/azul/stable/" },
     { name = "black", specifier = ">=26.1.0" },
     { name = "cachetools", specifier = ">=7.0.0" },
     { name = "cart", specifier = ">=1.2.3" },

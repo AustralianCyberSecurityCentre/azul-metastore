@@ -6,6 +6,7 @@ from typing import Iterable
 from azul_bedrock import models_network as azm
 from azul_bedrock.exception_enums import ExceptionCodeEnum
 from azul_bedrock.exceptions_bedrock import ApiException
+from azul_bedrock.models_network import SourceSettingsKeys
 from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR
 
 from azul_metastore import context
@@ -14,8 +15,6 @@ from azul_metastore.encoders import binary2 as rc
 from azul_metastore.query import binary_create
 
 logger = logging.getLogger(__name__)
-
-SUBMIT_SETTINGS_DEPTH_REMOVAL_KEY = "remove_at_depth"
 
 
 def _stream_events_for_manual_submission(
@@ -60,7 +59,7 @@ def _stream_events_for_manual_submission(
     }
 
     seen = set()
-    resp = ctx.man.binary2.w.search(ctx.sd, body=body)
+    resp = ctx.man.binary2.w.search(ctx.sd, body=body, routing=sha256)
     for outer in resp["hits"]["hits"]:
         for collapse in ["references", "securities"]:
             for inner in outer["inner_hits"][collapse]["hits"]["hits"]:
@@ -103,7 +102,9 @@ def _stream_append_manual_insert(
         event.source.settings = submit_settings
         # Settings should be removed at one more than initial depth so it only affects, first round of plugin results.
         if event.source.settings:
-            event.source.settings[SUBMIT_SETTINGS_DEPTH_REMOVAL_KEY] = str(len(event.source.path) + 1)
+            event.source.settings[SourceSettingsKeys.SETTINGS_DEPTH_REMOVAL_KEY.value] = str(
+                len(event.source.path) + 1
+            )
         yield event
 
 

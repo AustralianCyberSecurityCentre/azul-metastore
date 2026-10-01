@@ -20,6 +20,7 @@ def stream_dispatcher_events_for_binary(
     sha256 = sha256.lower()
     # query for specific fields set by dispatcher
     body = {
+        "size": 1000,
         "query": {
             "bool": {
                 "filter": [
@@ -48,7 +49,6 @@ def stream_dispatcher_events_for_binary(
         },
         "_source": {"excludes": rc.Binary2.decoded_fields_to_exclude()},
     }
-
     for resp in ctx.man.binary2.w.scan(ctx.sd, body=body, routing=sha256):
         resp["_source"]["kafka_key"] = resp["_id"]
         yield rc.Binary2.decode(resp["_source"])

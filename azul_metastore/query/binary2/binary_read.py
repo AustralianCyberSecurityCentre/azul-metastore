@@ -111,7 +111,7 @@ def find_stream_metadata(ctx: Context, sha256: str, stream_hash: str) -> tuple[s
         "size": 1,
         "_source": {"includes": ["datastreams", "source.name"]},
     }
-    resp = ctx.man.binary2.w.search(ctx.sd, body=body)
+    resp = ctx.man.binary2.w.search(ctx.sd, body=body, routing=sha256)
     if not resp["hits"]["hits"]:
         return None, None
 
@@ -128,7 +128,8 @@ def check_binaries(ctx: Context, sha256s: list[str]) -> list[dict]:
     sha256s = [x.lower() for x in sha256s]
     searches = []
     for sha256 in sha256s:
-        searches.append({"index": ctx.man.binary2.w.alias})
+        sha256 = sha256.lower()
+        searches.append({"index": ctx.man.binary2.w.alias, "routing": sha256})
         searches.append(
             {
                 "size": 0,

@@ -40,7 +40,7 @@ def get_best_event(ctx: Context, sha256: str) -> azm.BinaryEvent | None:
         ],
         "_source": {"excludes": rc.Binary2.decoded_fields_to_exclude()},
     }
-    resp = ctx.man.binary2.w.search(ctx.sd, body=body)
+    resp = ctx.man.binary2.w.search(ctx.sd, body=body, routing=sha256.lower())
     # check we got anything and decode
     if len(resp["hits"]["hits"]) > 0:
         decoded = rc.Binary2.decode(resp["hits"]["hits"][0]["_source"])
@@ -65,7 +65,7 @@ def get_binary_documents(
     }
     if event_type:
         body["query"]["bool"]["must"].append({"term": {"action": event_type.value}})
-    resp = ctx.man.binary2.w.search(ctx.sd, body=body).get("hits", {})
+    resp = ctx.man.binary2.w.search(ctx.sd, body=body, routing=sha256).get("hits", {})
     return models_restapi.OpensearchDocuments(
         items=resp.get("hits", []), total_docs=resp.get("total", {}).get("value", -1)
     )

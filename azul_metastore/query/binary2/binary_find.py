@@ -83,7 +83,10 @@ def _summarise_hashes(
             }
         },
     }
-    resp = ctx.man.binary2.w.search(ctx.sd, body=body)
+    if len(sha256s) == 1:
+        resp = ctx.man.binary2.w.search(ctx.sd, body=body, routing=sha256s[0])
+    else:
+        resp = ctx.man.binary2.w.search(ctx.sd, body=body)
     for bsha256 in resp["aggregations"]["SHA256"]["buckets"]:
         sha256 = bsha256["key"]
         summaries = []
@@ -354,7 +357,10 @@ def find_binaries(
         body["query"]["bool"]["filter"] += qf_highlight
 
         # perform search to retrieve matching sha256s
-        resp = ctx.man.binary2.w.complex_search(ctx.sd, body=body)
+        if is_all_sha256 and len(hashes_normal) == 1:
+            resp = ctx.man.binary2.w.complex_search(ctx.sd, body=body, routing=hashes_normal[0])
+        else:
+            resp = ctx.man.binary2.w.complex_search(ctx.sd, body=body)
 
         # store data for entities in same order as found
         for outer in resp["hits"]["hits"]:
