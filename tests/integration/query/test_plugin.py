@@ -297,15 +297,15 @@ class TestPlugin(integration_test.DynamicTestCase):
 
         desc = "generic_description"
         expected_values = [
-            plugin.PluginSummary(name="p1", version="1.0", security=gen.g1_1, features=3, description=desc),
-            plugin.PluginSummary(name="p2", version="1.2", security=gen.g2_1, features=2, description=desc),
-            plugin.PluginSummary(name="p3", version="1.3", security=gen.g3_1, features=1, description=desc),
+            plugin.PluginSummary(name="p1", version="1.0", security=gen.g1_1, feature_count=3, description=desc),
+            plugin.PluginSummary(name="p2", version="1.2", security=gen.g2_1, feature_count=2, description=desc),
+            plugin.PluginSummary(name="p3", version="1.3", security=gen.g3_1, feature_count=1, description=desc),
         ]
 
         self.assertEqual(3, len(summary))
         self.assertEqual(summary, expected_values)
 
-    def test_summary_dynamic(self):
+    def test_summary_full_stats(self):
         self.write_plugin_events(
             plugin_events=[
                 gen.plugin(authornv=("good_plugin", "1"), features=["f1"], authorsec=gen.g1_1),
@@ -351,10 +351,10 @@ class TestPlugin(integration_test.DynamicTestCase):
         for i in range(0, len(summary)):
             summary[i].last_completion = summary[i].last_completion.split(".")[0]
 
-        good_plugin = plugin.PluginSummary(
+        good_plugin = plugin.PluginSummaryStats(
             name="good_plugin",
             version="1",
-            features=1,
+            feature_count=1,
             security=gen.g1_1,
             description="generic_description",
             last_completion=str(now).split(".")[0],
@@ -364,10 +364,10 @@ class TestPlugin(integration_test.DynamicTestCase):
         )
         self.assertIn(good_plugin, summary)
 
-        bad_plugin = plugin.PluginSummary(
+        bad_plugin = plugin.PluginSummaryStats(
             name="bad_plugin",
             version="2",
-            features=1,
+            feature_count=1,
             security=gen.g2_1,
             description="generic_description",
             last_completion=str(now).split(".")[0],
@@ -377,10 +377,10 @@ class TestPlugin(integration_test.DynamicTestCase):
         )
         self.assertIn(bad_plugin, summary)
 
-        old_plugin = plugin.PluginSummary(
+        old_plugin = plugin.PluginSummaryStats(
             name="old_plugin",
             version="3",
-            features=2,
+            feature_count=2,
             security=gen.g1_1,
             description="generic_description",
             last_completion=str(eightDaysAgo).split(".")[0],
