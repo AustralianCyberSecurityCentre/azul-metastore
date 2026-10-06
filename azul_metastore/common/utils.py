@@ -33,7 +33,7 @@ F = TypeVar("F", bound=azm.BaseEvent)
 
 def jsondict(d: BaseModel) -> dict:
     """Return standardised python json dict from pydantic model."""
-    return jsonable_encoder(d, exclude_defaults=True, exclude_unset=True)
+    return jsonable_encoder(d, exclude_defaults=True)
 
 
 def md5(text: str):
