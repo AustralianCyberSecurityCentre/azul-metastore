@@ -30,6 +30,7 @@ from azul_metastore.query.binary2 import binary_expedite, binary_submit
 from azul_metastore.restapi.quick import can_user_access_api_wrapper, qr
 from azul_metastore.settings import get as get_metastore_settings
 
+# Workaround for issue with upload file through swagger - https://github.com/fastapi/fastapi/discussions/14975
 UploadFile = Annotated[UF, WithJsonSchema({"type": "string", "format": "binary"})]
 
 router = APIRouter()
@@ -210,7 +211,7 @@ async def submit_binary_to_source(
     request: Request,
     resp: Response,
     # data submission
-    binary: UploadFile = File(description="File to submit"),
+    binary: UploadFile = File(..., description="File to submit"),
     # source submission
     source_id: str = Form(description="Source/grouping to submit the file into"),
     references: SubmissionReferences = Depends(SubmissionReferences.as_form),
@@ -385,7 +386,7 @@ async def submit_child_binary_to_source(
     request: Request,
     resp: Response,
     # data submission
-    binary: UploadFile = File(description="File to submit"),
+    binary: UploadFile = File(..., description="File to submit"),
     # child submission
     parent_sha256: str = Form(description="Parent entity id", pattern="[a-fA-F0-9]{64}"),
     relationship: SubmissionRelationship = Depends(SubmissionRelationship.as_form),
