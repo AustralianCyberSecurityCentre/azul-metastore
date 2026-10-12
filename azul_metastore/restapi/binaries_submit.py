@@ -19,9 +19,9 @@ from fastapi import (
     Query,
     Request,
     Response,
-    UploadFile,
 )
-from pydantic import AfterValidator, BaseModel, computed_field, model_validator
+from fastapi import UploadFile as UF
+from pydantic import AfterValidator, BaseModel, computed_field, model_validator, WithJsonSchema
 from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT, HTTP_423_LOCKED
 
 from azul_metastore import context
@@ -29,6 +29,8 @@ from azul_metastore.common.utils import to_utc_no_future
 from azul_metastore.query.binary2 import binary_expedite, binary_submit
 from azul_metastore.restapi.quick import can_user_access_api_wrapper, qr
 from azul_metastore.settings import get as get_metastore_settings
+
+UploadFile = Annotated[UF, WithJsonSchema({"type": "string", "format": "binary"})]
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -217,8 +219,12 @@ async def submit_binary_to_source(
     extract: bool = Query(False, description="Extract entities from archive before processing"),
     password: str = Query(None, description="Password used for neutering"),
     # augstreams
-    stream_data: list[UploadFile] = File([], description="alternate streams for main binary"),
-    stream_labels: list[azm.DataLabel] = Form([], description="labels for alternate streams"),
+    stream_data: list[UploadFile] = File(
+        [], description="alternate streams for main binary (Note this isn't usable through the swagger UI)"
+    ),
+    stream_labels: list[azm.DataLabel] = Form(
+        [], description="labels for alternate streams (Note this isn't usable through the swagger UI)"
+    ),
     # metadata
     commonMeta: CommonBinarySubmitFormParams = Depends(CommonBinarySubmitFormParams.as_form),
     # misc
@@ -305,8 +311,12 @@ async def submit_binary_to_source_dataless(
     source_id: Optional[str] = Form(None, description="Source/grouping to submit the file into"),
     references: SubmissionReferences = Depends(SubmissionReferences.as_form),
     # augstreams
-    stream_data: list[UploadFile] = File([], description="alternate streams for main binary"),
-    stream_labels: list[azm.DataLabel] = Form([], description="labels for alternate streams"),
+    stream_data: list[UploadFile] = File(
+        [], description="alternate streams for main binary  (Note this isn't usable through the swagger UI)"
+    ),
+    stream_labels: list[azm.DataLabel] = Form(
+        [], description="labels for alternate streams  (Note this isn't usable through the swagger UI)"
+    ),
     # metadata
     commonMeta: CommonBinarySubmitFormParams = Depends(CommonBinarySubmitFormParams.as_form),
     # misc
