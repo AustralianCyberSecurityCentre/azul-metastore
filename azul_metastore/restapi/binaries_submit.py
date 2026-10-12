@@ -21,7 +21,7 @@ from fastapi import (
     Response,
 )
 from fastapi import UploadFile as UF
-from pydantic import AfterValidator, BaseModel, computed_field, model_validator, WithJsonSchema
+from pydantic import AfterValidator, BaseModel, WithJsonSchema, computed_field, model_validator
 from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT, HTTP_423_LOCKED
 
 from azul_metastore import context
