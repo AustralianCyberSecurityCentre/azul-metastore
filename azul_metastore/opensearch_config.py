@@ -8,6 +8,8 @@ import azul_security.settings
 from opensearchpy.exceptions import NotFoundError
 
 from azul_metastore.common import search_data, utils
+from azul_metastore.settings import Metastore
+from azul_metastore.settings import get as get_metastore_settings
 
 logger = logging.getLogger(__name__)
 
@@ -16,9 +18,10 @@ def _get_role_creation_bodies(roles: list[str]) -> dict[str, dict]:
     """Get the bodies for roles that need to be created."""
     roles = roles.copy()
     role_bodies = dict()
-    # --------------------------------------- azul_read
-    if "azul_read" in roles:
-        roles.remove("azul_read")
+    # --------------------------------------- azul-access/ Read setting
+    opensearch_settings = get_metastore_settings()
+    if opensearch_settings.opensearch_read_role in roles:
+        roles.remove(opensearch_settings.opensearch_read_role)
         # Build dls query in parts to make it clear what sections are for and make markings section optional.
         # Start of outer section of dls query
         dls_query = """{"bool": {"filter": ["""
@@ -38,7 +41,7 @@ def _get_role_creation_bodies(roles: list[str]) -> dict[str, dict]:
         # end of dls query
         dls_query += """]}}"""
 
-        role_bodies["azul_read"] = {
+        role_bodies[opensearch_settings.opensearch_read_role] = {
             "cluster_permissions": [
                 "indices:data/read/*",
                 "kibana_user",  # Reserved role
@@ -71,10 +74,10 @@ def _get_role_creation_bodies(roles: list[str]) -> dict[str, dict]:
                 },
             ],
         }
-    # --------------------------------------- azul_write
-    if "azul_write" in roles:
-        roles.remove("azul_write")
-        role_bodies["azul_write"] = {
+    # --------------------------------------- opensearch_settings.opensearch_write_role
+    if opensearch_settings.opensearch_write_role in roles:
+        roles.remove(opensearch_settings.opensearch_write_role)
+        role_bodies[opensearch_settings.opensearch_write_role] = {
             "cluster_permissions": [
                 "cluster_monitor",
                 "cluster:admin/script/*",
@@ -106,30 +109,49 @@ def _get_role_creation_bodies(roles: list[str]) -> dict[str, dict]:
     return role_bodies
 
 
+def required_opensearch_roles(
+    metastore_setting: Metastore, security_settings: azul_security.settings.Settings
+) -> list:
+    """Map unsafe to safe and add builtin opensearch specific mappings."""
+    copy_unsafe_to_safe = security_settings._unsafe_to_safe.copy()
+    result = list(copy_unsafe_to_safe.values())
+    result.append("s-any")
+    result.append(metastore_setting.opensearch_read_role)
+    result.append(metastore_setting.opensearch_write_role)
+    # fillers to prevent Opensearch prevent SG 900D errors
+    result.append("azul-fill1")
+    result.append("azul-fill2")
+    result.append("azul-fill3")
+    result.append("azul-fill4")
+    result.append("azul-fill5")
+
+    return result
+
+
 def generate_security_resources() -> tuple[list[tuple[str, dict]], list[tuple[str, dict]]]:
     """Generate roles and role mappings required."""
     security_settings = azul_security.settings.Settings()
+    metastore_settings = get_metastore_settings()
 
     ret_roles = []
     ret_role_mappings = []
 
-    roles = sorted(security_settings.required_opensearch_roles)
+    roles = sorted(required_opensearch_roles(metastore_settings, security_settings))
     role_body = _get_role_creation_bodies(roles)
     for role_name, body in role_body.items():
         ret_roles.append((role_name, body))
 
     # create/update role mappings for standard security options
     role_mappings = copy.copy(security_settings.safe_to_unsafe)
-    # add standard accesses (assumes external azul_read group)
-    # FUTURE "azul_read" & "azul_write" external group should be a setting
-    role_mappings["azul_read"] = "azul_read"
-    role_mappings["s-any"] = "azul_read"
-    role_mappings["azul_write"] = "azul_write"
-    role_mappings["azul-fill1"] = "azul_read"
-    role_mappings["azul-fill2"] = "azul_read"
-    role_mappings["azul-fill3"] = "azul_read"
-    role_mappings["azul-fill4"] = "azul_read"
-    role_mappings["azul-fill5"] = "azul_read"
+    # add standard accesses (assumes external group configured in opensearch_settings.opensearch_read_role)
+    role_mappings[metastore_settings.opensearch_read_role] = metastore_settings.opensearch_read_role
+    role_mappings["s-any"] = metastore_settings.opensearch_read_role
+    role_mappings[metastore_settings.opensearch_write_role] = metastore_settings.opensearch_write_role
+    role_mappings["azul-fill1"] = metastore_settings.opensearch_read_role
+    role_mappings["azul-fill2"] = metastore_settings.opensearch_read_role
+    role_mappings["azul-fill3"] = metastore_settings.opensearch_read_role
+    role_mappings["azul-fill4"] = metastore_settings.opensearch_read_role
+    role_mappings["azul-fill5"] = metastore_settings.opensearch_read_role
 
     for safe, unsafe in role_mappings.items():
         if safe not in roles:

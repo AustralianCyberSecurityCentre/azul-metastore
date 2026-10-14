@@ -5,10 +5,22 @@ from click.testing import CliRunner
 from azul_metastore import entry
 from azul_metastore.opensearch_config import get_opensearch_cli_commands
 from tests.support import unit_test
+from azul_metastore.settings import get as get_metastore_settings
+
+# from azul_metastore.settings import _settings_cache
+import os
+from azul_metastore.common import memcache
+import json
 
 
 class TestOpensearchConfig(unit_test.BaseUnitTestCase):
     def setUp(self) -> None:
+        # Ensure all settings are cleared first
+        memcache.clear()
+        # Set the custom roles for read and write roles
+        os.environ["metastore_opensearch_read_role"] = "custom_read_role"
+        os.environ["metastore_opensearch_write_role"] = "custom_write_role"
+
         super().setUp()
         self.test_username = "test-user-1"
         self.test_password = "myAwesomeTestPassword1!"
@@ -17,7 +29,8 @@ class TestOpensearchConfig(unit_test.BaseUnitTestCase):
 
     def test_get_configs(self):
         result = get_opensearch_cli_commands(rolesmapping=False)
-        print("ACTUAL\n\n", result, "\n\nEND ACTUAL")
+        # NOTE - to extract from ACTUAL it's recommended to dump to file because the command line can ruin the white spaces.
+        print("ACTUAL\n\n", json.dumps(result), "\n\nEND ACTUAL")
         self.assertEqual(
             result,
             [
@@ -26,8 +39,8 @@ class TestOpensearchConfig(unit_test.BaseUnitTestCase):
                 'PUT _plugins/_security/api/roles/azul-fill3\n{\n    "cluster_permissions": [],\n    "index_permissions": []\n}',
                 'PUT _plugins/_security/api/roles/azul-fill4\n{\n    "cluster_permissions": [],\n    "index_permissions": []\n}',
                 'PUT _plugins/_security/api/roles/azul-fill5\n{\n    "cluster_permissions": [],\n    "index_permissions": []\n}',
-                'PUT _plugins/_security/api/roles/azul_read\n{\n    "cluster_permissions": [\n        "indices:data/read/*",\n        "kibana_user"\n    ],\n    "index_permissions": [\n        {\n            "allowed_actions": [\n                "indices:admin/resolve/index"\n            ],\n            "fls": [],\n            "index_patterns": [\n                "*"\n            ],\n            "masked_fields": []\n        },\n        {\n            "allowed_actions": [\n                "indices:admin/get",\n                "indices:admin/analyze"\n            ],\n            "fls": [],\n            "index_patterns": [\n                "azul.*"\n            ],\n            "masked_fields": []\n        },\n        {\n            "allowed_actions": [\n                "read"\n            ],\n            "dls": "{\\"bool\\": {\\"filter\\": [{\\"terms\\": {\\"encoded_security.inclusive\\": [${user.securityRoles}]}},{\\"terms_set\\": {\\"encoded_security.exclusive\\": {\\"terms\\": [${user.securityRoles}], \\"minimum_should_match_field\\": \\"encoded_security.num_exclusive\\"}}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"must_not\\":{\\"terms\\":{\\"encoded_security.markings\\":[\\"s-tlp-amber-strict\\"]}}}},{\\"bool\\":{\\"must\\":{\\"terms\\":{\\"encoded_security.markings\\":[${user.securityRoles}]}}}}],\\"minimum_should_match\\":1}}]}}",\n            "fls": [],\n            "index_patterns": [\n                "azul.x.*"\n            ],\n            "masked_fields": []\n        },\n        {\n            "allowed_actions": [\n                "read"\n            ],\n            "fls": [],\n            "index_patterns": [\n                "azul.o.*"\n            ],\n            "masked_fields": []\n        }\n    ]\n}',
-                'PUT _plugins/_security/api/roles/azul_write\n{\n    "cluster_permissions": [\n        "cluster_monitor",\n        "cluster:admin/script/*",\n        "indices:admin/index_template/*",\n        "indices:admin/mapping/*",\n        "indices:admin/template/*",\n        "indices:data/read/*",\n        "indices:data/write/bulk",\n        "kibana_user"\n    ],\n    "index_permissions": [\n        {\n            "allowed_actions": [\n                "unlimited"\n            ],\n            "fls": [],\n            "index_patterns": [\n                "azul.*"\n            ],\n            "masked_fields": []\n        }\n    ]\n}',
+                'PUT _plugins/_security/api/roles/custom_read_role\n{\n    "cluster_permissions": [\n        "indices:data/read/*",\n        "kibana_user"\n    ],\n    "index_permissions": [\n        {\n            "allowed_actions": [\n                "indices:admin/resolve/index"\n            ],\n            "fls": [],\n            "index_patterns": [\n                "*"\n            ],\n            "masked_fields": []\n        },\n        {\n            "allowed_actions": [\n                "indices:admin/get",\n                "indices:admin/analyze"\n            ],\n            "fls": [],\n            "index_patterns": [\n                "azul.*"\n            ],\n            "masked_fields": []\n        },\n        {\n            "allowed_actions": [\n                "read"\n            ],\n            "dls": "{\\"bool\\": {\\"filter\\": [{\\"terms\\": {\\"encoded_security.inclusive\\": [${user.securityRoles}]}},{\\"terms_set\\": {\\"encoded_security.exclusive\\": {\\"terms\\": [${user.securityRoles}], \\"minimum_should_match_field\\": \\"encoded_security.num_exclusive\\"}}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"must_not\\":{\\"terms\\":{\\"encoded_security.markings\\":[\\"s-tlp-amber-strict\\"]}}}},{\\"bool\\":{\\"must\\":{\\"terms\\":{\\"encoded_security.markings\\":[${user.securityRoles}]}}}}],\\"minimum_should_match\\":1}}]}}",\n            "fls": [],\n            "index_patterns": [\n                "azul.x.*"\n            ],\n            "masked_fields": []\n        },\n        {\n            "allowed_actions": [\n                "read"\n            ],\n            "fls": [],\n            "index_patterns": [\n                "azul.o.*"\n            ],\n            "masked_fields": []\n        }\n    ]\n}',
+                'PUT _plugins/_security/api/roles/custom_write_role\n{\n    "cluster_permissions": [\n        "cluster_monitor",\n        "cluster:admin/script/*",\n        "indices:admin/index_template/*",\n        "indices:admin/mapping/*",\n        "indices:admin/template/*",\n        "indices:data/read/*",\n        "indices:data/write/bulk",\n        "kibana_user"\n    ],\n    "index_permissions": [\n        {\n            "allowed_actions": [\n                "unlimited"\n            ],\n            "fls": [],\n            "index_patterns": [\n                "azul.*"\n            ],\n            "masked_fields": []\n        }\n    ]\n}',
                 'PUT _plugins/_security/api/roles/s-any\n{\n    "cluster_permissions": [],\n    "index_permissions": []\n}',
                 'PUT _plugins/_security/api/roles/s-hanoverlap\n{\n    "cluster_permissions": [],\n    "index_permissions": []\n}',
                 'PUT _plugins/_security/api/roles/s-high\n{\n    "cluster_permissions": [],\n    "index_permissions": []\n}',
@@ -49,7 +62,8 @@ class TestOpensearchConfig(unit_test.BaseUnitTestCase):
             ],
         )
         result = get_opensearch_cli_commands(rolesmapping=True)
-        print("ACTUAL2\n\n", result, "\n\nEND ACTUAL2")
+        # NOTE - to extract from ACTUAL 2 it's recommended to dump to file because the command line can ruin the white spaces.
+        print("ACTUAL2\n\n", json.dumps(result), "\n\nEND ACTUAL2")
         self.assertEqual(
             result,
             [
@@ -58,8 +72,8 @@ class TestOpensearchConfig(unit_test.BaseUnitTestCase):
                 'PUT _plugins/_security/api/roles/azul-fill3\n{\n    "cluster_permissions": [],\n    "index_permissions": []\n}',
                 'PUT _plugins/_security/api/roles/azul-fill4\n{\n    "cluster_permissions": [],\n    "index_permissions": []\n}',
                 'PUT _plugins/_security/api/roles/azul-fill5\n{\n    "cluster_permissions": [],\n    "index_permissions": []\n}',
-                'PUT _plugins/_security/api/roles/azul_read\n{\n    "cluster_permissions": [\n        "indices:data/read/*",\n        "kibana_user"\n    ],\n    "index_permissions": [\n        {\n            "allowed_actions": [\n                "indices:admin/resolve/index"\n            ],\n            "fls": [],\n            "index_patterns": [\n                "*"\n            ],\n            "masked_fields": []\n        },\n        {\n            "allowed_actions": [\n                "indices:admin/get",\n                "indices:admin/analyze"\n            ],\n            "fls": [],\n            "index_patterns": [\n                "azul.*"\n            ],\n            "masked_fields": []\n        },\n        {\n            "allowed_actions": [\n                "read"\n            ],\n            "dls": "{\\"bool\\": {\\"filter\\": [{\\"terms\\": {\\"encoded_security.inclusive\\": [${user.securityRoles}]}},{\\"terms_set\\": {\\"encoded_security.exclusive\\": {\\"terms\\": [${user.securityRoles}], \\"minimum_should_match_field\\": \\"encoded_security.num_exclusive\\"}}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"must_not\\":{\\"terms\\":{\\"encoded_security.markings\\":[\\"s-tlp-amber-strict\\"]}}}},{\\"bool\\":{\\"must\\":{\\"terms\\":{\\"encoded_security.markings\\":[${user.securityRoles}]}}}}],\\"minimum_should_match\\":1}}]}}",\n            "fls": [],\n            "index_patterns": [\n                "azul.x.*"\n            ],\n            "masked_fields": []\n        },\n        {\n            "allowed_actions": [\n                "read"\n            ],\n            "fls": [],\n            "index_patterns": [\n                "azul.o.*"\n            ],\n            "masked_fields": []\n        }\n    ]\n}',
-                'PUT _plugins/_security/api/roles/azul_write\n{\n    "cluster_permissions": [\n        "cluster_monitor",\n        "cluster:admin/script/*",\n        "indices:admin/index_template/*",\n        "indices:admin/mapping/*",\n        "indices:admin/template/*",\n        "indices:data/read/*",\n        "indices:data/write/bulk",\n        "kibana_user"\n    ],\n    "index_permissions": [\n        {\n            "allowed_actions": [\n                "unlimited"\n            ],\n            "fls": [],\n            "index_patterns": [\n                "azul.*"\n            ],\n            "masked_fields": []\n        }\n    ]\n}',
+                'PUT _plugins/_security/api/roles/custom_read_role\n{\n    "cluster_permissions": [\n        "indices:data/read/*",\n        "kibana_user"\n    ],\n    "index_permissions": [\n        {\n            "allowed_actions": [\n                "indices:admin/resolve/index"\n            ],\n            "fls": [],\n            "index_patterns": [\n                "*"\n            ],\n            "masked_fields": []\n        },\n        {\n            "allowed_actions": [\n                "indices:admin/get",\n                "indices:admin/analyze"\n            ],\n            "fls": [],\n            "index_patterns": [\n                "azul.*"\n            ],\n            "masked_fields": []\n        },\n        {\n            "allowed_actions": [\n                "read"\n            ],\n            "dls": "{\\"bool\\": {\\"filter\\": [{\\"terms\\": {\\"encoded_security.inclusive\\": [${user.securityRoles}]}},{\\"terms_set\\": {\\"encoded_security.exclusive\\": {\\"terms\\": [${user.securityRoles}], \\"minimum_should_match_field\\": \\"encoded_security.num_exclusive\\"}}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"must_not\\":{\\"terms\\":{\\"encoded_security.markings\\":[\\"s-tlp-amber-strict\\"]}}}},{\\"bool\\":{\\"must\\":{\\"terms\\":{\\"encoded_security.markings\\":[${user.securityRoles}]}}}}],\\"minimum_should_match\\":1}}]}}",\n            "fls": [],\n            "index_patterns": [\n                "azul.x.*"\n            ],\n            "masked_fields": []\n        },\n        {\n            "allowed_actions": [\n                "read"\n            ],\n            "fls": [],\n            "index_patterns": [\n                "azul.o.*"\n            ],\n            "masked_fields": []\n        }\n    ]\n}',
+                'PUT _plugins/_security/api/roles/custom_write_role\n{\n    "cluster_permissions": [\n        "cluster_monitor",\n        "cluster:admin/script/*",\n        "indices:admin/index_template/*",\n        "indices:admin/mapping/*",\n        "indices:admin/template/*",\n        "indices:data/read/*",\n        "indices:data/write/bulk",\n        "kibana_user"\n    ],\n    "index_permissions": [\n        {\n            "allowed_actions": [\n                "unlimited"\n            ],\n            "fls": [],\n            "index_patterns": [\n                "azul.*"\n            ],\n            "masked_fields": []\n        }\n    ]\n}',
                 'PUT _plugins/_security/api/roles/s-any\n{\n    "cluster_permissions": [],\n    "index_permissions": []\n}',
                 'PUT _plugins/_security/api/roles/s-hanoverlap\n{\n    "cluster_permissions": [],\n    "index_permissions": []\n}',
                 'PUT _plugins/_security/api/roles/s-high\n{\n    "cluster_permissions": [],\n    "index_permissions": []\n}',
@@ -78,14 +92,14 @@ class TestOpensearchConfig(unit_test.BaseUnitTestCase):
                 'PUT _plugins/_security/api/roles/s-tlp-clear\n{\n    "cluster_permissions": [],\n    "index_permissions": []\n}',
                 'PUT _plugins/_security/api/roles/s-tlp-green\n{\n    "cluster_permissions": [],\n    "index_permissions": []\n}',
                 'PUT _plugins/_security/api/roles/s-top-high\n{\n    "cluster_permissions": [],\n    "index_permissions": []\n}',
-                'PUT _plugins/_security/api/rolesmapping/azul-fill1\n{\n    "backend_roles": [\n        "azul_read"\n    ],\n    "description": "Maps azul_read to this role"\n}',
-                'PUT _plugins/_security/api/rolesmapping/azul-fill2\n{\n    "backend_roles": [\n        "azul_read"\n    ],\n    "description": "Maps azul_read to this role"\n}',
-                'PUT _plugins/_security/api/rolesmapping/azul-fill3\n{\n    "backend_roles": [\n        "azul_read"\n    ],\n    "description": "Maps azul_read to this role"\n}',
-                'PUT _plugins/_security/api/rolesmapping/azul-fill4\n{\n    "backend_roles": [\n        "azul_read"\n    ],\n    "description": "Maps azul_read to this role"\n}',
-                'PUT _plugins/_security/api/rolesmapping/azul-fill5\n{\n    "backend_roles": [\n        "azul_read"\n    ],\n    "description": "Maps azul_read to this role"\n}',
-                'PUT _plugins/_security/api/rolesmapping/azul_read\n{\n    "backend_roles": [\n        "azul_read"\n    ],\n    "description": "Maps azul_read to this role"\n}',
-                'PUT _plugins/_security/api/rolesmapping/azul_write\n{\n    "backend_roles": [\n        "azul_write"\n    ],\n    "description": "Maps azul_write to this role"\n}',
-                'PUT _plugins/_security/api/rolesmapping/s-any\n{\n    "backend_roles": [\n        "azul_read"\n    ],\n    "description": "Maps azul_read to this role"\n}',
+                'PUT _plugins/_security/api/rolesmapping/azul-fill1\n{\n    "backend_roles": [\n        "custom_read_role"\n    ],\n    "description": "Maps custom_read_role to this role"\n}',
+                'PUT _plugins/_security/api/rolesmapping/azul-fill2\n{\n    "backend_roles": [\n        "custom_read_role"\n    ],\n    "description": "Maps custom_read_role to this role"\n}',
+                'PUT _plugins/_security/api/rolesmapping/azul-fill3\n{\n    "backend_roles": [\n        "custom_read_role"\n    ],\n    "description": "Maps custom_read_role to this role"\n}',
+                'PUT _plugins/_security/api/rolesmapping/azul-fill4\n{\n    "backend_roles": [\n        "custom_read_role"\n    ],\n    "description": "Maps custom_read_role to this role"\n}',
+                'PUT _plugins/_security/api/rolesmapping/azul-fill5\n{\n    "backend_roles": [\n        "custom_read_role"\n    ],\n    "description": "Maps custom_read_role to this role"\n}',
+                'PUT _plugins/_security/api/rolesmapping/custom_read_role\n{\n    "backend_roles": [\n        "custom_read_role"\n    ],\n    "description": "Maps custom_read_role to this role"\n}',
+                'PUT _plugins/_security/api/rolesmapping/custom_write_role\n{\n    "backend_roles": [\n        "custom_write_role"\n    ],\n    "description": "Maps custom_write_role to this role"\n}',
+                'PUT _plugins/_security/api/rolesmapping/s-any\n{\n    "backend_roles": [\n        "custom_read_role"\n    ],\n    "description": "Maps custom_read_role to this role"\n}',
                 'PUT _plugins/_security/api/rolesmapping/s-hanoverlap\n{\n    "backend_roles": [\n        "HANOVERLAP"\n    ],\n    "description": "Maps HANOVERLAP to this role"\n}',
                 'PUT _plugins/_security/api/rolesmapping/s-high\n{\n    "backend_roles": [\n        "HIGH"\n    ],\n    "description": "Maps HIGH to this role"\n}',
                 'PUT _plugins/_security/api/rolesmapping/s-low\n{\n    "backend_roles": [\n        "LOW"\n    ],\n    "description": "Maps LOW to this role"\n}',
@@ -164,3 +178,41 @@ class TestOpensearchConfig(unit_test.BaseUnitTestCase):
         )
         print(result.output)
         self.assertIn("Successfully created and validated all roles.", result.output)
+
+    def test_display_opensearch_roles_to_be_created(self):
+        """With the cli also test opensearch role printing."""
+        runner = CliRunner()
+
+        result = runner.invoke(entry.show_opensearch_roles)
+        print(result.stdout)
+        self.assertEqual(
+            result.stdout,
+            """The following roles must exist in Opensearch for Azul security to work:
+azul-fill1
+azul-fill2
+azul-fill3
+azul-fill4
+azul-fill5
+custom_read_role
+custom_write_role
+s-any
+s-hanoverlap
+s-high
+s-low
+s-low--ly
+s-medium
+s-mod1
+s-mod2
+s-mod3
+s-over
+s-rel-apple
+s-rel-bee
+s-rel-car
+s-tlp-amber
+s-tlp-amber-strict
+s-tlp-clear
+s-tlp-green
+s-top-high
+Admins will need to create these roles and map them to the appropriate backend_role(s) provided by your OIDC system as needed.
+""",
+        )
