@@ -226,7 +226,7 @@ class Metastore(BaseSettings):
             loki_logger.info(self.special_log_message_format.format(**fmt_vars))
 
 
-# @cachetools.cached(cache=memcache.get_lru_cache("settings"))
+@cachetools.cached(cache=memcache.get_lru_cache("settings"))
 def get() -> Metastore:
     """Return a cached copy of metastore settings."""
     return Metastore()
