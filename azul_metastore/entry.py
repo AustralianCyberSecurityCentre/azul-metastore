@@ -143,7 +143,13 @@ class AuthOptions(IntEnum):
     default=False,
     help="Continue role creation without prompting for confirmation (non-interactive use).",
 )
-def apply_opensearch_config(print_only: bool, rolesmapping: bool, no_input: bool = False):
+@click.option(
+    "--override",
+    is_flag=True,
+    default=False,
+    help="Override all existing roles with the changes, default is to only create new roles and role mappings.",
+)
+def apply_opensearch_config(print_only: bool, rolesmapping: bool, no_input: bool = False, override: bool = False):
     """Apply the current security configuration to Opensearch."""
     if rolesmapping:
         click.echo("Additionally creating role mappings.")
@@ -208,7 +214,7 @@ def apply_opensearch_config(print_only: bool, rolesmapping: bool, no_input: bool
             return 7
         credentials = search_data.SearchData(credentials, security_exclude=[], security_include=[])
         try:
-            write_config_to_opensearch(credentials, rolesmapping)
+            write_config_to_opensearch(credentials, rolesmapping, override=override)
         except Exception:
             click.echo(f"Failed to update and validate roles with exception traceback:\n{traceback.format_exc()}")
             return

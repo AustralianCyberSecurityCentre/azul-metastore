@@ -183,15 +183,19 @@ def get_opensearch_cli_commands(rolesmapping: bool) -> list[str]:
     return commands
 
 
-def write_config_to_opensearch(sd: search_data.SearchData, rolesmapping: bool):
+def write_config_to_opensearch(sd: search_data.SearchData, rolesmapping: bool, override: bool = False):
     """Creates the provided roles in Opensearch using the Opensearch API."""
     roles, role_mappings = generate_security_resources()
 
     for role_name, body in roles:
         try:
-            # Check if the role exists
-            sd.es().security.get_role(role=role_name)
-            logger.info(f"Role '{role_name}' already exists. Skipping creation.")
+            if override:
+                sd.es().security.create_role(role=role_name, body=body)
+                logger.info(f"Created role '{role_name}'.")
+            else:
+                # Check if the role exists
+                sd.es().security.get_role(role=role_name)
+                logger.info(f"Role '{role_name}' already exists. Skipping creation.")
         except NotFoundError:
             # Role does not exist, create it
             sd.es().security.create_role(role=role_name, body=body)
@@ -202,9 +206,15 @@ def write_config_to_opensearch(sd: search_data.SearchData, rolesmapping: bool):
     if rolesmapping:
         for role_mapping, body in role_mappings:
             try:
-                # Check if the role mapping exists
-                sd.es().security.get_role_mapping(role=role_mapping)
-                logger.info(f"Role mapping '{role_mapping}' already exists. Skipping creation.")
+                if override:
+                    # Role mapping does not exist, create it
+                    sd.es().security.create_role_mapping(role=role_mapping, body=body)
+                    logger.info(f"Created role mapping '{role_mapping}' for '{body['backend_roles'][0]}'.")
+
+                else:
+                    # Check if the role mapping exists
+                    sd.es().security.get_role_mapping(role=role_mapping)
+                    logger.info(f"Role mapping '{role_mapping}' already exists. Skipping creation.")
             except NotFoundError:
                 # Role mapping does not exist, create it
                 sd.es().security.create_role_mapping(role=role_mapping, body=body)
