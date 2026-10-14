@@ -27,6 +27,11 @@ class TestOpensearchConfig(unit_test.BaseUnitTestCase):
         self.test_jwt = "wow-this-is-a-jwt-i-can-barely-believe-it!"
         self.test_oauth = "wow-this-is-an-oauth-token-thats-awesomeeeeeeeeeeeeeeeeee"
 
+    def tearDown(self) -> None:
+        super().tearDown()
+        del os.environ["metastore_opensearch_read_role"]
+        del os.environ["metastore_opensearch_write_role"]
+
     def test_get_configs(self):
         result = get_opensearch_cli_commands(rolesmapping=False)
         # NOTE - to extract from ACTUAL it's recommended to dump to file because the command line can ruin the white spaces.
