@@ -32,6 +32,8 @@ class IndexSettings(BaseModel):
 class Metastore(BaseSettings):
     """Metastore specific environment variables parsed into settings object."""
 
+    model_config = SettingsConfigDict(env_prefix="metastore_")
+
     def __init__(self):
         """Init function."""
         global loki_logger
@@ -101,6 +103,9 @@ class Metastore(BaseSettings):
     # credentials for account to manage Azul indices in opensearch
     opensearch_username: str = "azul_writer"
     opensearch_password: str = ""  # nosec S105
+
+    opensearch_read_role: str = "azul-access"  # used to be "azul_read"
+    opensearch_write_role: str = "azul_write"
 
     # azul.<partition> prefix for all indices in opensearch
     # to simplify migration recommended to set to dev01, qa01, prod01
@@ -183,7 +188,6 @@ class Metastore(BaseSettings):
     # destination folder for sha256s txt that need to be checked for usage after a deletion
     # ensure that this folder is persistent to avoid orphaned files (i.e. pvc not ephemeral)
     purge_sha256_folder: str = ""
-    model_config = SettingsConfigDict(env_prefix="metastore_")
 
     # add diagnostics for binaries which have more than X events
     warn_on_event_count: int = 10_000

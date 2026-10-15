@@ -18,7 +18,7 @@ def gen_token(markings: list[str], user: str):
     markings.append(base_encoder.S_ANY)
     return jwt.encode(
         {
-            "roles": ["azul_read"] + markings,
+            "roles": ["azul-access"] + markings,
             "sub": user,
             "iss": "https://localhost",
             "iat": datetime.datetime.now() - datetime.timedelta(weeks=1),

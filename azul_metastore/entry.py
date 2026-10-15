@@ -12,6 +12,7 @@ import click
 from azul_bedrock import exceptions_bedrock
 from azul_bedrock.datastore import CredentialFormat, Credentials
 from azul_bedrock.exception_enums import ExceptionCodeEnum
+from azul_security import settings as security_settings
 from prometheus_client import start_http_server
 
 from azul_metastore import context, entry_purge, ingestor, settings
@@ -19,6 +20,7 @@ from azul_metastore.common import manager, search_data
 from azul_metastore.ingestor import BaseIngestor, stop_event
 from azul_metastore.opensearch_config import (
     get_opensearch_cli_commands,
+    required_opensearch_roles,
     write_config_to_opensearch,
 )
 from azul_metastore.query import age_off as _age_off
@@ -141,7 +143,13 @@ class AuthOptions(IntEnum):
     default=False,
     help="Continue role creation without prompting for confirmation (non-interactive use).",
 )
-def apply_opensearch_config(print_only: bool, rolesmapping: bool, no_input: bool = False):
+@click.option(
+    "--override",
+    is_flag=True,
+    default=False,
+    help="Override all existing roles with the changes, default is to only create new roles and role mappings.",
+)
+def apply_opensearch_config(print_only: bool, rolesmapping: bool, no_input: bool = False, override: bool = False):
     """Apply the current security configuration to Opensearch."""
     if rolesmapping:
         click.echo("Additionally creating role mappings.")
@@ -206,11 +214,31 @@ def apply_opensearch_config(print_only: bool, rolesmapping: bool, no_input: bool
             return 7
         credentials = search_data.SearchData(credentials, security_exclude=[], security_include=[])
         try:
-            write_config_to_opensearch(credentials, rolesmapping)
+            write_config_to_opensearch(credentials, rolesmapping, override=override)
         except Exception:
             click.echo(f"Failed to update and validate roles with exception traceback:\n{traceback.format_exc()}")
             return
         click.echo("Successfully created and validated all roles.")
+
+
+@cli.command(
+    help="""
+Display all of the Opensearch roles that need to be created for Azul's current security
+configuration to work with Opensearch.
+"""
+)
+def show_opensearch_roles():
+    """Console command to display the roles that need to be created in Opensearch."""
+    s_settings = security_settings.Settings()
+    m_settings = settings.Metastore()
+    render = required_opensearch_roles(m_settings, s_settings)
+    result = "The following roles must exist in Opensearch for Azul security to work:\n"
+    result += "\n".join(sorted(render))
+    result += (
+        "\nAdmins will need to create these roles and map them to "
+        + "the appropriate backend_role(s) provided by your OIDC system as needed."
+    )
+    click.echo(result)
 
 
 @cli.command()
