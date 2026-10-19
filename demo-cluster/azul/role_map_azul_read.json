@@ -1,0 +1,4 @@
+{
+  "backend_roles": ["azul_read", "azul-access"],
+  "description": "Maps azul_read role to azul_read and azul-access backend roles in line with the default behaviour in azul-app/infra/values.yaml"
+}

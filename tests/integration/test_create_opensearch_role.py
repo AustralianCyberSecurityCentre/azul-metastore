@@ -35,11 +35,11 @@ class TestSearch(integration_test.DynamicTestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         # restore roles
-        write_config_to_opensearch(cls.admin_session, rolesmapping=True)
+        write_config_to_opensearch(cls.admin_session, rolesmapping=True, override=True)
         return super().tearDownClass()
 
     def test_create_role(self):
-        write_config_to_opensearch(self.admin_session, rolesmapping=True)
+        write_config_to_opensearch(self.admin_session, rolesmapping=True, override=True)
         val = self.admin_session.es().security.get_role(role=self.test_role_name, ignore=[404])
         # Check role exists
         expected = {
@@ -56,7 +56,7 @@ class TestSearch(integration_test.DynamicTestCase):
         self.assertEqual(val, expected)
 
         # Check role still exists after re-creation exists.
-        write_config_to_opensearch(self.admin_session, rolesmapping=True)
+        write_config_to_opensearch(self.admin_session, rolesmapping=True, override=True)
         val = self.admin_session.es().security.get_role(role=self.test_role_name, ignore=[404])
         self.assertEqual(val, expected)
 
