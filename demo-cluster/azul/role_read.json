@@ -1,0 +1,4 @@
+{
+  "cluster_permissions": ["indices:data/read/*", "kibana_user"],
+  "index_permissions": []
+}

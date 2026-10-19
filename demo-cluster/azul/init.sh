@@ -63,10 +63,12 @@ put () {
 
 put roles role_admin.json azul_admin
 put roles role_official.json s-official
+put roles role_read.json azul_read
 
 put rolesmapping role_map_admin.json azul_admin
 put rolesmapping role_map_all_access.json all_access
 put rolesmapping role_map_official.json s-official
+put rolesmapping role_map_azul_read.json azul_read
 
 put tenants tenant.json azul
 
