@@ -126,9 +126,16 @@ def create_binary_tags(ctx: Context, owner: str, tags: list[dict]) -> None:
     ctx.man.annotation.w.wrap_and_index_docs(ctx.sd, [ctx.man.annotation.encode(x) for x in tags], refresh=True)
 
 
-def delete_binary_tag(ctx: Context, sha256: str, tag: str) -> models_restapi.AnnotationUpdated:
-    """Remove entity tag from metastore."""
-    sha256 = sha256.lower()
+def delete_binary_tag(
+    ctx: Context,
+    sha256s: str | list[str],
+    tag: str,
+) -> models_restapi.AnnotationUpdated:
+    if isinstance(sha256s, str):
+        sha256s = [sha256s]
+
+    sha256s = [sha.lower() for sha in sha256s]
+
     resp = ctx.man.annotation.w.update(
         ctx.sd,
         body={
@@ -137,7 +144,7 @@ def delete_binary_tag(ctx: Context, sha256: str, tag: str) -> models_restapi.Ann
                 "bool": {
                     "filter": [
                         {"term": {"type": "entity_tag"}},
-                        {"term": {"sha256": sha256}},
+                        {"terms": {"sha256": sha256s}},
                         {"term": {"tag": tag}},
                     ]
                 }
@@ -145,8 +152,11 @@ def delete_binary_tag(ctx: Context, sha256: str, tag: str) -> models_restapi.Ann
         },
         refresh=True,
     )
+
     return models_restapi.AnnotationUpdated(
-        total=resp.get("total", 0), updated=resp.get("updated", 0), deleted=resp.get("deleted", 0)
+        total=resp.get("total", 0),
+        updated=resp.get("updated", 0),
+        deleted=resp.get("deleted", 0),
     )
 
 

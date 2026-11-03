@@ -453,6 +453,47 @@ def create_tag_on_binary(
         ) from None
 
 
+@router.post("/v0/binaries/tags/bulk_add/{tag}", **qr.kw)
+def create_tag_on_binary_bulk(
+    resp: Response,
+    tag: str,
+    sha256: list[str] = Body([], embed=True),
+    security: str = Body(None, embed=True),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinaryModifyTags)),
+):
+    """Attach a tag to multiple entities."""
+    security = ctx.validate_user_security(security)
+    try:
+        ctx.azsec.check_access(ctx.get_user_access().security.labels, security, raise_error=True)
+    except SecurityParseException:
+        raise ApiException(
+            status_code=HTTP_422_UNPROCESSABLE_CONTENT,
+            ref="Must provide valid security string.",
+            internal=ExceptionCodeEnum.MetastoreTagBinaryBadSecurityString,
+        ) from None
+    except SecurityAccessException as e:
+        raise ApiException(
+            status_code=HTTP_422_UNPROCESSABLE_CONTENT,
+            ref="security greater than user permissions",
+            internal=ExceptionCodeEnum.MetastoreTagBinaryInvalidSecurity,
+            parameters={"inner_exception": str(e)},
+        ) from e
+
+    qr.set_security_headers(ctx, resp, security)
+
+    tag_dicts = []
+    timestamp = pendulum.now().isoformat()
+    for hash_ in sha256:
+        tag_dicts.append(dict(security=security, timestamp=timestamp, tag=tag, sha256=hash_))
+
+    try:
+        annotation.create_binary_tags(qr.writer, ctx.user_info.username, tag_dicts)
+    except InvalidAnnotation as e:
+        raise exceptions_metastore.convert_exception_to_api_exception(
+            base_exception=e, status_code=400, new_error_enum=ExceptionCodeEnum.MetastoreInvalidAnnotationForCreate
+        ) from None
+
+
 @router.delete("/v0/binaries/{sha256}/tags/{tag}", response_model=qr.gr(bedr_binaries.AnnotationUpdated), **qr.kw)
 def delete_tag_on_binary(
     resp: Response,
@@ -470,6 +511,32 @@ def delete_tag_on_binary(
             status_code=404,
             internal=ExceptionCodeEnum.MetastoreCantDeleteTagFromBinary,
             parameters={"sha256": sha256, "tag": tag},
+        ) from None
+    finally:
+        qr.set_security_headers(ctx, resp)
+
+    return qr.fr(ctx, data, resp)
+
+
+@router.delete("/v0/binaries/tags/bulk_delete/{tag}", response_model=qr.gr(bedr_binaries.AnnotationUpdated), **qr.kw)
+def delete_tag_on_binary_bulk(
+    resp: Response,
+    tag: str,
+    sha256s: list[str] = Body([], embed=True),
+    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinaryModifyTags)),
+):
+    """Delete a single tag from many entities."""
+    print("sha256")
+    for sha256 in sha256s:
+        print(sha256)
+
+    try:
+        data = annotation.delete_binary_tag(qr.writer, sha256s, tag)
+    except FileNotFoundError:
+        raise ApiException(
+            status_code=404,
+            internal=ExceptionCodeEnum.MetastoreCantDeleteTagFromBinary,
+            parameters={"sha256s": sha256s, "tag": tag},
         ) from None
     finally:
         qr.set_security_headers(ctx, resp)
