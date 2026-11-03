@@ -131,6 +131,7 @@ def delete_binary_tag(
     sha256s: str | list[str],
     tag: str,
 ) -> models_restapi.AnnotationUpdated:
+    """Deletes a tag from a single, or multiple entities."""
     if isinstance(sha256s, str):
         sha256s = [sha256s]
 
