@@ -87,7 +87,6 @@ async def async_extract_neutered(
     """Handle extracting MalPZ/CaRT."""
     fname = None
     try:
-        print("ASYNC EXTRACT NEUTERED!")
         async_iter = DispatcherAPI.async_convert_to_async_iterable(upload_file)
         async_iter_data, meta = await cart.async_unpack_iterable(async_iter)
         fname = meta.get("name")
