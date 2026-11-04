@@ -128,14 +128,11 @@ def create_binary_tags(ctx: Context, owner: str, tags: list[dict]) -> None:
 
 def delete_binary_tag(
     ctx: Context,
-    sha256s: str | list[str],
+    sha256: str,
     tag: str,
 ) -> models_restapi.AnnotationUpdated:
     """Deletes a tag from a single, or multiple entities."""
-    if isinstance(sha256s, str):
-        sha256s = [sha256s]
-
-    sha256s = [sha.lower() for sha in sha256s]
+    sha256 = sha256.lower()
 
     resp = ctx.man.annotation.w.update(
         ctx.sd,
@@ -145,7 +142,7 @@ def delete_binary_tag(
                 "bool": {
                     "filter": [
                         {"term": {"type": "entity_tag"}},
-                        {"terms": {"sha256": sha256s}},
+                        {"term": {"sha256": sha256}},
                         {"term": {"tag": tag}},
                     ]
                 }

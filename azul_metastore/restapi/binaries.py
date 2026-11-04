@@ -518,32 +518,6 @@ def delete_tag_on_binary(
     return qr.fr(ctx, data, resp)
 
 
-@router.delete("/v0/binaries/tags/bulk_delete/{tag}", response_model=qr.gr(bedr_binaries.AnnotationUpdated), **qr.kw)
-def delete_tag_on_binary_bulk(
-    resp: Response,
-    tag: str,
-    sha256s: list[str] = Body([], embed=True),
-    ctx: context.Context = Depends(can_user_access_api_wrapper(ApiAccessEnum.BinaryModifyTags)),
-):
-    """Delete a single tag from many entities."""
-    print("sha256")
-    for sha256 in sha256s:
-        print(sha256)
-
-    try:
-        data = annotation.delete_binary_tag(qr.writer, sha256s, tag)
-    except FileNotFoundError:
-        raise ApiException(
-            status_code=404,
-            internal=ExceptionCodeEnum.MetastoreCantDeleteTagFromBinary,
-            parameters={"sha256s": sha256s, "tag": tag},
-        ) from None
-    finally:
-        qr.set_security_headers(ctx, resp)
-
-    return qr.fr(ctx, data, resp)
-
-
 @router.get("/v0/binaries/{sha256}/statuses", response_model=qr.gr(bedr_binaries.Status), **qr.kw)
 def get_binary_status(
     resp: Response,
