@@ -98,6 +98,36 @@ class TestAnnotations(etb.DynamicTestCase):
         self.assertEqual(resp[0].num_entities, 2)
         self.assertEqual(resp[0].tag, "tag1")
 
+    def test_entity_tag_bulk(self):
+        tag1 = gen.entity_tag(eid="e1", tag="tag1")
+        tag2 = gen.entity_tag(eid="e2", tag="tag1")
+        annotation.create_binary_tags(self.writer, "generic_owner", [tag1, tag2])
+        self.flush()
+
+        resp = annotation.read_binary_tags(self.es1, "e1")
+        self.assertEqual(len(resp), 1)
+        self.assertEqual(resp[0].sha256, "e1")
+
+        resp = annotation.read_binary_tags(self.es1, "e2")
+        self.assertEqual(len(resp), 1)
+        self.assertEqual(resp[0].sha256, "e2")
+
+        ret = annotation.read_all_binary_tags(self.writer)
+        self.assertEqual(ret.num_tags, 1)
+        self.assertEqual(ret.tags[0].tag, "tag1")
+
+        annotation.delete_binary_tag(self.writer, ["e1", "e2"], "tag1")
+        self.flush()
+
+        resp = annotation.read_binary_tags(self.es1, "e1")
+        self.assertEqual(len(resp), 0)
+
+        resp = annotation.read_binary_tags(self.es1, "e2")
+        self.assertEqual(len(resp), 0)
+
+        ret = annotation.read_all_binary_tags(self.writer)
+        self.assertEqual(ret.num_tags, 0)
+
     def test_entity_tag_no_security(self):
         tag = gen.entity_tag(eid="e1", tag="tag1")
         tag.pop("security")
