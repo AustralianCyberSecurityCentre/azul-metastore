@@ -16,6 +16,9 @@ from fastapi import UploadFile
 from pydantic import ByteSize
 from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT
 
+# Cart block size defaults to 64kb which is too small for efficent uploads so bump it to 1MB
+cart.BLOCK_SIZE = 1024 * 1024
+
 logger = logging.getLogger(__name__)
 
 # Max bytes before extraction of a bundled submission
@@ -84,6 +87,7 @@ async def async_extract_neutered(
     """Handle extracting MalPZ/CaRT."""
     fname = None
     try:
+        print("ASYNC EXTRACT NEUTERED!")
         async_iter = DispatcherAPI.async_convert_to_async_iterable(upload_file)
         async_iter_data, meta = await cart.async_unpack_iterable(async_iter)
         fname = meta.get("name")
@@ -96,6 +100,7 @@ async def async_extract_neutered(
     data = None
     try:
         data, _ = await async_handle_malpz(upload_file)
+        print("INNER MALPZ RELATED EXTRACT NEUTRED?")
         return DispatcherAPI.async_convert_to_async_iterable(data), fname
     except malpz.MetadataException:
         pass
