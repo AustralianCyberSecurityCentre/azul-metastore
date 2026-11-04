@@ -116,7 +116,8 @@ class TestAnnotations(etb.DynamicTestCase):
         self.assertEqual(ret.num_tags, 1)
         self.assertEqual(ret.tags[0].tag, "tag1")
 
-        annotation.delete_binary_tag(self.writer, ["e1", "e2"], "tag1")
+        annotation.delete_binary_tag(self.writer, "e1", "tag1")
+        annotation.delete_binary_tag(self.writer, "e2", "tag1")
         self.flush()
 
         resp = annotation.read_binary_tags(self.es1, "e1")
