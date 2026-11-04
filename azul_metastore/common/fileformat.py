@@ -16,6 +16,9 @@ from fastapi import UploadFile
 from pydantic import ByteSize
 from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT
 
+# Cart block size defaults to 64kb which is too small for efficent uploads so bump it to 1MB
+cart.BLOCK_SIZE = 1024 * 1024
+
 logger = logging.getLogger(__name__)
 
 # Max bytes before extraction of a bundled submission
