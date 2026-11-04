@@ -99,7 +99,6 @@ async def async_extract_neutered(
     data = None
     try:
         data, _ = await async_handle_malpz(upload_file)
-        print("INNER MALPZ RELATED EXTRACT NEUTRED?")
         return DispatcherAPI.async_convert_to_async_iterable(data), fname
     except malpz.MetadataException:
         pass
