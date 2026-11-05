@@ -131,7 +131,7 @@ def delete_binary_tag(
     sha256: str,
     tag: str,
 ) -> models_restapi.AnnotationUpdated:
-    """Deletes a tag from a single, or multiple entities."""
+    """Deletes a tag from an entity."""
     sha256 = sha256.lower()
 
     resp = ctx.man.annotation.w.update(
