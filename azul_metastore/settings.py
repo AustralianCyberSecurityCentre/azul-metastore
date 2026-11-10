@@ -32,7 +32,7 @@ class IndexSettings(BaseModel):
 class Metastore(BaseSettings):
     """Metastore specific environment variables parsed into settings object."""
 
-    model_config = SettingsConfigDict(env_prefix="metastore_")
+    model_config = SettingsConfigDict(env_prefix="metastore_", nested_model_default_partial_update=True)
 
     def __init__(self):
         """Init function."""
