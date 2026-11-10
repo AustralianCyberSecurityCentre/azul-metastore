@@ -109,9 +109,8 @@ class TestManager(integration_test.DynamicTestCase):
         os.environ["METASTORE_STATUS_INDEX_CONFIG"] = (
             '{"number_of_shards": 10, "number_of_replicas": 1, "refresh_interval": "7s"}'
         )
-        os.environ["METASTORE_BINARY2_INDEX_CONFIG"] = (
-            '{"number_of_shards": 7, "number_of_replicas": 2, "refresh_interval": "30s"}'
-        )
+        # Intentionally emitting the refresh_interval to ensure it is overwritten
+        os.environ["METASTORE_BINARY2_INDEX_CONFIG"] = '{"number_of_shards": 7, "number_of_replicas": 2}'
         self.man = manager.Manager()
         self.man.initialise(self.writer.sd)
 
