@@ -134,11 +134,7 @@ class TestManager(integration_test.DynamicTestCase):
             self.man.status.index_settings, {"number_of_shards": 10, "number_of_replicas": 1, "refresh_interval": "7s"}
         )
 
-        print(self.man.binary2.index_settings)
-        self.assertEqual(
-            self.man.binary2.index_settings,
-            {"number_of_shards": 7, "number_of_replicas": 2, "refresh_interval": "30s"},
-        )
+        # Binary2 has a bunch of additional settings by default; test_get_settings will check that
 
         # Check the settings on the wrapper inside the encoder
         self.assertEqual(
@@ -149,11 +145,6 @@ class TestManager(integration_test.DynamicTestCase):
         self.assertEqual(
             self.man.status.w.index_settings,
             {"number_of_shards": 10, "number_of_replicas": 1, "refresh_interval": "7s"},
-        )
-
-        self.assertEqual(
-            self.man.binary2.w.index_settings,
-            {"number_of_shards": 7, "number_of_replicas": 2, "refresh_interval": "30s"},
         )
 
     def test_get_settings(self):
