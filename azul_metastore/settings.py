@@ -167,6 +167,10 @@ class Metastore(BaseSettings):
     # Opensearch plugin index config override
     plugin_index_config: IndexSettings = IndexSettings()
 
+    # Opensearch Binary2 index config override
+    # Refresh intervals for binaries should be longer
+    binary2_index_config: IndexSettings = IndexSettings(refresh_interval="30s")
+
     @computed_field
     @cached_property
     def status_expire_events_ms(self) -> int:

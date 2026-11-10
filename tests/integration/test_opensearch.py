@@ -109,6 +109,9 @@ class TestManager(integration_test.DynamicTestCase):
         os.environ["METASTORE_STATUS_INDEX_CONFIG"] = (
             '{"number_of_shards": 10, "number_of_replicas": 1, "refresh_interval": "7s"}'
         )
+        os.environ["METASTORE_BINARY2_INDEX_CONFIG"] = (
+            '{"number_of_shards": 7, "number_of_replicas": 2, "refresh_interval": "30s"}'
+        )
         self.man = manager.Manager()
         self.man.initialise(self.writer.sd)
 
@@ -116,6 +119,7 @@ class TestManager(integration_test.DynamicTestCase):
     def tearDownClass(cls) -> None:
         del os.environ["METASTORE_PLUGIN_INDEX_CONFIG"]
         del os.environ["METASTORE_STATUS_INDEX_CONFIG"]
+        del os.environ["METASTORE_BINARY2_INDEX_CONFIG"]
         return super().tearDownClass()
 
     def test_settings(self):
@@ -131,6 +135,12 @@ class TestManager(integration_test.DynamicTestCase):
             self.man.status.index_settings, {"number_of_shards": 10, "number_of_replicas": 1, "refresh_interval": "7s"}
         )
 
+        print(self.man.binary2.index_settings)
+        self.assertEqual(
+            self.man.binary2.index_settings,
+            {"number_of_shards": 7, "number_of_replicas": 2, "refresh_interval": "30s"},
+        )
+
         # Check the settings on the wrapper inside the encoder
         self.assertEqual(
             self.man.plugin.w.index_settings,
@@ -140,6 +150,11 @@ class TestManager(integration_test.DynamicTestCase):
         self.assertEqual(
             self.man.status.w.index_settings,
             {"number_of_shards": 10, "number_of_replicas": 1, "refresh_interval": "7s"},
+        )
+
+        self.assertEqual(
+            self.man.binary2.w.index_settings,
+            {"number_of_shards": 7, "number_of_replicas": 2, "refresh_interval": "30s"},
         )
 
     def test_get_settings(self):
@@ -154,3 +169,9 @@ class TestManager(integration_test.DynamicTestCase):
         self.assertEqual(status_template.get("settings").get("index").get("number_of_shards"), "10")
         self.assertEqual(status_template.get("settings").get("index").get("number_of_replicas"), "1")
         self.assertEqual(status_template.get("settings").get("index").get("refresh_interval"), "7s")
+
+        binary2_template = self.man.binary2.w.get_template(self.writer.sd)
+        print(binary2_template)
+        self.assertEqual(binary2_template.get("settings").get("index").get("number_of_shards"), "7")
+        self.assertEqual(binary2_template.get("settings").get("index").get("number_of_replicas"), "2")
+        self.assertEqual(binary2_template.get("settings").get("index").get("refresh_interval"), "30s")
