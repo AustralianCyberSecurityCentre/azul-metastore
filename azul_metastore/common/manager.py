@@ -3,7 +3,7 @@
 from azul_security import security as azsec
 
 from azul_metastore import settings
-from azul_metastore.common import search_data, wrapper
+from azul_metastore.common import search_data
 from azul_metastore.encoders import annotation, binary2, cache, plugin, status
 
 
@@ -16,7 +16,7 @@ class Manager:
 
         self.azsec = azsec.Security()
 
-        self.binary2 = binary2.Binary2()
+        self.binary2 = binary2.Binary2(setting_overrides=self.s.binary2_index_config.model_dump())
         self.status = status.Status(setting_overrides=self.s.status_index_config.model_dump())
         self.plugin = plugin.Plugin(setting_overrides=self.s.plugin_index_config.model_dump())
 
@@ -33,11 +33,13 @@ class Manager:
         self.cache.w.initialise(sd, force=force)
 
         # set up required sub-indices for binary event sources
-        for key, data in self.s.sources.items():
-            # create aliases for source
-            if data.elastic:
-                # custom index settings are usually only used because features/info take up so much disk space
-                wrapper.set_index_properties(self.s.partition, "binary2." + key, data.elastic)
+        # FUTURE: This doesn't seem to be valid for the current binary2 layout, noting that source names
+        #         are not in the index names anymore.
+        # for key, data in self.s.sources.items():
+        #     # create aliases for source
+        #     if data.elastic:
+        #         # custom index settings are usually only used because features/info take up so much disk space
+        #         wrapper.set_index_properties(self.s.partition, "binary2." + key, data.elastic)
 
     def check_canary(self, sd: search_data.SearchData):
         """Write a canary file to opensearch, to check that indices are available.

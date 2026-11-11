@@ -32,7 +32,7 @@ class IndexSettings(BaseModel):
 class Metastore(BaseSettings):
     """Metastore specific environment variables parsed into settings object."""
 
-    model_config = SettingsConfigDict(env_prefix="metastore_")
+    model_config = SettingsConfigDict(env_prefix="metastore_", nested_model_default_partial_update=True)
 
     def __init__(self):
         """Init function."""
@@ -166,6 +166,10 @@ class Metastore(BaseSettings):
 
     # Opensearch plugin index config override
     plugin_index_config: IndexSettings = IndexSettings()
+
+    # Opensearch Binary2 index config override
+    # Refresh intervals for binaries should be longer
+    binary2_index_config: IndexSettings = IndexSettings(refresh_interval="30s")
 
     @computed_field
     @cached_property
